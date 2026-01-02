@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-MZ">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Nyumba Food-Concept | Menu Digital</title>
+    
+    <!-- Bibliotecas Essenciais (Versões de Produção Ultra-Rápidas) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nyumba: { clay: '#D96C06', forest: '#1D4A2C', deep: '#0F2617', sand: '#E0E8D9' }
+                    },
+                    fontFamily: {
+                        heading: ['Syne', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root { --glass-bg: rgba(255, 255, 255, 0.07); --glass-border: rgba(255, 255, 255, 0.12); --blur: 25px; }
+        body {
+            background: #0F2617; /* Fallback */
+            background: radial-gradient(circle at center, #1D4A2C 0%, #0F2617 100%);
+            background-attachment: fixed;
+            color: #E0E8D9;
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
+            border: 1px solid var(--glass-border);
+        }
+        @keyframes pulse-status { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(0.92); } }
+        .status-pulse { animation: pulse-status 2s infinite ease-in-out; }
+        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(217, 108, 6, 0.5); border-radius: 10px; }
+        /* Fix para Safari Mobile */
+        .fixed-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script>
+        // Versão sem JSX para compatibilidade total com iPhone/WhatsApp
+        const e = React.createElement;
+        const { useState, useEffect, useCallback } = React;
+
+        const MENU_DATA = {
+            1: { pt: { dia: "Segunda-feira", sopa: "Creme de Cenoura", pratos: ["Costeleta de Porco", "Língua de Vaca"], sobremesa: "Salada de Fruta" }, en: { dia: "Monday", sopa: "Carrot Cream", pratos: ["Pork Chop", "Beef Tongue"], sobremesa: "Fruit Salad" }, precos: { sopa: "180MT", pratos: ["500MT", "500MT"], sobremesa: "150MT" } },
+            2: { pt: { dia: "Terça-feira", sopa: "Caldo Verde", pratos: ["Bife à Cerveja", "Pescadinha Frita"], sobremesa: "Pudim" }, en: { dia: "Tuesday", sopa: "Green Broth", pratos: ["Beer Steak", "Fried Whiting"], sobremesa: "Caramel Pudding" }, precos: { sopa: "180MT", pratos: ["500MT", "400MT"], sobremesa: "180MT" } },
+            3: { pt: { dia: "Quarta-feira", sopa: "Sopa de Mandioca", pratos: ["Posta de Peixe", "Arroz de Pato"], sobremesa: "Bolo de Cenoura" }, en: { dia: "Wednesday", sopa: "Cassava Soup", pratos: ["Fish Steak", "Duck Rice"], sobremesa: "Carrot Cake" }, precos: { sopa: "150MT", pratos: ["500MT", "500MT"], sobremesa: "250MT" } },
+            4: { pt: { dia: "Quinta-feira", sopa: "Sopa de Feijão", pratos: ["Polvo a Lagareiro", "Cabrito no Forno"], sobremesa: "Arroz-Doce" }, en: { dia: "Thursday", sopa: "Bean Soup", pratos: ["Octopus Lagareiro", "Roasted Goat"], sobremesa: "Rice Pudding" }, precos: { sopa: "150MT", pratos: ["750MT", "750MT"], sobremesa: "180MT" } },
+            5: { pt: { dia: "Sexta-feira", sopa: "Creme de Abóbora", pratos: ["Matapa c/ Caranguejo", "Pernil no Forno"], sobremesa: "Mousse de Chocolate" }, en: { dia: "Friday", sopa: "Pumpkin Cream", pratos: ["Matapa w/ Crab", "Roasted Pork Shank"], sobremesa: "Chocolate Mousse" }, precos: { sopa: "180MT", pratos: ["350MT", "750MT"], sobremesa: "180MT" } }
+        };
+
+        const TRANSLATIONS = {
+            pt: {
+                open: "ABERTO", closed: "FECHADO", order: "PEDIR", menuWeek: "Menus da Semana", suggestion: "SUGESTÃO DO DIA", 
+                reveal: "REVELAR MENU", hours: "09:00 - 22:00", entrance: "ENTRADA", mains: "PRATOS PRINCIPAIS", 
+                dessert: "SOBREMESA", location: "FEIMA - MAPUTO", close: "FECHAR", readMore: "Ler Mais", 
+                readLess: "Ver Menos", conceptTitle: "O CONCEITO", weeklyTitle: "MENÚ SEMANAL", social: "Siga-nos", 
+                address: "Av. Mártires da Machava", introText: "Há espaços onde se come. E depois há o Nyumba Food — Concept, onde cada prato parece ter sido criado para impressionar. Instalado no ambiente calmo e encantador da FEIMA, este quiosque transforma cada refeição numa viagem bem guiada.\nO Menu é uma celebração de fronteiras gastronómicas inteligentemente atravessadas: a cozinha moçambicana no seu esplendor, a herança portuguesa tratada com respeito e criatividade."
+            },
+            en: {
+                open: "OPEN", closed: "CLOSED", order: "ORDER", menuWeek: "Weekly Menus", suggestion: "TODAY'S SUGGESTION", 
+                reveal: "REVEAL MENU", hours: "09:00 - 22:00", entrance: "STARTER", mains: "MAIN COURSES", 
+                dessert: "DESSERT", location: "FEIMA - MAPUTO", close: "CLOSE", readMore: "Read More", 
+                readLess: "Read Less", conceptTitle: "THE CONCEPT", weeklyTitle: "WEEKLY MENU", social: "Follow us", 
+                address: "Martyrs of Machava Ave.", introText: "There are places where you eat. And then there is Nyumba Food — Concept, where every dish seems to have been created to impress. Located in the calm and charming environment of FEIMA, this kiosk transforms every meal into a well-guided journey.\nThe Menu is a celebration of intelligently crossed gastronomic borders: Mozambican cuisine in its splendor, Portuguese heritage treated with respect and creativity."
+            }
+        };
+
+        function App() {
+            const [lang, setLang] = useState('pt');
+            const [isOpen, setIsOpen] = useState(false);
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+            const [isExpanded, setIsExpanded] = useState(false);
+            const [isIntroExpanded, setIsIntroExpanded] = useState(false);
+            const t = TRANSLATIONS[lang];
+
+            useEffect(() => {
+                const check = () => {
+                    const hr = new Date().toLocaleTimeString('pt-PT', {timeZone: 'Africa/Maputo', hour: '2-digit', hour12: false});
+                    setIsOpen(parseInt(hr) >= 9 && parseInt(hr) < 22);
+                };
+                check();
+                const timer = setInterval(check, 30000);
+                return () => clearInterval(timer);
+            }, []);
+
+            const dayIdx = [1,1,2,3,4,5,1][new Date().getDay()];
+            const today = MENU_DATA[dayIdx];
+
+            return e('div', { className: 'min-h-screen flex flex-col' },
+                // NAV
+                e('nav', { className: 'fixed-nav glass border-b border-white/10 px-6 py-4 flex justify-between items-center shadow-xl' },
+                    e('div', { className: 'flex items-center gap-3' },
+                        e('button', { onClick: () => setLang(l => l === 'pt' ? 'en' : 'pt'), className: 'glass px-4 py-2 rounded-2xl text-[10px] font-black uppercase' }, lang),
+                        e('a', { href: 'https://wa.me/258846695390', target: '_blank', className: 'bg-white text-nyumba-forest px-6 py-2.5 rounded-full text-[11px] font-extrabold flex items-center gap-2 shadow-2xl' }, 
+                            e('i', { className: 'fab fa-whatsapp text-lg' }), t.order)
+                    ),
+                    e('div', { className: `px-4 py-1.5 rounded-full text-[10px] font-black flex items-center gap-2 shadow-lg ${isOpen ? 'bg-green-500/80 text-white' : 'bg-red-500/80 text-white'}` },
+                        e('span', { className: `w-2 h-2 rounded-full bg-white ${isOpen ? 'status-pulse' : ''}` }), isOpen ? t.open : t.closed)
+                ),
+
+                // HEADER
+                e('header', { className: 'pt-40 pb-10 px-6 text-center' },
+                    e('h1', { className: 'font-heading text-6xl md:text-9xl text-nyumba-clay tracking-tighter uppercase leading-none' }, 'NYUMBA', e('br'), 
+                    e('span', { className: 'italic font-light text-nyumba-sand opacity-90 lowercase font-sans' }, 'food-concept'))
+                ),
+
+                // MAIN
+                e('main', { className: 'max-w-xl mx-auto w-full px-6 space-y-6 pb-20' },
+                    // CONCEITO
+                    e('section', { className: 'glass rounded-[2.5rem] p-8 shadow-2xl border border-white/5' },
+                        e('div', { className: 'flex justify-between items-center mb-4' }, e('span', { className: 'text-nyumba-clay font-black text-[10px] uppercase tracking-[0.4em]' }, t.conceptTitle), e('i', { className: 'fas fa-quote-right text-nyumba-clay/20 text-xl' })),
+                        e('div', { className: `text-nyumba-sand text-[13px] leading-relaxed italic ${isIntroExpanded ? '' : 'line-clamp-3'}` }, t.introText),
+                        e('button', { onClick: () => setIsIntroExpanded(!isIntroExpanded), className: 'mt-4 text-[9px] font-black uppercase text-nyumba-clay flex items-center gap-2' }, isIntroExpanded ? t.readLess : t.readMore, e('i', { className: `fas fa-chevron-${isIntroExpanded ? 'up' : 'down'}` }))
+                    ),
+
+                    // SUGESTÃO
+                    e('section', { onClick: () => setIsExpanded(!isExpanded), className: `glass rounded-[3rem] p-8 cursor-pointer shadow-2xl relative transition-all border border-white/10 ${isExpanded ? 'ring-1 ring-nyumba-clay' : ''}` },
+                        e('div', { className: 'flex justify-between items-start' },
+                            e('div', { className: 'space-y-1' }, e('span', { className: 'text-nyumba-clay font-black text-[10px] uppercase tracking-[0.4em]' }, t.suggestion), e('h2', { className: 'font-heading text-4xl italic text-white uppercase tracking-tighter' }, today[lang].dia)),
+                            e('div', { className: `w-12 h-12 rounded-full glass flex items-center justify-center transition-all ${isExpanded ? 'rotate-180 bg-nyumba-clay text-white' : ''}` }, e('i', { className: 'fas fa-chevron-down' }))
+                        ),
+                        !isExpanded && e('p', { className: 'mt-6 text-[10px] font-black text-nyumba-sand/40 uppercase tracking-[0.3em] flex items-center gap-2' }, e('span', { className: 'w-2 h-2 rounded-full bg-nyumba-clay animate-ping' }), t.reveal),
+                        isExpanded && e('div', { className: 'mt-12 space-y-10' },
+                            e('div', { className: 'border-l-2 border-nyumba-clay pl-6' }, e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase mb-2 block' }, t.entrance), e('div', { className: 'flex justify-between items-end' }, e('p', { className: 'text-2xl font-black text-nyumba-sand italic uppercase tracking-tighter' }, today[lang].sopa), e('span', { className: 'font-bold text-nyumba-clay text-sm' }, today.precos.sopa))),
+                            e('div', { className: 'space-y-6' }, e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase block' }, t.mains), today[lang].pratos.map((p, i) => e('div', { key: i, className: 'flex justify-between items-center glass p-6 rounded-[2rem] border-white/5' }, e('p', { className: 'text-base font-black uppercase text-nyumba-sand' }, p), e('span', { className: 'font-black text-nyumba-clay text-sm' }, today.precos.pratos[i])))),
+                            e('div', { className: 'pt-8 border-t border-white/10 flex justify-between items-center' }, e('div', { className: 'space-y-1' }, e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase' }, t.dessert), e('p', { className: 'text-2xl font-black text-nyumba-sand italic uppercase' }, today[lang].sobremesa)), e('span', { className: 'font-bold text-nyumba-clay text-sm' }, today.precos.sobremesa))
+                        )
+                    ),
+
+                    // BOTAO SEMANAL
+                    e('button', { onClick: () => setIsMenuOpen(true), className: 'w-full glass py-8 rounded-[2.5rem] font-heading text-[11px] tracking-[0.5em] uppercase text-nyumba-sand active:scale-95' }, t.menuWeek),
+
+                    // CONTACTOS & MAPS
+                    e('section', { className: 'space-y-4' },
+                        e('div', { className: 'glass p-8 rounded-[3.5rem] space-y-8 border border-white/5' },
+                            e('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-8' },
+                                e('div', { className: 'flex gap-4 items-center' }, e('div', { className: 'w-12 h-12 rounded-2xl bg-nyumba-deep border border-white/10 flex items-center justify-center text-nyumba-clay text-xl' }, e('i', { className: 'fas fa-location-dot' })), e('div', null, e('p', { className: 'font-black text-white text-sm uppercase' }, t.location), e('p', { className: 'text-[10px] opacity-40 uppercase' }, t.address))),
+                                e('div', { className: 'flex gap-4 items-center' }, e('div', { className: 'w-12 h-12 rounded-2xl glass border border-white/10 flex items-center justify-center text-nyumba-sand text-xl' }, e('i', { className: 'fas fa-clock' })), e('div', null, e('p', { className: 'font-black text-white text-sm uppercase' }, 'HORÁRIO'), e('p', { className: 'text-[10px] opacity-40 uppercase' }, t.hours)))
+                            ),
+                            e('div', { className: 'flex flex-col gap-4 pt-4 border-t border-white/5' },
+                                e('a', { href: 'tel:+258846695390', className: 'flex items-center gap-4' }, e('i', { className: 'fas fa-phone text-nyumba-clay' }), e('span', { className: 'text-xs font-bold' }, '+258 84 669 5390')),
+                                e('a', { href: 'mailto:nyumba.maputo@gmail.com', className: 'flex items-center gap-4' }, e('i', { className: 'fas fa-envelope text-nyumba-clay' }), e('span', { className: 'text-xs font-bold uppercase' }, 'nyumba.maputo@gmail.com'))
+                            ),
+                            e('div', { className: 'pt-6 flex flex-col items-center gap-4' },
+                                e('span', { className: 'text-[9px] font-black uppercase tracking-[0.4em] text-nyumba-clay/60' }, t.social),
+                                e('div', { className: 'flex gap-6' },
+                                    ['instagram', 'facebook-f', 'suitcase'].map((ic, idx) => e('a', { key: idx, href: '#', className: 'w-12 h-12 rounded-full glass flex items-center justify-center text-xl' }, e('i', { className: `fab${idx===2?'s':''} fa-${ic}` })))
+                                )
+                            )
+                        ),
+                        e('div', { className: 'h-72 rounded-[3rem] overflow-hidden glass p-2 shadow-2xl' },
+                            e('iframe', { src: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3586.971653483244!2d32.593179!3d-25.96897!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1ee69bfe2dccc6a7%3A0xe72f04de0d760ff5!2sNYUMBA%20Food%20Concept!5e0!3m2!1sen!2spt!4v1767146297198!5m2!1sen!2spt', className: 'w-full h-full rounded-[2.5rem] grayscale invert opacity-70', style: { border: 0 }, loading: 'lazy' }))
+                    )
+                ),
+
+                // FOOTER
+                e('footer', { className: 'py-20 text-center px-6 opacity-30' },
+                    e('p', { className: 'text-[9px] font-black uppercase tracking-[0.6em]' }, 'Nyumba Food Concept © 2025', e('br'), 'José Freire • Creation')
+                ),
+
+                // MODAL
+                isMenuOpen && e('div', { className: 'fixed inset-0 z-[200] bg-nyumba-deep/98 backdrop-blur-3xl p-6 overflow-y-auto' },
+                    e('div', { className: 'max-w-xl mx-auto pt-6' },
+                        e('div', { className: 'flex justify-between items-center mb-16' }, e('h3', { className: 'font-heading text-4xl italic text-nyumba-clay uppercase' }, t.weeklyTitle), e('button', { onClick: () => setIsMenuOpen(false), className: 'w-14 h-14 rounded-full glass text-white flex items-center justify-center shadow-2xl' }, e('i', { className: 'fas fa-times text-xl' }))),
+                        e('div', { className: 'space-y-16 pb-32' }, Object.entries(MENU_DATA).map(([key, day]) => 
+                            e('div', { key, className: 'space-y-6' }, 
+                                e('h4', { className: 'text-white font-heading text-3xl italic border-b border-white/10 pb-2 uppercase' }, day[lang].dia),
+                                e('div', { className: 'glass p-8 rounded-[2.5rem] space-y-8' },
+                                    e('div', null, e('span', { className: 'text-[10px] font-black text-nyumba-sand/40 uppercase mb-1 block' }, t.entrance), e('div', { className: 'flex justify-between items-end' }, e('p', { className: 'text-xl font-black italic text-white uppercase' }, day[lang].sopa), e('span', { className: 'text-[11px] font-bold text-nyumba-sand ml-4' }, day.precos.sopa))),
+                                    e('div', { className: 'space-y-4' }, e('span', { className: 'text-[10px] font-black text-nyumba-sand/40 uppercase block' }, t.mains), day[lang].pratos.map((p, i) => e('div', { key: i, className: 'flex justify-between items-center border-b border-white/5 pb-2' }, e('p', { className: 'text-sm font-black uppercase text-white' }, p), e('span', { className: 'text-[11px] font-bold text-nyumba-sand ml-4' }, day.precos.pratos[i])))),
+                                    e('div', null, e('span', { className: 'text-[10px] font-black text-nyumba-sand/40 uppercase mb-1 block' }, t.dessert), e('div', { className: 'flex justify-between items-end' }, e('p', { className: 'text-xl font-black italic text-white uppercase' }, day[lang].sobremesa), e('span', { className: 'text-[11px] font-bold text-nyumba-sand ml-4' }, day.precos.sobremesa)))
+                                )
+                            )
+                        )),
+                        e('button', { onClick: () => setIsMenuOpen(false), className: 'w-full py-6 glass rounded-full text-nyumba-sand font-black uppercase text-[10px] tracking-[0.5em] mb-12' }, t.close)
+                    )
+                )
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(e(App));
+    </script>
+</body>
+</html>
