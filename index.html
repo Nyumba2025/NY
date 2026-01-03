@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-MZ">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Nyumba Food-Concept | Menu Digital</title>
-    
+
     <!-- Bibliotecas Essenciais (Versões de Produção Ultra-Rápidas) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script>
@@ -30,9 +33,15 @@
     </script>
 
     <style>
-        :root { --glass-bg: rgba(255, 255, 255, 0.07); --glass-border: rgba(255, 255, 255, 0.12); --blur: 25px; }
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --blur: 25px;
+        }
+
         body {
-            background: #0F2617; /* Fallback */
+            background: #0F2617;
+            /* Fallback */
             background: radial-gradient(circle at center, #1D4A2C 0%, #0F2617 100%);
             background-attachment: fixed;
             color: #E0E8D9;
@@ -42,21 +51,59 @@
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
+
         .glass {
             background: var(--glass-bg);
             backdrop-filter: blur(var(--blur));
             -webkit-backdrop-filter: blur(var(--blur));
             border: 1px solid var(--glass-border);
         }
-        @keyframes pulse-status { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(0.92); } }
-        .status-pulse { animation: pulse-status 2s infinite ease-in-out; }
-        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(217, 108, 6, 0.5); border-radius: 10px; }
+
+        @keyframes pulse-status {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.7;
+                transform: scale(0.92);
+            }
+        }
+
+        .status-pulse {
+            animation: pulse-status 2s infinite ease-in-out;
+        }
+
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(217, 108, 6, 0.5);
+            border-radius: 10px;
+        }
+
         /* Fix para Safari Mobile */
-        .fixed-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+        .fixed-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
     </style>
 </head>
+
 <body>
     <div id="root"></div>
 
@@ -70,23 +117,122 @@
             2: { pt: { dia: "Terça-feira", sopa: "Caldo Verde", pratos: ["Bife à Cerveja", "Pescadinha Frita"], sobremesa: "Pudim" }, en: { dia: "Tuesday", sopa: "Green Broth", pratos: ["Beer Steak", "Fried Whiting"], sobremesa: "Caramel Pudding" }, precos: { sopa: "180MT", pratos: ["500MT", "400MT"], sobremesa: "180MT" } },
             3: { pt: { dia: "Quarta-feira", sopa: "Sopa de Mandioca", pratos: ["Posta de Peixe", "Arroz de Pato"], sobremesa: "Bolo de Cenoura" }, en: { dia: "Wednesday", sopa: "Cassava Soup", pratos: ["Fish Steak", "Duck Rice"], sobremesa: "Carrot Cake" }, precos: { sopa: "150MT", pratos: ["500MT", "500MT"], sobremesa: "250MT" } },
             4: { pt: { dia: "Quinta-feira", sopa: "Sopa de Feijão", pratos: ["Polvo a Lagareiro", "Cabrito no Forno"], sobremesa: "Arroz-Doce" }, en: { dia: "Thursday", sopa: "Bean Soup", pratos: ["Octopus Lagareiro", "Roasted Goat"], sobremesa: "Rice Pudding" }, precos: { sopa: "150MT", pratos: ["750MT", "750MT"], sobremesa: "180MT" } },
-            5: { pt: { dia: "Sexta-feira", sopa: "Creme de Abóbora", pratos: ["Matapa c/ Caranguejo", "Pernil no Forno"], sobremesa: "Mousse de Chocolate" }, en: { dia: "Friday", sopa: "Pumpkin Cream", pratos: ["Matapa w/ Crab", "Roasted Pork Shank"], sobremesa: "Chocolate Mousse" }, precos: { sopa: "180MT", pratos: ["350MT", "750MT"], sobremesa: "180MT" } }
+            5: { pt: { dia: "Sexta-feira", sopa: "Creme de Abóbora", pratos: ["Matapa c/ Caranguejo", "Pernil no Forno"], sobremesa: "Doce de Mandioca" }, en: { dia: "Friday", sopa: "Pumpkin Cream", pratos: ["Matapa w/ Crab", "Roasted Pork Shank"], sobremesa: "Cassava Sweet" }, precos: { sopa: "180MT", pratos: ["350MT", "750MT"], sobremesa: "180MT" } }
+        };
+
+        const ALACARTE_MENU = {
+            pt: {
+                petiscos: [
+                    { nome: "Rabada", preco: "350MT" },
+                    { nome: "Amêijoas à NYUMBA", preco: "400MT" },
+                    { nome: "Cabeça de Salmão", preco: "350MT" },
+                    { nome: "Camarão Alinho", preco: "350MT" },
+                    { nome: "Chouriço (c/ Batata e Salada)", preco: "400MT" },
+                    { nome: "Tábua de 7 Queijos & Broa", preco: "750MT" },
+                    { nome: "Dobradinha", preco: "350MT" }
+                ],
+                sopas: [
+                    { nome: "Creme de Cenoura", preco: "150MT" },
+                    { nome: "Creme de Abóbora", preco: "180MT" },
+                    { nome: "Sopa de Mandioca", preco: "150MT" },
+                    { nome: "Caldo Verde", preco: "180MT" },
+                    { nome: "Sopa de Feijão", preco: "150MT" },
+                    { nome: "Sopa de Legumes", preco: "150MT" }
+                ],
+                snacks: [
+                    { nome: "Salgados (4)", preco: "250MT" }
+                ],
+                noPao: [
+                    { nome: "Hamburguer Simples (c/ Ovo ou Queijo e Batata)", preco: "250MT" },
+                    { nome: "Hamburguer Completo (c/ Queijo, Ovo, Alface, Queijo Cheddar, Mayonaisse Caseira, Alface, Cebola Caramelizada e Batata Frita)", preco: "350MT" },
+                    { nome: "Nyumba Burguer (c/ Mayonaisse Caseira, Fiambre ou Bacon, Queijo Mozzarella, Batatas Fritas, Cebola Caramelizada, Picles, Rúcula)", preco: "500MT" },
+                    { nome: "Hamburguer de Alheira (c/ Ovo, Rúcula, Queijo Mozzarella e Batata Frita)", preco: "600MT" },
+                    { nome: "Hamburguer de Frango (c/ Ovo, Queijo Mozzarella, Alface e Batata)", preco: "350MT" },
+                    { nome: "Prego no pão", preco: "350MT" },
+                    { nome: "Cachorro Quente (c/ Batatas)", preco: "350MT" },
+                    { nome: "Tosta Mista", preco: "280MT" },
+                    { nome: "Tosta de Atum", preco: "250MT" },
+                    { nome: "Tosta de Caranguejo", preco: "250MT" },
+                    { nome: "Tosta de Frango", preco: "250MT" }
+                ],
+                noPrato: [
+                    { nome: "Matabicho Thafo (c/ 2 ovos, Tomate, Salsichas, Torradas, Feijão Doce, Bacon)", preco: "500MT" }
+                ],
+                sobremesas: [
+                    { nome: "Sorvete (vários sabores)", preco: "180MT" },
+                    { nome: "Salada de Fruta", preco: "180MT" },
+                    { nome: "Pudim", preco: "180MT" },
+                    { nome: "Bolo de Chocolate", preco: "250MT" },
+                    { nome: "Doce de Mandioca", preco: "180MT" },
+                    { nome: "Arroz Doce", preco: "180MT" }
+                ]
+            },
+            en: {
+                petiscos: [
+                    { nome: "Oxtail", preco: "350MT" },
+                    { nome: "Clams NYUMBA Style", preco: "400MT" },
+                    { nome: "Salmon Head", preco: "350MT" },
+                    { nome: "Seasoned Shrimp", preco: "350MT" },
+                    { nome: "Chorizo (w/ Potato & Salad)", preco: "400MT" },
+                    { nome: "7 Cheese Board & Cornbread", preco: "750MT" },
+                    { nome: "Tripe", preco: "350MT" }
+                ],
+                sopas: [
+                    { nome: "Carrot Cream", preco: "150MT" },
+                    { nome: "Pumpkin Cream", preco: "180MT" },
+                    { nome: "Cassava Soup", preco: "150MT" },
+                    { nome: "Green Broth", preco: "180MT" },
+                    { nome: "Bean Soup", preco: "150MT" },
+                    { nome: "Vegetable Soup", preco: "150MT" }
+                ],
+                snacks: [
+                    { nome: "Savory Pastries (4)", preco: "250MT" }
+                ],
+                noPao: [
+                    { nome: "Simple Burger (w/ Egg or Cheese & Fries)", preco: "250MT" },
+                    { nome: "Complete Burger (w/ Cheese, Egg, Lettuce, Cheddar, Homemade Mayo, Caramelized Onion & Fries)", preco: "350MT" },
+                    { nome: "Nyumba Burger (w/ Homemade Mayo, Ham or Bacon, Mozzarella, Fries, Caramelized Onion, Pickles, Arugula)", preco: "500MT" },
+                    { nome: "Alheira Burger (w/ Egg, Arugula, Mozzarella & Fries)", preco: "600MT" },
+                    { nome: "Chicken Burger (w/ Egg, Mozzarella, Lettuce & Fries)", preco: "350MT" },
+                    { nome: "Steak Sandwich", preco: "350MT" },
+                    { nome: "Hot Dog (w/ Fries)", preco: "350MT" },
+                    { nome: "Mixed Toast", preco: "280MT" },
+                    { nome: "Tuna Toast", preco: "250MT" },
+                    { nome: "Crab Toast", preco: "250MT" },
+                    { nome: "Chicken Toast", preco: "250MT" }
+                ],
+                noPrato: [
+                    { nome: "Thafo Breakfast (w/ 2 eggs, Tomato, Sausages, Toast, Baked Beans, Bacon)", preco: "500MT" }
+                ],
+                sobremesas: [
+                    { nome: "Ice Cream (various flavors)", preco: "180MT" },
+                    { nome: "Fruit Salad", preco: "180MT" },
+                    { nome: "Caramel Pudding", preco: "180MT" },
+                    { nome: "Chocolate Cake", preco: "250MT" },
+                    { nome: "Cassava Sweet", preco: "180MT" },
+                    { nome: "Rice Pudding", preco: "180MT" }
+                ]
+            }
         };
 
         const TRANSLATIONS = {
             pt: {
-                open: "ABERTO", closed: "FECHADO", order: "PEDIR", menuWeek: "Menus da Semana", suggestion: "SUGESTÃO DO DIA", 
-                reveal: "REVELAR MENU", hours: "09:00 - 22:00", entrance: "ENTRADA", mains: "PRATOS PRINCIPAIS", 
-                dessert: "SOBREMESA", location: "FEIMA - MAPUTO", close: "FECHAR", readMore: "Ler Mais", 
-                readLess: "Ver Menos", conceptTitle: "O CONCEITO", weeklyTitle: "MENÚ SEMANAL", social: "Siga-nos", 
-                address: "Av. Mártires da Machava", introText: "Há espaços onde se come. E depois há o Nyumba Food — Concept, onde cada prato parece ter sido criado para impressionar. Instalado no ambiente calmo e encantador da FEIMA, este quiosque transforma cada refeição numa viagem bem guiada.\nO Menu é uma celebração de fronteiras gastronómicas inteligentemente atravessadas: a cozinha moçambicana no seu esplendor, a herança portuguesa tratada com respeito e criatividade."
+                open: "ABERTO", closed: "FECHADO", order: "PEDIR", menuWeek: "Menus da Semana", suggestion: "SUGESTÃO DO DIA",
+                reveal: "REVELAR MENU", hours: "09:00 - 22:00", entrance: "ENTRADA", mains: "PRATOS PRINCIPAIS",
+                dessert: "SOBREMESA", location: "FEIMA - MAPUTO", close: "FECHAR", readMore: "Ler Mais",
+                readLess: "Ver Menos", conceptTitle: "O CONCEITO", weeklyTitle: "MENÚ SEMANAL", social: "Siga-nos",
+                address: "Av. Mártires da Machava", introText: "Há espaços onde se come. E depois há o Nyumba Food — Concept, onde cada prato parece ter sido criado para impressionar. Instalado no ambiente calmo e encantador da FEIMA, este quiosque transforma cada refeição numa viagem bem guiada.\nO Menu é uma celebração de fronteiras gastronómicas inteligentemente atravessadas: a cozinha moçambicana no seu esplendor, a herança portuguesa tratada com respeito e criatividade.",
+                alacarte: "MENU À LA CARTE", weekendMenu: "Disponível aos Sábados, Domingos e Feriados",
+                petiscos: "PETISCOS", sopas: "SOPAS", snacks: "SNACKS", noPao: "NO PÃO", noPrato: "NO PRATO"
             },
             en: {
-                open: "OPEN", closed: "CLOSED", order: "ORDER", menuWeek: "Weekly Menus", suggestion: "TODAY'S SUGGESTION", 
-                reveal: "REVEAL MENU", hours: "09:00 - 22:00", entrance: "STARTER", mains: "MAIN COURSES", 
-                dessert: "DESSERT", location: "FEIMA - MAPUTO", close: "CLOSE", readMore: "Read More", 
-                readLess: "Read Less", conceptTitle: "THE CONCEPT", weeklyTitle: "WEEKLY MENU", social: "Follow us", 
-                address: "Martyrs of Machava Ave.", introText: "There are places where you eat. And then there is Nyumba Food — Concept, where every dish seems to have been created to impress. Located in the calm and charming environment of FEIMA, this kiosk transforms every meal into a well-guided journey.\nThe Menu is a celebration of intelligently crossed gastronomic borders: Mozambican cuisine in its splendor, Portuguese heritage treated with respect and creativity."
+                open: "OPEN", closed: "CLOSED", order: "ORDER", menuWeek: "Weekly Menus", suggestion: "TODAY'S SUGGESTION",
+                reveal: "REVEAL MENU", hours: "09:00 - 22:00", entrance: "STARTER", mains: "MAIN COURSES",
+                dessert: "DESSERT", location: "FEIMA - MAPUTO", close: "CLOSE", readMore: "Read More",
+                readLess: "Read Less", conceptTitle: "THE CONCEPT", weeklyTitle: "WEEKLY MENU", social: "Follow us",
+                address: "Martyrs of Machava Ave.", introText: "There are places where you eat. And then there is Nyumba Food — Concept, where every dish seems to have been created to impress. Located in the calm and charming environment of FEIMA, this kiosk transforms every meal into a well-guided journey.\nThe Menu is a celebration of intelligently crossed gastronomic borders: Mozambican cuisine in its splendor, Portuguese heritage treated with respect and creativity.",
+                alacarte: "À LA CARTE MENU", weekendMenu: "Available on Saturdays, Sundays and Holidays",
+                petiscos: "APPETIZERS", sopas: "SOUPS", snacks: "SNACKS", noPao: "SANDWICHES", noPrato: "PLATES"
             }
         };
 
@@ -100,7 +246,7 @@
 
             useEffect(() => {
                 const check = () => {
-                    const hr = new Date().toLocaleTimeString('pt-PT', {timeZone: 'Africa/Maputo', hour: '2-digit', hour12: false});
+                    const hr = new Date().toLocaleTimeString('pt-PT', { timeZone: 'Africa/Maputo', hour: '2-digit', hour12: false });
                     setIsOpen(parseInt(hr) >= 9 && parseInt(hr) < 22);
                 };
                 check();
@@ -108,15 +254,17 @@
                 return () => clearInterval(timer);
             }, []);
 
-            const dayIdx = [1,1,2,3,4,5,1][new Date().getDay()];
-            const today = MENU_DATA[dayIdx];
+            const currentDay = new Date().getDay(); // 0=Domingo, 6=Sábado
+            const isWeekend = currentDay === 0 || currentDay === 6;
+            const dayIdx = [1, 1, 2, 3, 4, 5, 1][currentDay]; // Mantém para dias úteis
+            const today = isWeekend ? null : MENU_DATA[dayIdx];
 
             return e('div', { className: 'min-h-screen flex flex-col' },
                 // NAV
                 e('nav', { className: 'fixed-nav glass border-b border-white/10 px-6 py-4 flex justify-between items-center shadow-xl' },
                     e('div', { className: 'flex items-center gap-3' },
                         e('button', { onClick: () => setLang(l => l === 'pt' ? 'en' : 'pt'), className: 'glass px-4 py-2 rounded-2xl text-[10px] font-black uppercase' }, lang),
-                        e('a', { href: 'https://wa.me/258846695390', target: '_blank', className: 'bg-white text-nyumba-forest px-6 py-2.5 rounded-full text-[11px] font-extrabold flex items-center gap-2 shadow-2xl' }, 
+                        e('a', { href: 'https://wa.me/258846695390', target: '_blank', className: 'bg-white text-nyumba-forest px-6 py-2.5 rounded-full text-[11px] font-extrabold flex items-center gap-2 shadow-2xl' },
                             e('i', { className: 'fab fa-whatsapp text-lg' }), t.order)
                     ),
                     e('div', { className: `px-4 py-1.5 rounded-full text-[10px] font-black flex items-center gap-2 shadow-lg ${isOpen ? 'bg-green-500/80 text-white' : 'bg-red-500/80 text-white'}` },
@@ -125,8 +273,8 @@
 
                 // HEADER
                 e('header', { className: 'pt-40 pb-10 px-6 text-center' },
-                    e('h1', { className: 'font-heading text-6xl md:text-9xl text-nyumba-clay tracking-tighter uppercase leading-none' }, 'NYUMBA', e('br'), 
-                    e('span', { className: 'italic font-light text-nyumba-sand opacity-90 lowercase font-sans' }, 'food-concept'))
+                    e('h1', { className: 'font-heading text-6xl md:text-9xl text-nyumba-clay tracking-tighter uppercase leading-none' }, 'NYUMBA', e('br'),
+                        e('span', { className: 'italic font-light text-nyumba-sand opacity-90 lowercase font-sans' }, 'food-concept'))
                 ),
 
                 // MAIN
@@ -138,19 +286,83 @@
                         e('button', { onClick: () => setIsIntroExpanded(!isIntroExpanded), className: 'mt-4 text-[9px] font-black uppercase text-nyumba-clay flex items-center gap-2' }, isIntroExpanded ? t.readLess : t.readMore, e('i', { className: `fas fa-chevron-${isIntroExpanded ? 'up' : 'down'}` }))
                     ),
 
-                    // SUGESTÃO
-                    e('section', { onClick: () => setIsExpanded(!isExpanded), className: `glass rounded-[3rem] p-8 cursor-pointer shadow-2xl relative transition-all border border-white/10 ${isExpanded ? 'ring-1 ring-nyumba-clay' : ''}` },
-                        e('div', { className: 'flex justify-between items-start' },
-                            e('div', { className: 'space-y-1' }, e('span', { className: 'text-nyumba-clay font-black text-[10px] uppercase tracking-[0.4em]' }, t.suggestion), e('h2', { className: 'font-heading text-4xl italic text-white uppercase tracking-tighter' }, today[lang].dia)),
-                            e('div', { className: `w-12 h-12 rounded-full glass flex items-center justify-center transition-all ${isExpanded ? 'rotate-180 bg-nyumba-clay text-white' : ''}` }, e('i', { className: 'fas fa-chevron-down' }))
-                        ),
-                        !isExpanded && e('p', { className: 'mt-6 text-[10px] font-black text-nyumba-sand/40 uppercase tracking-[0.3em] flex items-center gap-2' }, e('span', { className: 'w-2 h-2 rounded-full bg-nyumba-clay animate-ping' }), t.reveal),
-                        isExpanded && e('div', { className: 'mt-12 space-y-10' },
-                            e('div', { className: 'border-l-2 border-nyumba-clay pl-6' }, e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase mb-2 block' }, t.entrance), e('div', { className: 'flex justify-between items-end' }, e('p', { className: 'text-2xl font-black text-nyumba-sand italic uppercase tracking-tighter' }, today[lang].sopa), e('span', { className: 'font-bold text-nyumba-clay text-sm' }, today.precos.sopa))),
-                            e('div', { className: 'space-y-6' }, e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase block' }, t.mains), today[lang].pratos.map((p, i) => e('div', { key: i, className: 'flex justify-between items-center glass p-6 rounded-[2rem] border-white/5' }, e('p', { className: 'text-base font-black uppercase text-nyumba-sand' }, p), e('span', { className: 'font-black text-nyumba-clay text-sm' }, today.precos.pratos[i])))),
-                            e('div', { className: 'pt-8 border-t border-white/10 flex justify-between items-center' }, e('div', { className: 'space-y-1' }, e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase' }, t.dessert), e('p', { className: 'text-2xl font-black text-nyumba-sand italic uppercase' }, today[lang].sobremesa)), e('span', { className: 'font-bold text-nyumba-clay text-sm' }, today.precos.sobremesa))
+                    // MENU CONDICIONAL (À LA CARTE ou SUGESTÃO DO DIA)
+                    isWeekend ?
+                        // MENU À LA CARTE (Fins de Semana)
+                        e('section', { onClick: () => setIsExpanded(!isExpanded), className: `glass rounded-[3rem] p-8 cursor-pointer shadow-2xl relative transition-all border border-white/10 ${isExpanded ? 'ring-1 ring-nyumba-clay' : ''}` },
+                            e('div', { className: 'flex justify-between items-start' },
+                                e('div', { className: 'space-y-1' },
+                                    e('span', { className: 'text-nyumba-clay font-black text-[10px] uppercase tracking-[0.4em]' }, t.alacarte),
+                                    e('p', { className: 'text-[11px] text-nyumba-sand/60 uppercase tracking-wide mt-2' }, t.weekendMenu)
+                                ),
+                                e('div', { className: `w-12 h-12 rounded-full glass flex items-center justify-center transition-all ${isExpanded ? 'rotate-180 bg-nyumba-clay text-white' : ''}` }, e('i', { className: 'fas fa-chevron-down' }))
+                            ),
+                            !isExpanded && e('p', { className: 'mt-6 text-[10px] font-black text-nyumba-sand/40 uppercase tracking-[0.3em] flex items-center gap-2' }, e('span', { className: 'w-2 h-2 rounded-full bg-nyumba-clay animate-ping' }), t.reveal),
+                            isExpanded && e('div', { className: 'mt-12 space-y-10 max-h-[70vh] overflow-y-auto custom-scrollbar pr-2' },
+                                // PETISCOS
+                                e('div', { className: 'space-y-4' },
+                                    e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase block mb-4' }, t.petiscos),
+                                    ALACARTE_MENU[lang].petiscos.map((item, i) => e('div', { key: i, className: 'flex justify-between items-center border-b border-white/5 pb-3' },
+                                        e('p', { className: 'text-sm font-bold text-nyumba-sand' }, item.nome),
+                                        e('span', { className: 'font-black text-nyumba-clay text-xs ml-4' }, item.preco)
+                                    ))
+                                ),
+                                // SOPAS
+                                e('div', { className: 'space-y-4' },
+                                    e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase block mb-4' }, t.sopas),
+                                    ALACARTE_MENU[lang].sopas.map((item, i) => e('div', { key: i, className: 'flex justify-between items-center border-b border-white/5 pb-3' },
+                                        e('p', { className: 'text-sm font-bold text-nyumba-sand' }, item.nome),
+                                        e('span', { className: 'font-black text-nyumba-clay text-xs ml-4' }, item.preco)
+                                    ))
+                                ),
+                                // SNACKS
+                                e('div', { className: 'space-y-4' },
+                                    e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase block mb-4' }, t.snacks),
+                                    ALACARTE_MENU[lang].snacks.map((item, i) => e('div', { key: i, className: 'flex justify-between items-center border-b border-white/5 pb-3' },
+                                        e('p', { className: 'text-sm font-bold text-nyumba-sand' }, item.nome),
+                                        e('span', { className: 'font-black text-nyumba-clay text-xs ml-4' }, item.preco)
+                                    ))
+                                ),
+                                // NO PÃO
+                                e('div', { className: 'space-y-4' },
+                                    e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase block mb-4' }, t.noPao),
+                                    ALACARTE_MENU[lang].noPao.map((item, i) => e('div', { key: i, className: 'flex justify-between items-center border-b border-white/5 pb-3' },
+                                        e('p', { className: 'text-sm font-bold text-nyumba-sand' }, item.nome),
+                                        e('span', { className: 'font-black text-nyumba-clay text-xs ml-4' }, item.preco)
+                                    ))
+                                ),
+                                // NO PRATO
+                                e('div', { className: 'space-y-4' },
+                                    e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase block mb-4' }, t.noPrato),
+                                    ALACARTE_MENU[lang].noPrato.map((item, i) => e('div', { key: i, className: 'flex justify-between items-center border-b border-white/5 pb-3' },
+                                        e('p', { className: 'text-sm font-bold text-nyumba-sand' }, item.nome),
+                                        e('span', { className: 'font-black text-nyumba-clay text-xs ml-4' }, item.preco)
+                                    ))
+                                ),
+                                // SOBREMESAS
+                                e('div', { className: 'space-y-4' },
+                                    e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase block mb-4' }, t.dessert),
+                                    ALACARTE_MENU[lang].sobremesas.map((item, i) => e('div', { key: i, className: 'flex justify-between items-center border-b border-white/5 pb-3' },
+                                        e('p', { className: 'text-sm font-bold text-nyumba-sand' }, item.nome),
+                                        e('span', { className: 'font-black text-nyumba-clay text-xs ml-4' }, item.preco)
+                                    ))
+                                )
+                            )
                         )
-                    ),
+                        :
+                        // SUGESTÃO DO DIA (Segunda a Sexta)
+                        e('section', { onClick: () => setIsExpanded(!isExpanded), className: `glass rounded-[3rem] p-8 cursor-pointer shadow-2xl relative transition-all border border-white/10 ${isExpanded ? 'ring-1 ring-nyumba-clay' : ''}` },
+                            e('div', { className: 'flex justify-between items-start' },
+                                e('div', { className: 'space-y-1' }, e('span', { className: 'text-nyumba-clay font-black text-[10px] uppercase tracking-[0.4em]' }, t.suggestion), e('h2', { className: 'font-heading text-4xl italic text-white uppercase tracking-tighter' }, today[lang].dia)),
+                                e('div', { className: `w-12 h-12 rounded-full glass flex items-center justify-center transition-all ${isExpanded ? 'rotate-180 bg-nyumba-clay text-white' : ''}` }, e('i', { className: 'fas fa-chevron-down' }))
+                            ),
+                            !isExpanded && e('p', { className: 'mt-6 text-[10px] font-black text-nyumba-sand/40 uppercase tracking-[0.3em] flex items-center gap-2' }, e('span', { className: 'w-2 h-2 rounded-full bg-nyumba-clay animate-ping' }), t.reveal),
+                            isExpanded && e('div', { className: 'mt-12 space-y-10' },
+                                e('div', { className: 'border-l-2 border-nyumba-clay pl-6' }, e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase mb-2 block' }, t.entrance), e('div', { className: 'flex justify-between items-end' }, e('p', { className: 'text-2xl font-black text-nyumba-sand italic uppercase tracking-tighter' }, today[lang].sopa), e('span', { className: 'font-black text-nyumba-clay text-xs' }, today.precos.sopa))),
+                                e('div', { className: 'space-y-6' }, e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase block' }, t.mains), today[lang].pratos.map((p, i) => e('div', { key: i, className: 'flex justify-between items-center glass p-6 rounded-[2rem] border-white/5' }, e('p', { className: 'text-base font-black uppercase text-nyumba-sand' }, p), e('span', { className: 'font-black text-nyumba-clay text-xs' }, today.precos.pratos[i])))),
+                                e('div', { className: 'pt-8 border-t border-white/10 flex justify-between items-center' }, e('div', { className: 'space-y-1' }, e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase' }, t.dessert), e('p', { className: 'text-2xl font-black text-nyumba-sand italic uppercase' }, today[lang].sobremesa)), e('span', { className: 'font-black text-nyumba-clay text-xs' }, today.precos.sobremesa))
+                            )
+                        ),
 
                     // BOTAO SEMANAL
                     e('button', { onClick: () => setIsMenuOpen(true), className: 'w-full glass py-8 rounded-[2.5rem] font-heading text-[11px] tracking-[0.5em] uppercase text-nyumba-sand active:scale-95' }, t.menuWeek),
@@ -169,7 +381,9 @@
                             e('div', { className: 'pt-6 flex flex-col items-center gap-4' },
                                 e('span', { className: 'text-[9px] font-black uppercase tracking-[0.4em] text-nyumba-clay/60' }, t.social),
                                 e('div', { className: 'flex gap-6' },
-                                    ['instagram', 'facebook-f', 'suitcase'].map((ic, idx) => e('a', { key: idx, href: '#', className: 'w-12 h-12 rounded-full glass flex items-center justify-center text-xl' }, e('i', { className: `fab${idx===2?'s':''} fa-${ic}` })))
+                                    e('a', { href: 'https://www.instagram.com/nyumbafoodconcept', target: '_blank', rel: 'noopener noreferrer', className: 'w-12 h-12 rounded-full glass flex items-center justify-center text-xl hover:bg-nyumba-clay/20 transition-colors' }, e('i', { className: 'fab fa-instagram' })),
+                                    e('a', { href: 'https://www.facebook.com/713621391838871?ref=pl_edit_xav_ig_profile_page_web', target: '_blank', rel: 'noopener noreferrer', className: 'w-12 h-12 rounded-full glass flex items-center justify-center text-xl hover:bg-nyumba-clay/20 transition-colors' }, e('i', { className: 'fab fa-facebook-f' })),
+                                    e('a', { href: 'https://www.tripadvisor.com/Restaurant_Review-g293819-d33987869-Reviews-Nyumba_Food_Concept-Maputo_Maputo_Province.html', target: '_blank', rel: 'noopener noreferrer', className: 'w-12 h-12 rounded-full glass flex items-center justify-center text-xl hover:bg-nyumba-clay/20 transition-colors' }, e('i', { className: 'fab fa-tripadvisor' }))
                                 )
                             )
                         ),
@@ -187,13 +401,14 @@
                 isMenuOpen && e('div', { className: 'fixed inset-0 z-[200] bg-nyumba-deep/98 backdrop-blur-3xl p-6 overflow-y-auto' },
                     e('div', { className: 'max-w-xl mx-auto pt-6' },
                         e('div', { className: 'flex justify-between items-center mb-16' }, e('h3', { className: 'font-heading text-4xl italic text-nyumba-clay uppercase' }, t.weeklyTitle), e('button', { onClick: () => setIsMenuOpen(false), className: 'w-14 h-14 rounded-full glass text-white flex items-center justify-center shadow-2xl' }, e('i', { className: 'fas fa-times text-xl' }))),
-                        e('div', { className: 'space-y-16 pb-32' }, Object.entries(MENU_DATA).map(([key, day]) => 
-                            e('div', { key, className: 'space-y-6' }, 
+                        e('div', { className: 'space-y-16 pb-32' }, Object.entries(MENU_DATA).map(([key, day]) =>
+                            e('div', { key, className: 'space-y-6' },
                                 e('h4', { className: 'text-white font-heading text-3xl italic border-b border-white/10 pb-2 uppercase' }, day[lang].dia),
                                 e('div', { className: 'glass p-8 rounded-[2.5rem] space-y-8' },
-                                    e('div', null, e('span', { className: 'text-[10px] font-black text-nyumba-sand/40 uppercase mb-1 block' }, t.entrance), e('div', { className: 'flex justify-between items-end' }, e('p', { className: 'text-xl font-black italic text-white uppercase' }, day[lang].sopa), e('span', { className: 'text-[11px] font-bold text-nyumba-sand ml-4' }, day.precos.sopa))),
-                                    e('div', { className: 'space-y-4' }, e('span', { className: 'text-[10px] font-black text-nyumba-sand/40 uppercase block' }, t.mains), day[lang].pratos.map((p, i) => e('div', { key: i, className: 'flex justify-between items-center border-b border-white/5 pb-2' }, e('p', { className: 'text-sm font-black uppercase text-white' }, p), e('span', { className: 'text-[11px] font-bold text-nyumba-sand ml-4' }, day.precos.pratos[i])))),
-                                    e('div', null, e('span', { className: 'text-[10px] font-black text-nyumba-sand/40 uppercase mb-1 block' }, t.dessert), e('div', { className: 'flex justify-between items-end' }, e('p', { className: 'text-xl font-black italic text-white uppercase' }, day[lang].sobremesa), e('span', { className: 'text-[11px] font-bold text-nyumba-sand ml-4' }, day.precos.sobremesa)))
+                                    e('div', null, e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase mb-1 block' }, t.entrance), e('div', { className: 'flex justify-between items-end' }, e('p', { className: 'text-xl font-black italic text-nyumba-sand uppercase' }, day[lang].sopa), e('span', { className: 'font-black text-nyumba-clay text-xs ml-4' }, day.precos.sopa))),
+                                    e('div', { className: 'space-y-4' }, e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase block' }, t.mains), day[lang].pratos.map((p, i) => e('div', { key: i, className: 'flex justify-between items-center border-b border-white/5 pb-3' }, e('p', { className: 'text-sm font-bold text-nyumba-sand' }, p), e('span', { className: 'font-black text-nyumba-clay text-xs ml-4' }, day.precos.pratos[i])))),
+
+                                    e('div', null, e('span', { className: 'text-[10px] font-black text-nyumba-clay/60 uppercase mb-1 block' }, t.dessert), e('div', { className: 'flex justify-between items-end' }, e('p', { className: 'text-xl font-black italic text-nyumba-sand uppercase' }, day[lang].sobremesa), e('span', { className: 'font-black text-nyumba-clay text-xs ml-4' }, day.precos.sobremesa)))
                                 )
                             )
                         )),
@@ -207,4 +422,5 @@
         root.render(e(App));
     </script>
 </body>
+
 </html>
