@@ -26,10 +26,19 @@
     <style>
         body { background: #0F2617; background: radial-gradient(circle at center, #1D4A2C 0%, #0F2617 100%) fixed; color: #E0E8D9; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .modal-full { background: #0F2617; position: fixed; inset: 0; z-index: 100; overflow-y: auto; padding: 1.5rem; }
+        .modal-full { background: #0F2617; position: fixed; inset: 0; z-index: 200; overflow-y: auto; padding: 1.5rem; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #D96C06; border-radius: 10px; }
         input[type="date"], input[type="time"] { color-scheme: dark; }
+        
+        /* Animações Live Status */
+        .pulse-green { animation: pulse-green 2s infinite; background: #10B981; box-shadow: 0 0 10px #10B981; }
+        .pulse-red { animation: pulse-red 2s infinite; background: #EF4444; box-shadow: 0 0 10px #EF4444; }
+        @keyframes pulse-green { 0%, 100% { opacity: 0.6; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } }
+        @keyframes pulse-red { 0%, 100% { opacity: 0.6; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } }
+        
+        .pulse-border { border: 2px solid #D96C06; animation: border-glow 2s infinite; }
+        @keyframes border-glow { 0%, 100% { border-color: rgba(217, 108, 6, 0.3); } 50% { border-color: rgba(217, 108, 6, 1); } }
     </style>
 </head>
 <body>
@@ -37,113 +46,115 @@
 
     <script>
         const e = React.createElement;
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useEffect, useMemo, useCallback } = React;
 
         const MOZ_HOLIDAYS = ["01-01", "02-03", "04-07", "05-01", "06-25", "09-07", "09-25", "10-04", "12-25"];
 
         const TRANSLATIONS = {
             pt: {
+                statusOpen: "ABERTO AGORA", statusClosed: "FECHADO AGORA",
                 conceptTitle: "O CONCEITO",
-                conceptText: "Há espaços onde se come. E depois há o Nyumba Food — Concept, onde cada prato parece ter sido criado para impressionar. Instalado no ambiente calmo e encantador da FEIMA, este quiosque transforma cada refeição numa viagem bem guiada.\nO Menu é uma celebração de fronteiras gastronómicas inteligentemente atravessadas: a cozinha moçambicana no seu esplendor, a herança portuguesa tratada com respeito e criatividade.",
+                conceptText: "Há espaços onde se come. E depois há o Nyumba Food — Concept, onde cada prato parece ter sido criado para impressionar. Instalado no ambiente calmo e encantador da FEIMA, este quiosque transforma cada refeição numa viagem bem guiada.\n\nO Menu é uma celebração de fronteiras gastronómicas inteligentemente atravessadas: a cozinha moçambicana no seu esplendor e a herança portuguesa tratada com respeito e criatividade.",
                 orderBtn: "PEDIR VIA WHATSAPP",
                 weeklyBtn: "CONSULTAR MENU SEMANAL",
+                weeklyMenuTitle: "MENU SEMANAL",
                 alacarteBtn: "CONSULTAR À LA CARTE",
+                alacarteTitle: "MENU À LA CARTE",
                 location: "FEIMA - MAPUTO", address: "Av. Mártires da Machava",
                 hours: "HORÁRIO", hoursDetail: "09:00 - 22:00",
                 footer: "Nyumba Food Concept © 2026 | José Freire • Criação",
-                name: "O teu nome", phone: "Telemóvel *", date: "Data", time: "Hora",
-                addressLabel: "Morada de entrega (Maputo) *",
-                notesEventLabel: "Notas (Festas de Aniversário, Casamento...)",
+                name: "O teu nome *", phone: "Telemóvel (WhatsApp) *", date: "Data", time: "Hora",
+                addressLabel: "Morada de entrega (OBRIGATÓRIO) *",
                 notesGenericLabel: "Notas e Observações",
-                notesPlaceholders: {
-                    comer_local: "Bebidas, alergias ou preferência de lugar...",
-                    takeaway: "Bebidas ou observações para a recolha...",
-                    entrega: "Bebidas, pontos de referência ou alergias...",
-                    evento: "Detalhes do evento, decoração, pedidos especiais..."
-                },
+                notesPlaceholders: { comer_local: "Preferência de mesa...", takeaway: "Hora de recolha...", entrega: "Ponto de referência...", evento: "Detalhes do evento..." },
                 sendWa: "FINALIZAR NO WHATSAPP",
                 resetBtn: "LIMPAR TUDO",
                 close: "FECHAR",
                 selectItems: "SELECIONAR PRATOS",
-                weekendMsg: "Fim de Semana / Feriado: Apenas À La Carte disponível.",
                 total: "TOTAL ESTIMADO",
-                requiredAlert: "Por favor, preencha o seu nome, telemóvel e morada (se aplicável).",
+                requiredAlert: "Por favor, preencha o Nome, Telemóvel e Morada (se entrega).",
                 types: { comer_local: "No Local", takeaway: "Takeaway", entrega: "Entrega", evento: "Evento" },
-                sections: { starter: "ENTRADA", main: "PRATOS PRINCIPAIS", dessert: "SOBREMESA", alacarte: "À LA CARTE", snacks: "SNACKS", appetizers: "PETISCOS", sandwiches: "NO PÃO", plates: "NO PRATO" }
+                sections: { starter: "ENTRADAS / SOPAS", main: "PRATOS PRINCIPAIS", dessert: "SOBREMESAS", appetizers: "PETISCOS", snacks: "SNACKS", sandwiches: "NO PÃO", plates: "NO PRATO" }
             },
             en: {
+                statusOpen: "OPEN NOW", statusClosed: "CLOSED NOW",
                 conceptTitle: "THE CONCEPT",
-                conceptText: "There are places where you eat. And then there is Nyumba Food — Concept, where every dish seems to have been created to impress. Located in the calm and charming environment of FEIMA, this kiosk transforms every meal into a well-guided journey.\nThe Menu is a celebration of intelligently crossed gastronomic borders: Mozambican cuisine in its splendor, Portuguese heritage treated with respect and creativity.",
+                conceptText: "There are places where you eat. And then there is Nyumba Food — Concept, where every dish seems to have been created to impress. Located in the calm environment of FEIMA, this kiosk transforms every meal into a well-guided journey.",
                 orderBtn: "ORDER VIA WHATSAPP",
-                weeklyBtn: "SEE WEEKLY MENU",
-                alacarteBtn: "SEE À LA CARTE",
+                weeklyBtn: "WEEKLY MENU",
+                weeklyMenuTitle: "WEEKLY MENU",
+                alacarteBtn: "À LA CARTE",
+                alacarteTitle: "À LA CARTE MENU",
                 location: "FEIMA - MAPUTO", address: "Martyrs of Machava Ave.",
-                hours: "OPENING HOURS", hoursDetail: "09:00 AM - 10:00 PM",
+                hours: "HOURS", hoursDetail: "09:00 AM - 10:00 PM",
                 footer: "Nyumba Food Concept © 2026 | José Freire • Creation",
-                name: "Your name", phone: "Phone number *", date: "Date", time: "Time",
-                addressLabel: "Delivery address (Maputo) *",
-                notesEventLabel: "Notes (Birthday Parties, Weddings...)",
+                name: "Your name *", phone: "Phone (WhatsApp) *", date: "Date", time: "Time",
+                addressLabel: "Delivery address *",
                 notesGenericLabel: "Notes & Observations",
-                notesPlaceholders: {
-                    comer_local: "Drinks, allergies, or seat preference...",
-                    takeaway: "Drinks or pickup notes...",
-                    entrega: "Drinks, landmarks, or allergies...",
-                    evento: "Event details, decor, special requests..."
-                },
-                sendWa: "FINISH ON WHATSAPP",
+                notesPlaceholders: { comer_local: "Table preference...", takeaway: "Pickup time...", entrega: "Landmark...", evento: "Event details..." },
+                sendWa: "ORDER ON WHATSAPP",
                 resetBtn: "CLEAR ALL",
                 close: "CLOSE",
                 selectItems: "SELECT DISHES",
-                weekendMsg: "Weekend / Holiday: Only À La Carte available.",
                 total: "ESTIMATED TOTAL",
-                requiredAlert: "Please fill in your name, phone, and address (if applicable).",
+                requiredAlert: "Please fill Name, Phone and Address (if delivery).",
                 types: { comer_local: "Dine-in", takeaway: "Takeaway", entrega: "Delivery", evento: "Event" },
-                sections: { starter: "STARTER", main: "MAIN COURSES", dessert: "DESSERT", alacarte: "À LA CARTE", snacks: "SNACKS", appetizers: "APPETIZERS", sandwiches: "SANDWICHES", plates: "ON PLATE" }
+                sections: { starter: "STARTERS / SOUPS", main: "MAIN COURSES", dessert: "DESSERTS", appetizers: "APPETIZERS", snacks: "SNACKS", sandwiches: "SANDWICHES", plates: "ON PLATE" }
             }
         };
 
         const MENU_DATA = {
-            1: { pt: "Segunda", en: "Monday", sopa: { pt: "Creme de Cenoura", en: "Carrot Cream", p: "180MT" }, pratos: [{pt: "Costeleta de Porco", en: "Pork Chop", p: "500MT"}, {pt: "Língua de Vaca", en: "Beef Tongue", p: "500MT"}], sobremesa: { pt: "Salada de Fruta", en: "Fruit Salad", p: "150MT" } },
-            2: { pt: "Terça", en: "Tuesday", sopa: { pt: "Caldo Verde", en: "Green Broth", p: "180MT" }, pratos: [{pt: "Bife à Cerveja", en: "Beer Steak", p: "500MT"}, {pt: "Pescadinha Frita", en: "Fried Whiting", p: "400MT"}], sobremesa: { pt: "Pudim", en: "Caramel Pudding", p: "180MT" } },
-            3: { pt: "Quarta", en: "Wednesday", sopa: { pt: "Sopa de Mandioca", en: "Cassava Soup", p: "150MT" }, pratos: [{pt: "Posta de Peixe", en: "Fish Steak", p: "500MT"}, {pt: "Arroz de Pato", en: "Duck Rice", p: "500MT"}], sobremesa: { pt: "Bolo de Cenoura", en: "Carrot Cake", p: "250MT" } },
-            4: { pt: "Quinta", en: "Thursday", sopa: { pt: "Sopa de Feijão", en: "Bean Soup", p: "150MT" }, pratos: [{pt: "Polvo a Lagareiro", en: "Octopus Lagareiro", p: "750MT"}, {pt: "Cabrito no Forno", en: "Roasted Goat", p: "750MT"}], sobremesa: { pt: "Arroz-Doce", en: "Rice Pudding", p: "180MT" } },
-            5: { pt: "Sexta", en: "Friday", sopa: { pt: "Creme de Abóbora", en: "Pumpkin Cream", p: "180MT" }, pratos: [{pt: "Matapa c/ Caranguejo", en: "Matapa w/ Crab", p: "350MT"}, {pt: "Pernil no Forno", en: "Roasted Pork Shank", p: "750MT"}], sobremesa: { pt: "Doce de Mandioca", en: "Cassava Sweet", p: "180MT" } }
+            1: { pt: "Segunda", en: "Monday", sopa: { pt: "Creme de Cenoura", en: "Carrot Cream", p: "180MT" }, pratos: [{pt: "Costeleta de Porco", en: "Pork Chop", p: "500MT", d_pt: "Grelhada com arroz e batata frita", d_en: "Grilled with rice and fries"}, {pt: "Língua de Vaca", en: "Beef Tongue", p: "500MT", d_pt: "Estufada com puré de batata", d_en: "Braised with mashed potatoes"}], sobremesa: { pt: "Salada de Fruta", en: "Fruit Salad", p: "150MT" } },
+            2: { pt: "Terça", en: "Tuesday", sopa: { pt: "Caldo Verde", en: "Green Broth", p: "180MT" }, pratos: [{pt: "Bife à Cerveja", en: "Beer Steak", p: "500MT", d_pt: "Com batata frita e ovo", d_en: "With fries and egg"}, {pt: "Pescadinha Frita", en: "Fried Whiting", p: "400MT", d_pt: "Com arroz de feijão", d_en: "With bean rice"}], sobremesa: { pt: "Pudim", en: "Caramel Pudding", p: "180MT" } },
+            3: { pt: "Quarta", en: "Wednesday", sopa: { pt: "Sopa de Mandioca", en: "Cassava Soup", p: "150MT" }, pratos: [{pt: "Posta de Peixe", en: "Fish Steak", p: "500MT", d_pt: "Grelhada com legumes", d_en: "Grilled with vegetables"}, {pt: "Arroz de Pato", en: "Duck Rice", p: "500MT", d_pt: "Tradicional no forno com chouriço", d_en: "Traditional oven-baked with chorizo"}], sobremesa: { pt: "Bolo de Cenoura", en: "Carrot Cake", p: "250MT" } },
+            4: { pt: "Quinta", en: "Thursday", sopa: { pt: "Sopa de Feijão", en: "Bean Soup", p: "150MT" }, pratos: [{pt: "Polvo a Lagareiro", en: "Octopus Lagareiro", p: "750MT", d_pt: "Com batata a murro e azeite", d_en: "With punched potatoes and olive oil"}, {pt: "Cabrito no Forno", en: "Roasted Goat", p: "750MT", d_pt: "Com batata assada e arroz", d_en: "With roasted potatoes and rice"}], sobremesa: { pt: "Arroz-Doce", en: "Rice Pudding", p: "180MT" } },
+            5: { pt: "Sexta", en: "Friday", sopa: { pt: "Creme de Abóbora", en: "Pumpkin Cream", p: "180MT" }, pratos: [{pt: "Matapa c/ Caranguejo", en: "Matapa w/ Crab", p: "350MT", d_pt: "Prato tradicional com arroz branco", d_en: "Traditional dish with white rice"}, {pt: "Pernil no Forno", en: "Roasted Pork Shank", p: "750MT", d_pt: "Assado lentamente com guarnição", d_en: "Slow roasted with sides"}], sobremesa: { pt: "Doce de Mandioca", en: "Cassava Sweet", p: "180MT" } }
         };
 
         const ALACARTE_DATA = {
             appetizers: [
-                { pt: "Rabada", en: "Oxtail", p: "350MT" },
-                { pt: "Amêijoas à NYUMBA", en: "Clams NYUMBA style", p: "400MT" },
-                { pt: "Cabeça de Salmão", en: "Salmon Head", p: "350MT" },
-                { pt: "Camarão Alinho", en: "Seasoned Shrimp", p: "350MT" },
-                { pt: "Chouriço (c/ Batata e Salada)", en: "Chorizo (w/ Potato & Salad)", p: "400MT" },
-                { pt: "Tábua de 7 Queijos & Broa", en: "7 Cheese Board & Cornbread", p: "750MT" },
-                { pt: "Dobradinha", en: "Tripe", p: "350MT" }
+                { pt: "Rabada", en: "Oxtail", p: "350MT", d_pt: "Estufada de forma tradicional", d_en: "Traditional slow-cooked stew" },
+                { pt: "Amêijoas à NYUMBA", en: "Clams NYUMBA", p: "400MT", d_pt: "Com molho especial da casa", d_en: "With house special sauce" },
+                { pt: "Cabeça de Salmão", en: "Salmon Head", p: "350MT", d_pt: "Grelhada no ponto", d_en: "Perfectly grilled" },
+                { pt: "Camarão Alinho", en: "Garlic Shrimp", p: "350MT", d_pt: "Temperado com alho e ervas aromáticas", d_en: "Seasoned with garlic and herbs" },
+                { pt: "Chouriço", en: "Chorizo", p: "400MT", d_pt: "Acompanhado com batata e salada", d_en: "Served with potatoes and salad" },
+                { pt: "Tábua de 7 Queijos & Broa", en: "7 Cheese Board", p: "750MT", d_pt: "Seleção premium com broa de milho", d_en: "Premium selection with cornbread" },
+                { pt: "Dobradinha", en: "Tripe Stew", p: "350MT", d_pt: "Tradicional e suculenta", d_en: "Traditional and juicy" }
             ],
             starter: [
-                { pt: "Creme de Cenoura", en: "Carrot Cream", p: "150MT" },
-                { pt: "Creme de Abóbora", en: "Pumpkin Cream", p: "180MT" },
-                { pt: "Sopa de Mandioca", en: "Cassava Soup", p: "150MT" },
-                { pt: "Caldo Verde", en: "Green Broth", p: "180MT" },
-                { pt: "Sopa de Feijão", en: "Bean Soup", p: "150MT" },
-                { pt: "Sopa de Legumes", en: "Vegetable Soup", p: "150MT" }
+                { pt: "Creme de Cenoura", en: "Carrot Cream", p: "150MT", d_pt: "Cremosa e nutritiva", d_en: "Creamy and nutritious" },
+                { pt: "Creme de Abóbora", en: "Pumpkin Cream", p: "180MT", d_pt: "Toque suave de especiarias", d_en: "Smooth touch of spices" },
+                { pt: "Sopa de Mandioca", en: "Cassava Soup", p: "150MT", d_pt: "Sabor autêntico local", d_en: "Authentic local flavor" },
+                { pt: "Caldo Verde", en: "Green Broth", p: "180MT", d_pt: "Tradicional com chouriço", d_en: "Traditional with chorizo" },
+                { pt: "Sopa de Feijão", en: "Bean Soup", p: "150MT", d_pt: "Rica e reconfortante", d_en: "Rich and comforting" },
+                { pt: "Sopa de Legumes", en: "Vegetable Soup", p: "150MT", d_pt: "Legumes frescos da época", d_en: "Fresh seasonal vegetables" }
             ],
-            snacks: [{ pt: "Salgados (4)", en: "Savory Pastries (4)", p: "250MT" }],
+            snacks: [
+                { pt: "Salgados (4)", en: "Savory Pastries (4)", p: "250MT", d_pt: "Mix de salgadinhos fritos na hora", d_en: "Freshly fried savory mix" }
+            ],
             sandwiches: [
-                { pt: "Hamburguer Simples", en: "Simple Burger", p: "250MT" },
-                { pt: "Hamburguer Completo", en: "Complete Burger", p: "350MT" },
-                { pt: "Nyumba Burguer", en: "Nyumba Burger", p: "500MT" },
-                { pt: "Hamburguer de Alheira", en: "Alheira Burger", p: "600MT" },
-                { pt: "Prego no pão", en: "Steak Sandwich", p: "350MT" },
-                { pt: "Tosta de Caranguejo", en: "Crab Toast", p: "250MT" }
+                { pt: "Hamburguer Simples", en: "Simple Burger", p: "250MT", d_pt: "Com ovo ou queijo e batata frita", d_en: "With egg or cheese and French fries" },
+                { pt: "Hamburguer Completo", en: "Complete Burger", p: "350MT", d_pt: "Queijo, ovo, alface, cheddar, maionese caseira, cebola caramelizada e batata frita", d_en: "Cheese, egg, lettuce, cheddar, homemade mayo, caramelized onion and fries" },
+                { pt: "Nyumba Burguer", en: "Nyumba Burger", p: "500MT", d_pt: "Maionese caseira, fiambre ou bacon, mozzarella, batata frita, cebola caramelizada, picles e rúcula", d_en: "Homemade mayo, ham or bacon, mozzarella, fries, caramelized onion, pickles and arugula" },
+                { pt: "Hamburguer de Alheira", en: "Alheira Burger", p: "600MT", d_pt: "Com ovo, rúcula, mozzarella e batata frita", d_en: "With egg, arugula, mozzarella and French fries" },
+                { pt: "Hamburguer de Frango", en: "Chicken Burger", p: "350MT", d_pt: "Com ovo, mozzarella, alface e batata", d_en: "With egg, mozzarella, lettuce and potatoes" },
+                { pt: "Prego no pão", en: "Steak Sandwich", p: "350MT", d_pt: "Bife suculento em pão fresco", d_en: "Juicy steak in fresh bread" },
+                { pt: "Cachorro Quente", en: "Hot Dog", p: "350MT", d_pt: "Acompanhado com batatas", d_en: "Served with French fries" },
+                { pt: "Tosta Mista", en: "Ham & Cheese Toast", p: "280MT", d_pt: "Pão tostado com fiambre e queijo", d_en: "Toasted bread with ham and cheese" },
+                { pt: "Tosta de Atum", en: "Tuna Toast", p: "250MT", d_pt: "Pasta de atum artesanal", d_en: "Handmade tuna spread" },
+                { pt: "Tosta de Caranguejo", en: "Crab Toast", p: "250MT", d_pt: "Recheio cremoso de caranguejo", d_en: "Creamy crab filling" },
+                { pt: "Tosta de Frango", en: "Chicken Toast", p: "250MT", d_pt: "Frango desfiado temperado", d_en: "Seasoned shredded chicken" }
             ],
-            plates: [{ pt: "Matabicho Thafo", en: "Thafo Breakfast", p: "500MT" }],
+            plates: [
+                { pt: "Matabicho Thafo", en: "Thafo Breakfast", p: "500MT", d_pt: "2 ovos, tomate, salsichas, torradas, feijão doce e bacon", d_en: "2 eggs, tomato, sausages, toast, baked beans and bacon" }
+            ],
             dessert: [
-                { pt: "Salada de Fruta", en: "Fruit Salad", p: "180MT" },
-                { pt: "Pudim", en: "Caramel Pudding", p: "180MT" },
-                { pt: "Bolo de Chocolate", en: "Chocolate Cake", p: "250MT" },
-                { pt: "Doce de Mandioca", en: "Cassava Sweet", p: "180MT" },
-                { pt: "Arroz Doce", en: "Rice Pudding", p: "180MT" }
+                { pt: "Sorvete", en: "Ice Cream", p: "180MT", d_pt: "Vários sabores disponíveis", d_en: "Various flavors available" },
+                { pt: "Salada de Fruta", en: "Fruit Salad", p: "180MT", d_pt: "Fruta fresca da época", d_en: "Fresh seasonal fruit" },
+                { pt: "Pudim", en: "Caramel Pudding", p: "180MT", d_pt: "Caseiro e cremoso", d_en: "Homemade and creamy" },
+                { pt: "Bolo de Chocolate", en: "Chocolate Cake", p: "250MT", d_pt: "Fatia generosa e húmida", d_en: "Generous moist slice" },
+                { pt: "Doce de Mandioca", en: "Cassava Sweet", p: "180MT", d_pt: "Sobremesa tradicional", d_en: "Traditional dessert" },
+                { pt: "Arroz Doce", en: "Rice Pudding", p: "180MT", d_pt: "Cremoso com canela", d_en: "Creamy with cinnamon" }
             ]
         };
 
@@ -153,16 +164,40 @@
             const [isWeeklyOpen, setIsWeeklyOpen] = useState(false);
             const [isAlacarteOpen, setIsAlacarteOpen] = useState(false);
             const [isMenuExpanded, setIsMenuExpanded] = useState(false);
+            const [isRestaurantOpen, setIsRestaurantOpen] = useState(false);
             const [cart, setCart] = useState({});
             const [form, setForm] = useState({ tipo: 'comer_local', nome: '', telemovel: '', data: '', hora: '', morada: '', detalhes: '' });
+            
             const t = TRANSLATIONS[lang];
+
+            // LOGICA HORARIO MAPUTO (UTC+2)
+            const checkMaputoStatus = useCallback(() => {
+                const now = new Date();
+                const maputoTime = new Intl.DateTimeFormat('pt-PT', {
+                    timeZone: 'Africa/Maputo',
+                    hour: 'numeric',
+                    hour12: false
+                }).format(now);
+                const hour = parseInt(maputoTime);
+                setIsRestaurantOpen(hour >= 9 && hour < 22);
+            }, []);
+
+            useEffect(() => {
+                checkMaputoStatus();
+                const timer = setInterval(checkMaputoStatus, 30000);
+                return () => clearInterval(timer);
+            }, [checkMaputoStatus]);
+
+            const handleReset = () => {
+                setCart({});
+                setForm({ tipo: 'comer_local', nome: '', telemovel: '', data: '', hora: '', morada: '', detalhes: '' });
+            };
 
             const isWeekendOrHoliday = useMemo(() => {
                 if (!form.data) return false;
-                const date = new Date(form.data);
-                const day = date.getDay();
-                const mDay = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-                return day === 0 || day === 6 || MOZ_HOLIDAYS.includes(mDay);
+                const d = new Date(form.data);
+                const mDay = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                return d.getDay() === 0 || d.getDay() === 6 || MOZ_HOLIDAYS.includes(mDay);
             }, [form.data]);
 
             const [selectedDay, setSelectedDay] = useState(() => {
@@ -171,25 +206,23 @@
             });
 
             const availableItems = useMemo(() => {
-                const items = [];
-                if (!isWeekendOrHoliday) {
-                    const day = MENU_DATA[selectedDay];
-                    items.push({ n_pt: day.sopa.pt, n_en: day.sopa.en, p: day.sopa.p, cat: t.sections.starter });
-                    day.pratos.forEach((p) => items.push({ n_pt: p.pt, n_en: p.en, p: p.p, cat: t.sections.main }));
-                    items.push({ n_pt: day.sobremesa.pt, n_en: day.sobremesa.en, p: day.sobremesa.p, cat: t.sections.dessert });
+                let items = [];
+                const day = MENU_DATA[selectedDay];
+                if (day && !isWeekendOrHoliday) {
+                    items.push({ id: `day-sopa`, n_pt: day.sopa.pt, n_en: day.sopa.en, p: day.sopa.p, cat: t.sections.starter });
+                    day.pratos.forEach((p, i) => items.push({ id: `day-p-${i}`, n_pt: p.pt, n_en: p.en, p: p.p, cat: t.sections.main, desc_pt: p.d_pt, desc_en: p.d_en }));
+                    items.push({ id: `day-doce`, n_pt: day.sobremesa.pt, n_en: day.sobremesa.en, p: day.sobremesa.p, cat: t.sections.dessert });
                 }
                 Object.entries(ALACARTE_DATA).forEach(([catKey, list]) => {
-                    list.forEach((item) => items.push({ n_pt: item.pt, n_en: item.en, p: item.p, cat: t.sections[catKey] || catKey.toUpperCase() }));
+                    list.forEach((item, i) => items.push({ id: `ala-${catKey}-${i}`, n_pt: item.pt, n_en: item.en, p: item.p, cat: t.sections[catKey] || catKey.toUpperCase(), desc_pt: item.d_pt, desc_en: item.d_en }));
                 });
                 return items;
             }, [selectedDay, isWeekendOrHoliday, t]);
 
             const totalPrice = useMemo(() => {
-                return Object.entries(cart).reduce((sum, [key, qty]) => {
-                    const item = availableItems.find(i => i.n_pt === key);
-                    if (!item) return sum;
-                    const price = parseInt(item.p.replace(/\D/g, ''));
-                    return sum + (price * qty);
+                return Object.entries(cart).reduce((sum, [namePt, qty]) => {
+                    const item = availableItems.find(i => i.n_pt === namePt);
+                    return item ? sum + (parseInt(item.p.replace(/\D/g, '')) * qty) : sum;
                 }, 0);
             }, [cart, availableItems]);
 
@@ -197,63 +230,58 @@
                 setCart(prev => {
                     const next = (prev[namePt] || 0) + delta;
                     const newCart = { ...prev };
-                    if (next <= 0) delete newCart[namePt];
-                    else newCart[namePt] = next;
+                    if (next <= 0) delete newCart[namePt]; else newCart[namePt] = next;
                     return newCart;
                 });
             };
 
-            const handleReset = () => {
-                setCart({});
-                setForm({ ...form, detalhes: '', morada: '', nome: '', telemovel: '', data: '', hora: '' });
-            };
-
             const sendWA = () => {
                 if (!form.nome || !form.telemovel || (form.tipo === 'entrega' && !form.morada)) {
-                    alert(t.requiredAlert);
-                    return;
+                    alert(t.requiredAlert); return;
                 }
                 const itensStr = Object.entries(cart).map(([n, q]) => `• ${q}x ${n}`).join('\n');
-                const text = `*PEDIDO NYUMBA*\n📍 *Tipo:* ${t.types[form.tipo]}\n👤 *Nome:* ${form.nome}\n📞 *Tel:* ${form.telemovel}\n📅 *Data:* ${form.data} às ${form.hora}\n\n*ITENS:*\n${itensStr}\n\n💰 *TOTAL:* ${totalPrice.toLocaleString()} MT\n\n*NOTAS:* ${form.detalhes}${form.tipo === 'entrega' ? `\n🏠 *Morada:* ${form.morada}` : ''}`;
-                window.open(`https://wa.me/258846695390?text=${encodeURIComponent(text)}`, '_blank');
+                if (!itensStr) { alert("O carrinho está vazio!"); return; }
+                const msg = `*PEDIDO NYUMBA*\n📍 *Tipo:* ${t.types[form.tipo]}\n👤 *Nome:* ${form.nome}\n📞 *WhatsApp:* ${form.telemovel}\n📅 *Data:* ${form.data} às ${form.hora}\n\n*ITENS:*\n${itensStr}\n\n💰 *TOTAL:* ${totalPrice.toLocaleString()} MT\n\n*NOTAS:* ${form.detalhes}${form.tipo === 'entrega' ? `\n🏠 *Morada:* ${form.morada}` : ''}`;
+                window.open(`https://wa.me/258846695390?text=${encodeURIComponent(msg)}`, '_blank');
             };
 
-            const MenuModalItem = ({ name, price, category }) => e('div', { className: 'flex justify-between items-center border-b border-white/5 py-5 group' },
-                e('div', { className: 'flex flex-col' },
-                    category && e('span', { className: 'text-[10px] font-black text-nyumba-clay uppercase tracking-widest mb-1' }, category),
-                    e('span', { className: 'text-sm font-bold group-hover:text-nyumba-clay transition-colors uppercase' }, name)
+            const MenuModalItem = ({ name, price, category, desc }) => e('div', { className: 'flex justify-between items-start border-b border-white/5 py-4 group' },
+                e('div', { className: 'flex flex-col flex-1 pr-4' },
+                    category && e('span', { className: 'text-[9px] font-black text-nyumba-clay uppercase tracking-widest mb-1' }, category),
+                    e('span', { className: 'text-sm font-bold uppercase group-hover:text-nyumba-clay transition-colors' }, name),
+                    desc && e('span', { className: 'text-[10px] opacity-50 italic mt-1 leading-relaxed' }, desc)
                 ),
-                e('span', { className: 'text-xs font-black text-nyumba-clay ml-4' }, price)
+                e('span', { className: 'text-xs font-black text-nyumba-clay whitespace-nowrap' }, price)
             );
 
             return e('div', { className: 'flex flex-col min-h-screen' },
-                // NAV
-                e('nav', { className: 'fixed top-0 w-full z-50 glass px-6 py-4 flex justify-between items-center shadow-lg' },
-                    e('div', { className: 'font-heading text-nyumba-clay font-black text-xl tracking-tighter uppercase' }, 'NYUMBA'),
-                    e('button', { 
-                        onClick: () => setLang(l => l === 'pt' ? 'en' : 'pt'), 
-                        className: 'glass px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-nyumba-clay' 
-                    }, lang === 'pt' ? 'EN' : 'PT')
+                // NAVBAR
+                e('nav', { className: 'fixed top-0 w-full z-50 glass px-6 py-4 flex justify-between items-center shadow-2xl' },
+                    e('div', { className: 'flex flex-col' },
+                        e('div', { className: 'font-heading text-nyumba-clay font-black text-xl tracking-tighter uppercase' }, 'NYUMBA'),
+                        e('div', { className: 'flex items-center gap-2 mt-0.5' },
+                            e('span', { className: `w-2 h-2 rounded-full ${isRestaurantOpen ? 'pulse-green' : 'pulse-red'}` }),
+                            e('span', { className: `text-[9px] font-black tracking-widest uppercase ${isRestaurantOpen ? 'text-emerald-400' : 'text-red-400'}` }, isRestaurantOpen ? t.statusOpen : t.statusClosed)
+                        )
+                    ),
+                    e('button', { onClick: () => setLang(l => l === 'pt' ? 'en' : 'pt'), className: 'glass px-4 py-2 rounded-xl text-[10px] font-black text-nyumba-clay' }, lang === 'pt' ? 'ENGLISH' : 'PORTUGUÊS')
                 ),
 
-                e('header', { className: 'pt-40 pb-12 px-6 text-center' },
-                    e('h1', { className: 'font-heading text-7xl md:text-9xl text-nyumba-clay leading-none tracking-tighter' }, 'NYUMBA'),
+                // HERO
+                e('header', { className: 'pt-44 pb-12 px-6 text-center' },
+                    e('h1', { className: 'font-heading text-7xl md:text-9xl text-nyumba-clay leading-none' }, 'NYUMBA'),
                     e('p', { className: 'font-sans text-xl italic text-nyumba-sand/60 -mt-2' }, 'food-concept')
                 ),
 
+                // MAIN
                 e('main', { className: 'max-w-xl mx-auto w-full px-6 space-y-10 pb-20' },
-                    // CONCEITO INTEGRAL
-                    e('section', { className: 'glass rounded-[2.5rem] p-8 space-y-4 shadow-2xl' },
-                        e('div', { className: 'flex justify-between items-center mb-2' },
-                            e('span', { className: 'text-nyumba-clay font-black text-[10px] uppercase tracking-[0.4em]' }, t.conceptTitle),
-                            e('i', { className: 'fas fa-quote-right text-nyumba-clay/20 text-xl' })
-                        ),
+                    e('section', { className: 'glass rounded-[2.5rem] p-8 shadow-2xl' },
+                        e('div', { className: 'flex justify-between items-center mb-4' }, e('span', { className: 'text-nyumba-clay font-black text-[10px] uppercase tracking-[0.4em]' }, t.conceptTitle), e('i', { className: 'fas fa-quote-right text-nyumba-clay/20 text-xl' })),
                         e('p', { className: 'text-sm leading-relaxed text-justify opacity-90 whitespace-pre-line italic' }, t.conceptText)
                     ),
 
                     e('div', { className: 'space-y-4' },
-                        e('button', { onClick: () => setIsOrderOpen(true), className: 'w-full bg-zinc-800 border border-white/10 text-white py-8 rounded-[2.5rem] font-black uppercase text-xs tracking-widest shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-4 hover:bg-zinc-700' }, 
-                            e('i', { className: 'fab fa-whatsapp text-xl text-[#25D366]' }), t.orderBtn),
+                        e('button', { onClick: () => setIsOrderOpen(true), className: 'w-full bg-zinc-800 border border-white/10 text-white py-8 rounded-[2.5rem] font-black uppercase text-xs tracking-widest shadow-2xl active:scale-95 flex items-center justify-center gap-4 hover:bg-zinc-700 transition-all' }, e('i', { className: 'fab fa-whatsapp text-xl text-[#25D366]' }), t.orderBtn),
                         e('button', { onClick: () => setIsWeeklyOpen(true), className: 'w-full glass text-nyumba-sand py-6 rounded-[2rem] font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all' }, t.weeklyBtn),
                         e('button', { onClick: () => setIsAlacarteOpen(true), className: 'w-full glass text-nyumba-sand py-6 rounded-[2rem] font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all' }, t.alacarteBtn)
                     ),
@@ -264,8 +292,8 @@
                             e('div', { className: 'flex gap-4 items-center' }, e('div', { className: 'w-10 h-10 rounded-xl glass flex items-center justify-center text-nyumba-sand' }, e('i', { className: 'fas fa-clock' })), e('div', null, e('p', { className: 'font-black text-sm uppercase' }, t.hours), e('p', { className: 'text-[10px] opacity-40 uppercase' }, t.hoursDetail)))
                         ),
                         e('div', { className: 'flex gap-6 justify-center pt-6 border-t border-white/5' },
-                            e('a', { href: "https://www.instagram.com/nyumbafoodconcept", target: "_blank", className: "w-12 h-12 rounded-full glass flex items-center justify-center text-xl hover:bg-nyumba-clay transition-all shadow-lg" }, e('i', { className: "fab fa-instagram" })),
-                            e('a', { href: "https://www.facebook.com/713621391838871", target: "_blank", className: "w-12 h-12 rounded-full glass flex items-center justify-center text-xl hover:bg-nyumba-clay transition-all shadow-lg" }, e('i', { className: "fab fa-facebook-f" }))
+                            e('a', { href: "https://www.instagram.com/nyumbafoodconcept", target: "_blank", className: "w-12 h-12 rounded-full glass flex items-center justify-center text-xl hover:bg-nyumba-clay transition-all" }, e('i', { className: "fab fa-instagram" })),
+                            e('a', { href: "https://www.facebook.com/713621391838871", target: "_blank", className: "w-12 h-12 rounded-full glass flex items-center justify-center text-xl hover:bg-nyumba-clay transition-all" }, e('i', { className: "fab fa-facebook-f" }))
                         )
                     ),
 
@@ -276,38 +304,11 @@
 
                 e('footer', { className: 'py-20 text-center px-6 opacity-30 mt-auto' }, e('p', { className: 'text-[9px] font-black uppercase tracking-[0.5em]' }, t.footer)),
 
-                // MODAL À LA CARTE
-                isAlacarteOpen && e('div', { className: 'modal-full custom-scrollbar' },
-                    e('div', { className: 'max-w-xl mx-auto py-10 pb-32' },
-                        e('div', { className: 'flex justify-between items-center mb-10 border-b border-white/10 pb-6' }, e('h2', { className: 'font-heading text-4xl text-nyumba-clay italic uppercase' }, t.alacarteTitle), e('button', { onClick: () => setIsAlacarteOpen(false), className: 'w-12 h-12 rounded-full glass flex items-center justify-center' }, '✕')),
-                        Object.entries(ALACARTE_DATA).map(([catKey, list]) => e('div', { key: catKey, className: 'mb-12 p-8 glass rounded-[3rem]' },
-                            e('h3', { className: 'text-nyumba-clay font-heading text-2xl mb-8 border-l-4 border-nyumba-clay pl-6 uppercase italic tracking-tighter' }, t.sections[catKey] || catKey.toUpperCase()),
-                            list.map((item, idx) => e(MenuModalItem, { key: idx, name: item[lang], price: item.p }))
-                        )),
-                        e('button', { onClick: () => setIsAlacarteOpen(false), className: 'w-full glass py-6 rounded-[2rem] font-black uppercase text-[10px] tracking-widest mt-10' }, t.close)
-                    )
-                ),
-
-                // MODAL SEMANAL
-                isWeeklyOpen && e('div', { className: 'modal-full custom-scrollbar' },
-                    e('div', { className: 'max-w-xl mx-auto py-10 pb-32' },
-                        e('div', { className: 'flex justify-between items-center mb-10 border-b border-white/10 pb-6' }, e('h2', { className: 'font-heading text-4xl text-nyumba-clay italic uppercase' }, t.weeklyMenu), e('button', { onClick: () => setIsWeeklyOpen(false), className: 'w-12 h-12 rounded-full glass flex items-center justify-center' }, '✕')),
-                        Object.values(MENU_DATA).map(d => e('div', { key: d[lang], className: 'mb-12 p-8 glass rounded-[3rem]' },
-                            e('h3', { className: 'text-nyumba-clay font-heading text-2xl mb-8 border-l-4 border-nyumba-clay pl-6 uppercase italic tracking-tighter' }, d[lang]),
-                            e('div', { className: 'space-y-6' },
-                                e(MenuModalItem, { name: d.sopa[lang], price: d.sopa.p, category: t.sections.starter }),
-                                e('div', { className: 'space-y-4' }, d.pratos.map((p, i) => e(MenuModalItem, { key: i, name: p[lang], price: p.p, category: i === 0 ? t.sections.main : null }))),
-                                e(MenuModalItem, { name: d.sobremesa[lang], price: d.sobremesa.p, category: t.sections.dessert })
-                            )
-                        )),
-                        e('button', { onClick: () => setIsWeeklyOpen(false), className: 'w-full glass py-6 rounded-[2rem] font-black uppercase text-[10px] tracking-widest mt-10' }, t.close)
-                    )
-                ),
-
                 // MODAL PEDIDO
                 isOrderOpen && e('div', { className: 'modal-full custom-scrollbar' },
                     e('div', { className: 'max-w-lg mx-auto py-4 pb-32' },
-                        e('div', { className: 'flex justify-between items-center mb-8' }, e('h2', { className: 'font-heading text-2xl text-nyumba-clay italic' }, t.orderBtn), e('button', { onClick: () => setIsOrderOpen(false), className: 'w-12 h-12 rounded-full glass flex items-center justify-center' }, '✕')),
+                        e('div', { className: 'flex justify-between items-center mb-8' }, e('h2', { className: 'font-heading text-2xl text-nyumba-clay italic' }, t.orderBtn), e('button', { onClick: () => setIsOrderOpen(false), className: 'w-10 h-10 rounded-full glass flex items-center justify-center shadow-lg' }, '✕')),
+                        
                         e('div', { className: 'space-y-6' },
                             e('div', { className: 'grid grid-cols-2 gap-2 glass p-1 rounded-2xl' },
                                 ['comer_local', 'takeaway', 'entrega', 'evento'].map(type => 
@@ -315,51 +316,83 @@
                                 )
                             ),
                             e('div', { className: 'space-y-3' },
-                                e('input', { value: form.nome, placeholder: t.name, className: 'w-full glass rounded-xl px-4 py-3 text-sm outline-none focus:ring-1 ring-nyumba-clay', onChange: e => setForm({...form, nome: e.target.value}) }),
-                                e('input', { value: form.telemovel, type: 'tel', placeholder: t.phone, className: 'w-full glass rounded-xl px-4 py-3 text-sm outline-none focus:ring-1 ring-nyumba-clay', onChange: e => setForm({...form, telemovel: e.target.value}) }),
+                                e('input', { value: form.nome, placeholder: t.name, className: 'w-full glass rounded-xl px-4 py-3 text-sm outline-none text-white', onChange: e => setForm({...form, nome: e.target.value}) }),
+                                e('input', { value: form.telemovel, placeholder: t.phone, className: 'w-full glass rounded-xl px-4 py-3 text-sm outline-none text-white', onChange: e => setForm({...form, telemovel: e.target.value}) }),
                                 e('div', { className: 'grid grid-cols-2 gap-2' },
-                                    e('input', { value: form.data, type: 'date', className: 'glass rounded-xl px-4 py-3 text-sm outline-none focus:ring-1 ring-nyumba-clay', onChange: e => setForm({...form, data: e.target.value}) }),
-                                    e('input', { value: form.hora, type: 'time', className: 'glass rounded-xl px-4 py-3 text-sm outline-none focus:ring-1 ring-nyumba-clay', onChange: e => setForm({...form, hora: e.target.value}) })
+                                    e('input', { value: form.data, type: 'date', className: 'glass rounded-xl px-4 py-3 text-sm outline-none text-white', onChange: e => setForm({...form, data: e.target.value}) }),
+                                    e('input', { value: form.hora, type: 'time', className: 'glass rounded-xl px-4 py-3 text-sm outline-none text-white', onChange: e => setForm({...form, hora: e.target.value}) })
                                 )
                             ),
+
                             e('div', { className: 'glass rounded-[2rem] overflow-hidden shadow-lg' },
                                 e('button', { onClick: () => setIsMenuExpanded(!isMenuExpanded), className: 'w-full p-6 flex justify-between items-center bg-white/5' },
                                     e('span', { className: 'text-xs font-black uppercase tracking-widest text-nyumba-clay' }, t.selectItems),
                                     e('i', { className: `fas fa-chevron-${isMenuExpanded ? 'up' : 'down'}` })
                                 ),
                                 isMenuExpanded && e('div', { className: 'p-6 space-y-4 max-h-[50vh] overflow-y-auto custom-scrollbar' },
-                                    !isWeekendOrHoliday && e('div', { className: 'flex gap-2 overflow-x-auto pb-4 custom-scrollbar border-b border-white/5 mb-6' },
+                                    !isWeekendOrHoliday && e('div', { className: 'flex gap-2 overflow-x-auto pb-4 border-b border-white/5 mb-6' },
                                         [1, 2, 3, 4, 5].map(d => e('button', { key: d, onClick: () => { setSelectedDay(d); setCart({}); }, className: `px-4 py-2 text-[10px] font-bold uppercase transition-all whitespace-nowrap ${selectedDay === d ? 'text-nyumba-clay border-b-2 border-nyumba-clay' : 'opacity-40'}` }, MENU_DATA[d][lang]))
                                     ),
                                     availableItems.map(item => e('div', { key: item.id, className: 'flex justify-between items-center py-3 border-b border-white/5' },
-                                        e('div', { className: 'flex flex-col' },
+                                        e('div', { className: 'flex flex-col flex-1' },
                                             e('span', { className: 'text-[8px] opacity-40 uppercase tracking-tighter' }, item.cat),
                                             e('span', { className: 'text-xs font-bold leading-tight uppercase' }, lang === 'pt' ? item.n_pt : item.n_en),
                                             e('span', { className: 'text-[10px] text-nyumba-clay font-black' }, item.p)
                                         ),
                                         e('div', { className: 'flex items-center gap-3 bg-white/5 rounded-xl p-1' },
                                             e('button', { onClick: () => updateCart(item.n_pt, -1), className: 'w-8 h-8 glass rounded-lg flex items-center justify-center font-bold active:scale-90 transition-all' }, '-'),
-                                            e('span', { className: 'text-xs font-black w-4 text-center' }, cart[item.n_pt] || 0),
+                                            e('span', { className: 'text-xs font-black' }, cart[item.n_pt] || 0),
                                             e('button', { onClick: () => updateCart(item.n_pt, 1), className: 'w-8 h-8 bg-nyumba-clay text-white rounded-lg flex items-center justify-center font-bold active:scale-90 transition-all' }, '+')
                                         )
                                     ))
                                 )
                             ),
-                            form.tipo === 'entrega' && e('input', { value: form.morada, placeholder: t.addressLabel, className: 'w-full glass border-nyumba-clay/50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-1 ring-nyumba-clay transition-all animate-pulse', onChange: e => setForm({...form, morada: e.target.value}) }),
+
+                            form.tipo === 'entrega' && e('input', { value: form.morada, placeholder: t.addressLabel, className: 'w-full glass rounded-xl px-4 py-3 text-sm pulse-border text-white outline-none', onChange: e => setForm({...form, morada: e.target.value}) }),
+                            
                             e('div', { className: 'space-y-2' },
-                                e('label', { className: 'text-[10px] font-black uppercase ml-2 block' + (form.tipo === 'evento' ? ' text-nyumba-clay' : ' opacity-40') }, form.tipo === 'evento' ? t.notesEventLabel : t.notesGenericLabel),
-                                e('textarea', { value: form.detalhes, placeholder: t.notesPlaceholders[form.tipo], className: 'w-full glass rounded-xl px-4 py-3 text-sm h-32 outline-none text-nyumba-sand leading-relaxed focus:ring-1 ring-nyumba-clay', onChange: e => setForm({...form, detalhes: e.target.value}) })
+                                e('textarea', { value: form.detalhes, placeholder: t.notesPlaceholders[form.tipo], className: 'w-full glass rounded-xl px-4 py-3 text-sm h-24 outline-none text-white', onChange: e => setForm({...form, detalhes: e.target.value}) })
                             ),
-                            totalPrice > 0 && e('div', { className: 'bg-nyumba-clay/20 border border-nyumba-clay/30 rounded-2xl p-6 flex justify-between items-center shadow-inner animate-pulse' },
-                                e('span', { className: 'text-[10px] font-black uppercase tracking-widest' }, t.total),
+
+                            totalPrice > 0 && e('div', { className: 'bg-nyumba-clay/20 border border-nyumba-clay/30 rounded-2xl p-6 flex justify-between items-center animate-pulse' },
+                                e('span', { className: 'text-[10px] font-black uppercase' }, t.total),
                                 e('span', { className: 'text-xl font-heading italic text-nyumba-clay' }, `${totalPrice.toLocaleString()} MT`)
                             ),
-                            e('div', { className: 'flex flex-col gap-3 mt-4' },
-                                e('button', { onClick: sendWA, className: 'w-full bg-[#25D366] text-white py-6 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all' }, e('i', { className: 'fab fa-whatsapp text-lg' }), t.sendWa),
-                                e('button', { onClick: handleReset, className: 'w-full glass py-4 rounded-2xl font-black uppercase text-[9px] tracking-[0.2em] text-white/40 hover:text-white/80 transition-all' }, t.resetBtn)
+
+                            e('div', { className: 'flex flex-col gap-3' },
+                                e('button', { onClick: sendWA, className: 'w-full bg-[#25D366] text-white py-6 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3 shadow-xl' }, e('i', { className: 'fab fa-whatsapp text-lg' }), t.sendWa),
+                                e('button', { onClick: handleReset, className: 'w-full glass py-4 rounded-2xl font-black uppercase text-[9px] opacity-40' }, t.resetBtn)
                             ),
-                            e('button', { onClick: () => setIsOrderOpen(false), className: 'w-full glass py-6 rounded-[2rem] font-black uppercase text-[10px] tracking-widest mt-10' }, t.close)
+                            e('button', { onClick: () => setIsOrderOpen(false), className: 'w-full glass py-6 rounded-[2rem] font-black uppercase text-[10px] tracking-widest mt-6' }, t.close)
                         )
+                    )
+                ),
+
+                // MODAL SEMANAL
+                isWeeklyOpen && e('div', { className: 'modal-full custom-scrollbar' },
+                    e('div', { className: 'max-w-xl mx-auto py-10 pb-32' },
+                        e('div', { className: 'flex justify-between items-center mb-10 border-b border-white/10 pb-6' }, e('h2', { className: 'font-heading text-4xl text-nyumba-clay italic uppercase' }, t.weeklyMenuTitle), e('button', { onClick: () => setIsWeeklyOpen(false), className: 'w-10 h-10 rounded-full glass flex items-center justify-center' }, '✕')),
+                        Object.values(MENU_DATA).map(d => e('div', { key: d.pt, className: 'mb-12 p-8 glass rounded-[3rem]' },
+                            e('h3', { className: 'text-nyumba-clay font-heading text-2xl mb-8 border-l-4 border-nyumba-clay pl-6 italic uppercase tracking-tighter' }, d[lang]),
+                            e('div', { className: 'space-y-6' },
+                                e(MenuModalItem, { name: d.sopa[lang], price: d.sopa.p, category: t.sections.starter }),
+                                d.pratos.map((p, i) => e(MenuModalItem, { key: i, name: p[lang], price: p.p, category: i === 0 ? t.sections.main : null, desc: lang === 'pt' ? p.d_pt : p.d_en })),
+                                e(MenuModalItem, { name: d.sobremesa[lang], price: d.sobremesa.p, category: t.sections.dessert })
+                            )
+                        )),
+                        e('button', { onClick: () => setIsWeeklyOpen(false), className: 'w-full glass py-6 rounded-[2rem] font-black uppercase text-[10px] tracking-widest mt-10' }, t.close)
+                    )
+                ),
+
+                // MODAL À LA CARTE
+                isAlacarteOpen && e('div', { className: 'modal-full custom-scrollbar' },
+                    e('div', { className: 'max-w-xl mx-auto py-10 pb-32' },
+                        e('div', { className: 'flex justify-between items-center mb-10 border-b border-white/10 pb-6' }, e('h2', { className: 'font-heading text-4xl text-nyumba-clay italic uppercase' }, t.alacarteTitle), e('button', { onClick: () => setIsAlacarteOpen(false), className: 'w-10 h-10 rounded-full glass flex items-center justify-center' }, '✕')),
+                        Object.entries(ALACARTE_DATA).map(([catKey, list]) => e('div', { key: catKey, className: 'mb-12 p-8 glass rounded-[3rem]' },
+                            e('h3', { className: 'text-nyumba-clay font-heading text-2xl mb-8 border-l-4 border-nyumba-clay pl-6 italic uppercase tracking-tighter' }, t.sections[catKey] || catKey.toUpperCase()),
+                            list.map((item, idx) => e(MenuModalItem, { key: idx, name: item[lang], price: item.p, desc: lang === 'pt' ? item.d_pt : item.d_en }))
+                        )),
+                        e('button', { onClick: () => setIsAlacarteOpen(false), className: 'w-full glass py-6 rounded-[2rem] font-black uppercase text-[10px] tracking-widest mt-10' }, t.close)
                     )
                 )
             );
