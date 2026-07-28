@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="pt-MZ">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Nyumba Food-Concept | Menu & Reservas</title>
+
+    <!-- Frameworks -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Typography & Icons -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=69efd7dc08cbbb9054f73a061ff6c8a272ebd53e552690df788468c94b193e49&libraries=places"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { nyumba: { clay: '#D96C06', forest: '#1D4A2C', deep: '#0F2617', sand: '#E0E8D9' } },
+                    fontFamily: { heading: ['Syne', 'sans-serif'], sans: ['Plus Jakarta Sans', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            width: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            touch-action: manipulation;
+        }
+
+        body {
+            background: #0F2617;
+            background: radial-gradient(circle at center, #1D4A2C 0%, #0F2617 100%) fixed;
+            color: #E0E8D9;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-full {
+            background: #0F2617;
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            overflow-y: auto;
+            padding: env(safe-area-inset-top) 1.25rem env(safe-area-inset-bottom);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #D96C06;
+            border-radius: 10px;
+        }
+
+        input,
+        textarea,
+        select {
+            font-size: 16px !important;
+        }
+
+        input[type="date"],
+        input[type="time"] {
+            color-scheme: dark;
+            width: 100%;
+        }
+
+        .pulse-green {
+            animation: pulse-opacity 2s infinite;
+            background: #10B981;
+            box-shadow: 0 0 12px #10B981;
+        }
+
+        .pulse-red {
+            animation: pulse-opacity 2s infinite;
+            background: #EF4444;
+            box-shadow: 0 0 12px #EF4444;
+        }
+
+        @keyframes pulse-opacity {
+
+            0%,
+            100% {
+                opacity: 0.6;
+                transform: scale(0.95);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+        }
+
+        .btn-social-xl {
+            width: 4.8rem;
+            height: 4.8rem;
+            border-radius: 50%;
+            background: #D96C06;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-social-xl i {
+            font-size: 2.2rem;
+            display: block;
+        }
+
+        .btn-social-xl svg {
+            width: 2.4rem;
+            height: 2.4rem;
+            fill: currentColor;
+            display: block;
+        }
+
+        .weather-mask {
+            border-radius: 2.5rem;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            line-height: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .pulse-border {
+            border: 2px solid #D96C06;
+            animation: border-glow 2s infinite;
+        }
+
+        .pulse-border-red {
+            border: 2px solid #EF4444;
+            animation: border-glow-red 2s infinite;
+        }
+
+        @keyframes border-glow {
+
+            0%,
+            100% {
+                border-color: rgba(217, 108, 6, 0.3);
+            }
+
+            50% {
+                border-color: rgba(217, 108, 6, 1);
+            }
+        }
+
+        @keyframes border-glow-red {
+
+            0%,
+            100% {
+                border-color: rgba(239, 68, 68, 0.3);
+            }
+
+            50% {
+                border-color: rgba(239, 68, 68, 1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script>
+        const e = React.createElement;
+        const { useState, useEffect, useMemo, useCallback } = React;
+
+        const MOZ_HOLIDAYS = ["01-01", "02-03", "04-07", "05-01", "06-25", "09-07", "09-25", "10-04", "12-25"];
+
+        const TRANSLATIONS = {
+            pt: {
+                statusOpen: "ABERTO", statusClosed: "FECHADO",
+                timeLeft: "Faltam", toClose: "p/ fechar", toOpen: "p/ abrir",
+                conceptTitle: "O CONCEITO",
+                conceptText: "Há espaços onde se come. E depois há o Nyumba Food — Concept, onde cada prato parece ter sido criado para impressionar. Instalado no ambiente calmo e encantador da FEIMA, este quiosque transforma cada refeição numa viagem bem guiada.\n\nO Menu é uma celebração de fronteiras gastronómicas inteligentemente atravessadas: a cozinha moçambicana no seu esplendor e a herança portuguesa tratada com respeito e criatividade.",
+                socialCallTitle: "A NOSSA CASA É A SUA",
+                socialCallText: "A sua opinião ajuda-nos a crescer! Siga-nos e, por favor, deixe a sua avaliação no Google Maps e no TripAdvisor. A sua interação é o nosso ingrediente secreto.",
+                reviewGoogle: "AVALIAR NO GOOGLE MAPS",
+                orderBtn: "PEDIR VIA WHATSAPP", weeklyBtn: "MENU SEMANAL", alacarteBtn: "À LA CARTE",
+                location: "FEIMA - MAPUTO", address: "Av. Mártires da Machava",
+                hours: "HORÁRIO", hoursDetail: "Aberto todos os dias\n09:00 – 22:00",
+                phoneLabel: "TELEFONE", emailLabel: "EMAIL",
+                footer: "Nyumba Food Concept © 2026 | José Freire • Criação",
+                name: "O teu nome *", phone: "Contacto com WhatsApp *", date: "Data do Pedido", time: "Hora",
+                addressLabel: "Morada de entrega (OBRIGATÓRIO) *",
+                notesGenericLabel: "Notas e Observações",
+                notesPlaceholders: { comer_local: "Mesa...", takeaway: "Recolha...", entrega: "Referência...", evento: "Detalhes..." },
+                sendWa: "FINALIZAR NO WHATSAPP", resetBtn: "LIMPAR TUDO", close: "FECHAR", selectItems: "SELECIONAR PRATOS",
+                weekendNotice: "Atenção: Apenas À La Carte disponível em Fins de Semana e Feriados.",
+                total: "TOTAL ESTIMADO", requiredAlert: "Preencha Nome, Telemóvel e Morada (se entrega).",
+                paymentNotice: "Este pedido só será processado após confirmação de pagamento via M-Pesa ou e-Mola.",
+                deliveryNotice: "Entregas em Maputo, Matola e Zimpeto (Raio de 20km).",
+                minOrderError: "Pedidos para entrega devem ser superiores a 750 MT (excluindo a taxa).",
+                phoneError: "Contacto inválido. Use: + (código país) seguido de 9 dígitos (ex: +258841234567).",
+                feeLabel: "TAXA DE ENTREGA",
+                paymentTitle: "PAGAMENTO ANTECIPADO",
+                copyNumber: "Copiar Número",
+                copyTotal: "Copiar Valor",
+                copied: "Copiado!",
+                payVia: "Pagar via",
+                verifyingAddress: "A calcular distância...",
+                outsideZone: "Morada fora do raio de entrega (limite 20km por estrada)",
+                types: { comer_local: "No Local", takeaway: "Takeaway", entrega: "Entrega", evento: "Evento" },
+                sections: { starter: "ENTRADAS / SOPAS", main: "PRATOS PRINCIPAIS", dessert: "SOBREMESAS", appetizers: "PETISCOS", snacks: "SNACKS", sandwiches: "NO PÃO", plates: "NO PRATO" }
+            },
+            en: {
+                statusOpen: "OPEN", statusClosed: "CLOSED",
+                timeLeft: "Left", toClose: "to close", toOpen: "to open",
+                conceptTitle: "THE CONCEPT",
+                conceptText: "There are places where you eat. And then there is Nyumba Food — Concept, where every dish seems to have been created to impress. Located in the calm environment of FEIMA, this kiosk transforms every meal into a well-guided journey.\n\nThe Menu is a celebration of intelligently crossed gastronomic borders: Mozambican cuisine in its splendor and Portuguese heritage treated with respect and creativity.",
+                socialCallTitle: "NYUMBA IS YOUR HOME",
+                socialCallText: "Your feedback helps us grow! Follow us and please leave a review on Google Maps and TripAdvisor. Your interaction is our secret ingredient.",
+                reviewGoogle: "REVIEW ON GOOGLE MAPS",
+                orderBtn: "ORDER VIA WHATSAPP", weeklyBtn: "WEEKLY MENU", alacarteBtn: "À LA CARTE",
+                location: "FEIMA - MAPUTO", address: "Martyrs of Machava Ave.",
+                hours: "HOURS", hoursDetail: "Open every day\n09:00 AM – 10:00 PM",
+                phoneLabel: "PHONE", emailLabel: "EMAIL",
+                footer: "Nyumba Food Concept © 2026 | José Freire • Creation",
+                name: "Your name *", phone: "Contact with WhatsApp *", date: "Order Date", time: "Time",
+                addressLabel: "Delivery address *",
+                notesGenericLabel: "Notes & Observations",
+                notesPlaceholders: { comer_local: "Table...", takeaway: "Pickup...", entrega: "Landmark...", evento: "Details..." },
+                sendWa: "ORDER ON WHATSAPP", resetBtn: "CLEAR ALL", close: "CLOSE", selectItems: "SELECT DISHES",
+                weekendNotice: "Note: Only À La Carte available on Weekends and Holidays.",
+                total: "ESTIMATED TOTAL", requiredAlert: "Please fill Name, Phone and Address (if delivery).",
+                paymentNotice: "Orders processed after payment confirmation (M-Pesa or E-Mola), via WhatsApp.",
+                deliveryNotice: "Deliveries in Maputo, Matola and Zimpeto (20km Radius).",
+                minOrderError: "Delivery orders must be over 750 MT (excluding fee).",
+                phoneError: "Invalid contact. Use: + (country code) followed by 9 digits (e.g., +258841234567).",
+                feeLabel: "DELIVERY FEE",
+                paymentTitle: "ADVANCE PAYMENT",
+                copyNumber: "Copy Number",
+                copyTotal: "Copy Amount",
+                copied: "Copied!",
+                payVia: "Pay via",
+                verifyingAddress: "Calculating distance...",
+                outsideZone: "Address outside delivery radius (20km road limit)",
+                types: { comer_local: "Dine-in", takeaway: "Takeaway", entrega: "Delivery", evento: "Event" },
+                sections: { starter: "STARTERS / SOUPS", main: "MAIN COURSES", dessert: "DESSERTS", appetizers: "APPETIZERS", snacks: "SNACKS", sandwiches: "SANDWICHES", plates: "ON PLATE" }
+            }
+        };
+
+        const MENU_DATA = {
+            1: { pt: "Segunda", en: "Monday", sopa: { pt: "Creme de Cenoura", en: "Carrot Cream", p: "180MT" }, pratos: [{ pt: "Costeleta de Porco", en: "Pork Chop", p: "500MT", d_pt: "Grelhada com arroz e batata frita", d_en: "Grilled with rice and fries" }, { pt: "Língua de Vaca", en: "Beef Tongue", p: "500MT", d_pt: "Estufada com puré de batata", d_en: "Braised with mashed potatoes" }], sobremesa: { pt: "Salada de Fruta", en: "Fruit Salad", p: "150MT" } },
+            2: { pt: "Terça", en: "Tuesday", sopa: { pt: "Caldo Verde", en: "Green Broth", p: "180MT" }, pratos: [{ pt: "Bife à Cerveja", en: "Beer Steak", p: "500MT", d_pt: "Com batata frita e ovo", d_en: "With fries and egg" }, { pt: "Pescadinha Frita", en: "Fried Whiting", p: "400MT", d_pt: "Com arroz de feijão", d_en: "With bean rice" }], sobremesa: { pt: "Pudim", en: "Caramel Pudding", p: "180MT" } },
+            3: { pt: "Quarta", en: "Wednesday", sopa: { pt: "Sopa de Mandioca", en: "Cassava Soup", p: "150MT" }, pratos: [{ pt: "Posta de Peixe", en: "Fish Steak", p: "500MT", d_pt: "Grelhada com legumes", d_en: "Grilled with vegetables" }, { pt: "Arroz de Pato", en: "Duck Rice", p: "500MT", d_pt: "Tradicional no forno com chouriço", d_en: "Traditional oven-baked with chorizo" }], sobremesa: { pt: "Bolo de Cenoura", en: "Carrot Cake", p: "250MT" } },
+            4: { pt: "Quinta", en: "Thursday", sopa: { pt: "Sopa de Feijão", en: "Bean Soup", p: "150MT" }, pratos: [{ pt: "Polvo a Lagareiro", en: "Octopus Lagareiro", p: "750MT", d_pt: "Com batata a murro e azeite", d_en: "With punched potatoes and olive oil" }, { pt: "Cabrito no Forno", en: "Roasted Goat", p: "750MT", d_pt: "Com batata assada e arroz", d_en: "With roasted potatoes and rice" }], sobremesa: { pt: "Arroz-Doce", en: "Rice Pudding", p: "180MT" } },
+            5: { pt: "Sexta", en: "Friday", sopa: { pt: "Creme de Abóbora", en: "Pumpkin Cream", p: "180MT" }, pratos: [{ pt: "Matapa c/ Caranguejo", en: "Matapa w/ Crab", p: "350MT", d_pt: "Prato tradicional com arroz branco", d_en: "Traditional dish with white rice" }, { pt: "Pernil no Forno", en: "Roasted Pork Shank", p: "750MT", d_pt: "Assado lentamente com guarnição", d_en: "Slow roasted with sides" }], sobremesa: { pt: "Doce de Mandioca", en: "Cassava Sweet", p: "180MT" } }
+        };
+
+        const ALACARTE_DATA = {
+            appetizers: [
+                { pt: "Rabada", en: "Oxtail", p: "350MT", d_pt: "Estufada tradicional", d_en: "Traditional stew" },
+                { pt: "Amêijoas à NYUMBA", en: "Clams NYUMBA", p: "400MT", d_pt: "Com molho especial da casa", d_en: "With house sauce" },
+                { pt: "Cabeça de Salmão", en: "Salmon Head", p: "350MT", d_pt: "Grelhada no ponto", d_en: "Perfectly grilled" },
+                { pt: "Camarão Alinho", en: "Shrimp Alinho", p: "350MT", d_pt: "Com alho e ervas aromáticas", d_en: "Garlic and herbs" },
+                { pt: "Chouriço", en: "Chorizo", p: "400MT", d_pt: "Com batata e salada", d_en: "Served with potatoes and salad" },
+                { pt: "Tábua de 7 Queijos & Broa", en: "7 Cheese Board", p: "750MT", d_pt: "Seleção premium com broa", d_en: "Premium selection with bread" },
+                { pt: "Dobradinha", en: "Tripe Stew", p: "350MT", d_pt: "Tradicional e suculenta", d_en: "Traditional and juicy" }
+            ],
+            starter: [
+                { pt: "Creme de Cenoura", en: "Carrot Cream", p: "150MT", d_pt: "Nutritiva", d_en: "Nutritious" },
+                { pt: "Creme de Abóbora", en: "Pumpkin Cream", p: "180MT", d_pt: "Suave", d_en: "Smooth" },
+                { pt: "Sopa de Mandioca", en: "Cassava Soup", p: "150MT", d_pt: "Sabor local", d_en: "Local flavor" },
+                { pt: "Caldo Verde", en: "Green Broth", p: "180MT", d_pt: "Com chouriço", d_en: "With chorizo" },
+                { pt: "Sopa de Feijão", en: "Bean Soup", p: "150MT", d_pt: "Reconfortante", d_en: "Comforting" },
+                { pt: "Sopa de Legumes", en: "Vegetable Soup", p: "150MT", d_pt: "Legumes frescos", d_en: "Fresh vegetables" }
+            ],
+            snacks: [
+                { pt: "Salgados (4 unidades)", en: "Savory Pastries (4)", p: "250MT", d_pt: "Mix de salgadinhos fritos na hora", d_en: "Freshly fried savory mix" }
+            ],
+            sandwiches: [
+                { pt: "Hamburguer Simples", en: "Simple Burger", p: "250MT", d_pt: "Com ovo ou queijo e batata frita", d_en: "With egg or cheese and French fries" },
+                { pt: "Hamburguer Completo", en: "Complete Burger", p: "350MT", d_pt: "Queijo, ovo, alface, cheddar, maionese caseira, cebola caramelizada e batata frita", d_en: "Cheese, egg, lettuce, cheddar, homemade mayo, caramelized onion and fries" },
+                { pt: "Nyumba Burguer", en: "Nyumba Burger", p: "500MT", d_pt: "Maionese caseira, fiambre ou bacon, mozzarella, batata frita, cebola caramelizada, picles e rúcula", d_en: "Homemade mayo, ham or bacon, mozzarella, fries, caramelized onion, pickles and arugula" },
+                { pt: "Hamburguer de Alheira", en: "Alheira Burger", p: "600MT", d_pt: "Com ovo, rúcula, mozzarella e batata frita", d_en: "With egg, arugula, mozzarella and French fries" },
+                { pt: "Hamburguer de Frango", en: "Chicken Burger", p: "350MT", d_pt: "Com ovo, mozzarella, alface e batata", d_en: "With egg, mozzarella, lettuce and potatoes" },
+                { pt: "Prego no pão", en: "Steak Sandwich", p: "350MT", d_pt: "Bife suculento em pão fresco", d_en: "Juicy steak in fresh bread" },
+                { pt: "Cachorro Quente", en: "Hot Dog", p: "350MT", d_pt: "Acompanhado com batatas", d_en: "Served with French fries" },
+                { pt: "Tosta Mista", en: "Ham & Cheese Toast", p: "280MT", d_pt: "Pão tostado com fiambre e queijo", d_en: "Toasted bread with ham and cheese" },
+                { pt: "Tosta de Atum", en: "Tuna Toast", p: "250MT", d_pt: "Pasta de atum artesanal", d_en: "Handmade tuna spread" },
+                { pt: "Tosta de Caranguejo", en: "Crab Toast", p: "250MT", d_pt: "Recheio cremoso de caranguejo", d_en: "Creamy crab filling" },
+                { pt: "Tosta de Frango", en: "Chicken Toast", p: "250MT", d_pt: "Frango desfiado temperado", d_en: "Seasoned shredded chicken" }
+            ],
+            plates: [
+                { pt: "Matabicho Thafo", en: "Thafo Breakfast", p: "500MT", d_pt: "2 ovos, tomate, salsichas, torradas, feijão doce e bacon", d_en: "2 eggs, tomato, sausages, toast, baked beans and bacon" }
+            ],
+            dessert: [
+                { pt: "Sorvete", en: "Ice Cream", p: "180MT", d_pt: "Vários sabores disponíveis", d_en: "Various flavors available" },
+                { pt: "Salada de Fruta", en: "Fruit Salad", p: "180MT", d_pt: "Fruta fresca da época", d_en: "Fresh seasonal fruit" },
+                { pt: "Pudim", en: "Caramel Pudding", p: "180MT", d_pt: "Caseiro e cremoso", d_en: "Homemade and creamy" },
+                { pt: "Bolo de Chocolate", en: "Chocolate Cake", p: "250MT", d_pt: "Fatia generosa e húmida", d_en: "Generous moist slice" },
+                { pt: "Doce de Mandioca", en: "Cassava Sweet", p: "180MT", d_pt: "Sobremesa tradicional", d_en: "Traditional dessert" },
+                { pt: "Arroz Doce", en: "Rice Pudding", p: "180MT", d_pt: "Cremoso com canela", d_en: "Creamy with cinnamon" }
+            ]
+        };
+
+        const COUNTRIES = [
+            { n: "Moçambique", c: "+258", f: "🇲🇿" }, { n: "Portugal", c: "+351", f: "🇵🇹" }, { n: "África do Sul", c: "+27", f: "🇿🇦" },
+            { n: "Angola", c: "+244", f: "🇦🇴" }, { n: "Brasil", c: "+55", f: "🇧🇷" }, { n: "Cabo Verde", c: "+238", f: "🇨🇻" },
+            { n: "Guiné-Bissau", c: "+245", f: "🇬🇼" }, { n: "São Tomé e Príncipe", c: "+239", f: "🇸🇹" }, { n: "Timor-Leste", c: "+670", f: "🇹🇱" },
+            { n: "Estados Unidos", c: "+1", f: "🇺🇸" }, { n: "Reino Unido", c: "+44", f: "🇬🇧" }, { n: "França", c: "+33", f: "🇫🇷" },
+            { n: "Alemanha", c: "+49", f: "🇩🇪" }, { n: "Espanha", c: "+34", f: "🇪🇸" }, { n: "Itália", c: "+39", f: "🇮🇹" },
+            { n: "China", c: "+86", f: "🇨🇳" }, { n: "Índia", c: "+91", f: "🇮🇳" }, { n: "Emirados Árabes", c: "+971", f: "🇦🇪" }
+        ].sort((a, b) => a.n.localeCompare(b.n));
+
+        function App() {
+            const [lang, setLang] = useState('pt');
+            const [modals, setModals] = useState({ order: false, weekly: false, alacarte: false });
+            const [isMenuExpanded, setIsMenuExpanded] = useState(false);
+            const [maputoTime, setMaputoTime] = useState(new Date());
+            const [cart, setCart] = useState({});
+            const [form, setForm] = useState({ tipo: 'comer_local', nome: '', telemovel: '', data: '', hora: '', morada: '', detalhes: '' });
+            const [phoneInvalid, setPhoneInvalid] = useState(false);
+            const [selectedCountry, setSelectedCountry] = useState(COUNTRIES.find(c => c.c === '+258'));
+            const [isCountryPickerOpen, setIsCountryPickerOpen] = useState(false);
+            const [countrySearch, setCountrySearch] = useState('');
+            const [flash, setFlash] = useState(null);
+            const [isValidating, setIsValidating] = useState(false);
+
+            const t = TRANSLATIONS[lang];
+
+            useEffect(() => {
+                if (flash) {
+                    const timer = setTimeout(() => setFlash(null), 4000);
+                    return () => clearTimeout(timer);
+                }
+            }, [flash]);
+
+            useEffect(() => {
+                const timer = setInterval(() => {
+                    const now = new Date();
+                    const offset = now.getTimezoneOffset() * 60000;
+                    const maputoDate = new Date(now.getTime() + offset + (3600000 * 2));
+                    setMaputoTime(maputoDate);
+                }, 1000);
+                const id = 'weatherwidget-io-js';
+                if (!document.getElementById(id)) {
+                    const js = document.createElement('script'); js.id = id;
+                    js.src = 'https://weatherwidget.io/js/widget.min.js';
+                    document.body.appendChild(js);
+                }
+                return () => clearInterval(timer);
+            }, []);
+
+            const statusInfo = useMemo(() => {
+                const h = maputoTime.getHours();
+                const m = maputoTime.getMinutes();
+                const isOpen = h >= 9 && h < 22;
+                let countdown = "";
+                if (isOpen) {
+                    const dh = 21 - h; const dm = 59 - m;
+                    countdown = `${dh}h ${dm}m ${t.toClose}`;
+                } else {
+                    let dh = (h < 9) ? (8 - h) : (24 - h + 8);
+                    const dm = 59 - m;
+                    countdown = `${dh}h ${dm}m ${t.toOpen}`;
+                }
+                const dShort = new Intl.DateTimeFormat(lang === 'pt' ? 'pt-PT' : 'en-US', { weekday: 'short', timeZone: 'Africa/Maputo' }).format(maputoTime).replace('.', '');
+                const dStr = new Intl.DateTimeFormat(lang === 'pt' ? 'pt-PT' : 'en-US', { day: '2-digit', month: 'short', timeZone: 'Africa/Maputo' }).format(maputoTime);
+                const tStr = maputoTime.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+                return { isOpen, countdown, dShort, dStr, tStr };
+            }, [maputoTime, lang, t]);
+
+            const dayType = useMemo(() => {
+                if (!form.data) return { isRestricted: false, dayIdx: 0 };
+                const [y, m, d] = form.data.split('-').map(Number);
+                const dateObj = new Date(y, m - 1, d);
+                const dayNum = dateObj.getDay();
+                const mDay = `${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                return { isRestricted: (dayNum === 0 || dayNum === 6 || MOZ_HOLIDAYS.includes(mDay)), dayIdx: dayNum === 0 ? 7 : dayNum };
+            }, [form.data]);
+
+            useEffect(() => {
+                if (dayType.isRestricted) {
+                    setCart(prev => {
+                        const next = { ...prev };
+                        Object.keys(next).forEach(k => { if (k.startsWith('WD_')) delete next[k]; });
+                        return next;
+                    });
+                }
+            }, [dayType.isRestricted]);
+
+            const availableItems = useMemo(() => {
+                let items = [];
+                if (!dayType.isRestricted && MENU_DATA[dayType.dayIdx]) {
+                    const wd = MENU_DATA[dayType.dayIdx];
+                    items.push({ id: 'WD_SOPA', n_pt: wd.sopa.pt, n_en: wd.sopa.en, p: wd.sopa.p, cat: t.sections.starter });
+                    wd.pratos.forEach((p, i) => items.push({ id: `WD_P${i}`, n_pt: p.pt, n_en: p.en, p: p.p, cat: t.sections.main, desc_pt: p.d_pt, desc_en: p.d_en }));
+                    items.push({ id: 'WD_DOCE', n_pt: wd.sobremesa.pt, n_en: wd.sobremesa.en, p: wd.sobremesa.p, cat: t.sections.dessert });
+                }
+                Object.entries(ALACARTE_DATA).forEach(([cat, list]) => {
+                    list.forEach((it, i) => items.push({ id: `AL_${cat}_${i}`, n_pt: it.pt, n_en: it.en, p: it.p, cat: t.sections[cat] || cat.toUpperCase(), desc_pt: it.d_pt, desc_en: it.d_en }));
+                });
+                return items;
+            }, [dayType, t]);
+
+            const basePrice = useMemo(() => {
+                return Object.entries(cart).reduce((sum, [itemId, qty]) => {
+                    const item = availableItems.find(i => i.id === itemId);
+                    if (!item) return sum;
+                    return sum + (parseInt(item.p.replace(/\D/g, '')) * qty);
+                }, 0);
+            }, [cart, availableItems]);
+
+            const deliveryFee = useMemo(() => (form.tipo === 'entrega' && basePrice > 0) ? 150 : 0, [form.tipo, basePrice]);
+            const totalPrice = useMemo(() => basePrice + deliveryFee, [basePrice, deliveryFee]);
+
+            const MenuItem = ({ item }) => e('div', { className: 'flex justify-between items-start border-b border-white/5 py-4' },
+                e('div', { className: 'flex flex-col flex-1 pr-4' },
+                    e('span', { className: 'text-[8px] font-black text-nyumba-clay uppercase mb-1' }, item.cat),
+                    e('span', { className: 'text-sm font-bold uppercase leading-tight' }, lang === 'pt' ? item.n_pt : item.n_en),
+                    (item.desc_pt || item.desc_en) && e('span', { className: 'text-[10px] opacity-40 italic mt-1 leading-tight' }, lang === 'pt' ? item.desc_pt : item.desc_en)
+                ),
+                e('div', { className: 'flex flex-col items-end gap-2' },
+                    e('span', { className: 'text-xs font-black text-nyumba-clay' }, item.p),
+                    modals.order && e('div', { className: 'flex items-center gap-2 bg-white/5 rounded-lg p-0.5' },
+                        e('button', { onClick: () => { const n = (cart[item.id] || 0) - 1; setCart(p => { const next = { ...p }; if (n <= 0) delete next[item.id]; else next[item.id] = n; return next; }); }, className: 'w-8 h-8 glass rounded-md flex items-center justify-center text-sm' }, '-'),
+                        e('span', { className: 'text-xs font-bold w-4 text-center' }, cart[item.id] || 0),
+                        e('button', { onClick: () => { setCart(p => ({ ...p, [item.id]: (p[item.id] || 0) + 1 })); }, className: 'w-8 h-8 bg-nyumba-clay rounded-md flex items-center justify-center text-sm text-white font-bold' }, '+')
+                    )
+                )
+            );
+
+            const copyToClipboard = (text) => {
+                navigator.clipboard.writeText(text);
+            };
+
+            const sendWA = async () => {
+                if (!form.nome || !form.telemovel || (form.tipo === 'entrega' && !form.morada)) { alert(t.requiredAlert); return; }
+                const cleanPhone = form.telemovel.replace(/\s/g, '');
+                if (cleanPhone.length !== 9) { setPhoneInvalid(true); alert(t.phoneError); return; }
+
+                if (form.tipo === 'entrega') {
+                    setIsValidating(true);
+                    try {
+                        const service = new google.maps.DistanceMatrixService();
+                        const origin = "FEIMA, Av. Mártires da Machava, Maputo, Mozambique";
+                        const destination = `${form.morada}, Maputo, Mozambique`;
+
+                        const response = await new Promise((resolve, reject) => {
+                            service.getDistanceMatrix({
+                                origins: [origin],
+                                destinations: [destination],
+                                travelMode: google.maps.TravelMode.DRIVING,
+                                unitSystem: google.maps.UnitSystem.METRIC,
+                            }, (res, status) => {
+                                if (status === 'OK') resolve(res);
+                                else reject(status);
+                            });
+                        });
+
+                        const distance = response.rows[0].elements[0].distance.value / 1000; // meters to km
+                        if (distance > 20.0) {
+                            setFlash(t.outsideZone);
+                            setIsValidating(false);
+                            return;
+                        }
+                    } catch (e) {
+                        console.error("Google Maps Error:", e);
+                        // Fallback: If API fails or key is missing, we might want to let it pass or show an error.
+                        // For now, let's just proceed if the service is unavailable to avoid blocking customers during setup.
+                    }
+                    setIsValidating(false);
+                }
+
+                const fullPhone = selectedCountry.c + cleanPhone;
+                const itens = Object.entries(cart).map(([id, q]) => {
+                    const it = availableItems.find(x => x.id === id);
+                    return it ? `• ${q}x ${it.n_pt}` : null;
+                }).filter(Boolean).join('\n');
+                if (!itens) { alert("Carrinho vazio!"); return; }
+                const deliveryStr = deliveryFee > 0 ? `\n🚚 *${t.feeLabel}:* ${deliveryFee} MT` : '';
+                const alertStr = (form.tipo === 'takeaway' || form.tipo === 'entrega')
+                    ? `⚠️ *ACÇÃO NECESSÁRIA*\n---------------------------\n💳 *PAGAMENTO ANTECIPADO*\nESTE PEDIDO SÓ DEVE SER PROCESSADO APÓS PAGAMENTO.\n\n👉 *POR FAVOR CONTACTE O CLIENTE AGORA.*\n---------------------------\n\n`
+                    : '';
+                const msg = `${alertStr}*PEDIDO NYUMBA*\n📍 *Tipo:* ${t.types[form.tipo]}\n👤 *Nome:* ${form.nome}\n📞 *WhatsApp:* ${fullPhone}\n📅 *Data:* ${form.data} ${form.hora}\n\n*ITENS:*\n${itens}\n\n💰 *SUBTOTAL:* ${basePrice.toLocaleString()} MT${deliveryStr}\n✨ *TOTAL:* ${totalPrice.toLocaleString()} MT\n\n*NOTAS:* ${form.detalhes}${form.tipo === 'entrega' ? `\n🏠 *Morada:* ${form.morada}` : ''}`;
+                window.open(`https://wa.me/258846695390?text=${encodeURIComponent(msg)}`, '_blank');
+            };
+
+            const Flash = () => flash && e('div', { className: 'fixed top-24 left-1/2 -translate-x-1/2 z-[1000] bg-red-600/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/20 animate-in fade-in slide-in-from-top-4 duration-300' },
+                e('i', { className: 'fas fa-exclamation-triangle text-lg' }),
+                e('span', { className: 'text-xs font-black uppercase tracking-wider' }, flash)
+            );
+
+            return e('div', { className: 'flex flex-col min-h-screen w-full max-w-full' },
+                e(Flash),
+                // NAVBAR
+                e('nav', { className: 'fixed top-0 w-full z-50 glass px-4 py-3 flex justify-between items-center shadow-2xl' },
+                    e('div', { className: 'flex flex-col' },
+                        e('div', { className: 'font-heading text-nyumba-clay font-black text-xl uppercase leading-none' }, 'NYUMBA'),
+                        e('div', { className: 'flex items-center gap-1.5 mt-1' },
+                            e('span', { className: 'text-[9px] font-black text-white bg-nyumba-clay px-1 py-0.5 rounded uppercase' }, statusInfo.dShort),
+                            e('span', { className: 'text-[10px] font-bold text-nyumba-sand opacity-70' }, `${statusInfo.dStr} | ${statusInfo.tStr}`)
+                        )
+                    ),
+                    e('div', { className: 'flex flex-col items-end' },
+                        e('div', { className: 'flex items-center gap-2' },
+                            e('span', { className: `w-2 h-2 rounded-full ${statusInfo.isOpen ? 'pulse-green' : 'pulse-red'}` }),
+                            e('span', { className: `text-[10px] font-black tracking-widest uppercase ${statusInfo.isOpen ? 'text-emerald-400' : 'text-red-400'}` }, statusInfo.isOpen ? t.statusOpen : t.statusClosed)
+                        ),
+                        e('span', { className: 'text-[9px] font-bold opacity-50 uppercase mt-0.5' }, `${t.timeLeft} ${statusInfo.countdown}`)
+                    ),
+                    e('button', { onClick: () => setLang(l => l === 'pt' ? 'en' : 'pt'), className: 'glass h-9 w-9 flex items-center justify-center rounded-lg text-[10px] font-black text-nyumba-clay ml-2' }, lang === 'pt' ? 'EN' : 'PT')
+                ),
+
+                e('header', { className: 'pt-36 pb-8 px-6 text-center' },
+                    e('h1', { className: 'font-heading text-6xl sm:text-7xl md:text-9xl text-nyumba-clay leading-none hero-title' }, 'NYUMBA'),
+                    e('p', { className: 'font-sans text-lg italic text-nyumba-sand/60 -mt-1' }, 'food-concept')
+                ),
+
+                e('main', { className: 'max-w-xl mx-auto w-full px-5 space-y-8 pb-20' },
+                    e('section', { className: 'glass rounded-[2rem] p-6 shadow-2xl' },
+                        e('div', { className: 'flex justify-between items-center mb-3' }, e('span', { className: 'text-nyumba-clay font-black text-[9px] uppercase tracking-widest' }, t.conceptTitle), e('i', { className: 'fas fa-quote-right text-nyumba-clay/20 text-lg' })),
+                        e('p', { className: 'text-sm leading-relaxed text-justify opacity-80 italic whitespace-pre-line' }, t.conceptText)
+                    ),
+
+                    e('div', { className: 'space-y-4' },
+                        e('button', { onClick: () => setModals({ ...modals, order: true }), className: 'w-full bg-zinc-800 border border-white/10 text-white py-7 rounded-[2rem] font-black uppercase text-xs tracking-[0.2em] flex items-center justify-center gap-4 active:scale-95 transition-all shadow-2xl' }, e('i', { className: 'fab fa-whatsapp text-xl text-[#25D366]' }), t.orderBtn),
+                        e('button', { onClick: () => setModals({ ...modals, weekly: true }), className: 'w-full glass text-nyumba-sand py-5 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-xl' }, t.weeklyBtn),
+                        e('button', { onClick: () => setModals({ ...modals, alacarte: true }), className: 'w-full glass text-nyumba-sand py-5 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-xl' }, t.alacarteBtn)
+                    ),
+
+                    e('section', { className: 'glass p-8 rounded-[2.5rem] space-y-6 shadow-2xl border border-nyumba-clay/20' },
+                        e('div', { className: 'text-center space-y-1' },
+                            e('h3', { className: 'font-heading text-lg text-nyumba-clay font-black uppercase' }, t.socialCallTitle),
+                            e('p', { className: 'text-[11px] opacity-70 leading-relaxed italic' }, t.socialCallText)
+                        ),
+                        e('div', { className: 'flex justify-center gap-5 sm:gap-8' },
+                            e('a', { href: "https://www.instagram.com/nyumbafoodconcept", target: "_blank", rel: "noopener noreferrer", className: "btn-social-xl" }, e('i', { className: "fab fa-instagram" })),
+                            e('a', { href: "https://www.facebook.com/people/Nyumbafoodconcept/61578702685238/", target: "_blank", rel: "noopener noreferrer", className: "btn-social-xl" }, e('i', { className: "fab fa-facebook-f" })),
+                            e('a', { href: "https://www.tripadvisor.pt/Restaurant_Review-g293819-d33987869-Reviews-Nyumba_Food_Concept-Maputo_Maputo_Province.html", target: "_blank", className: "btn-social-xl", rel: "noopener noreferrer" },
+                                e('svg', { viewBox: "0 0 512 512" }, e('path', { d: "M128 128c-35.4 0-64 28.6-64 64s28.6 64 64 64 64-28.6 64-64-28.6-64-64-64zm0 110c-25.4 0-46-20.6-46-46s20.6-46 46-46 46 20.6 46 46-20.6 46-46 46zm0-78c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm256-32c-35.4 0-64 28.6-64 64s28.6 64 64 64 64-28.6 64-64-28.6-64-64-64zm0 110c-25.4 0-46-20.6-46-46s20.6-46 46-46 46 20.6 46 46-20.6 46-46 46zm0-78c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm90.2-26.8l37.7-37.4h-76.4C392.9 29 321.8 0 255.9 0c-66 0-136.5 29-179.3 63.8H0l37.7 37.4C14.4 124.4 0 156.5 0 192c0 70.8 57.4 128.2 128.2 128.2 32.5 0 62.2-12.1 84.8-32.1l43.4 31.9 42.9-31.2-.5-1.2c22.7 20.2 52.5 32.5 85.3 32.5 70.8 0 128.2-57.4 128.2-128.2-.1-35.4-14.6-67.5-37.9-90.7zM368 64.8c-60.7 7.6-108.3 57.6-111.9 119.5-3.7-62-51.4-112.1-112.3-119.5 30.6-22 69.6-32.8 112.1-32.8S337.4 42.8 368 64.8z" }))
+                            )
+                        ),
+                        e('a', { href: "https://www.google.com/maps/place/NYUMBA+Food+Concept/@-25.96897,32.593179,17z/data=!4m8!3m7!1s0x1ee69bfe2dccc6a7:0xe72f04de0d760ff5!8m2!3d-25.96897!4d32.593179!9m1!1b1!16s%2Fg%2F11vsw0q663", target: "_blank", className: "w-full py-4 glass rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black tracking-[0.2em] bg-white/5 active:bg-nyumba-clay" },
+                            e('i', { className: "fas fa-star text-yellow-500" }), t.reviewGoogle
+                        )
+                    ),
+
+                    e('section', { className: 'glass p-6 rounded-[2.5rem] space-y-6 shadow-2xl' },
+                        e('div', { className: 'grid grid-cols-1 sm:grid-cols-2 gap-6' },
+                            e('div', { className: 'flex gap-3 items-center' }, e('i', { className: 'fas fa-location-dot text-nyumba-clay text-lg' }), e('div', null, e('p', { className: 'font-black text-xs uppercase' }, t.location), e('p', { className: 'text-[9px] opacity-50 uppercase leading-tight' }, t.address))),
+                            e('div', { className: 'flex gap-3 items-center' }, e('i', { className: 'fas fa-clock text-nyumba-sand text-lg' }), e('div', null, e('p', { className: 'font-black text-xs uppercase' }, t.hours), e('p', { className: 'text-[9px] opacity-50 leading-tight whitespace-pre-line' }, t.hoursDetail))),
+                            e('div', { className: 'flex gap-3 items-center' }, e('i', { className: 'fas fa-phone text-nyumba-sand text-lg' }), e('div', null, e('p', { className: 'font-black text-xs uppercase' }, t.phoneLabel), e('a', { href: 'tel:+258846695390', className: 'text-[9px] opacity-50 uppercase' }, "+258 84 669 5390"))),
+                            e('div', { className: 'flex gap-3 items-center' }, e('i', { className: 'fas fa-envelope text-nyumba-sand text-lg' }), e('div', null, e('p', { className: 'font-black text-xs uppercase' }, t.emailLabel), e('a', { href: 'mailto:nyumba.maputo@gmail.com', className: 'text-[9px] opacity-50 lowercase' }, "nyumba.maputo@gmail.com")))
+                        )
+                    ),
+
+                    e('div', { className: 'h-64 rounded-[2.5rem] overflow-hidden glass p-0.5 shadow-2xl' },
+                        e('iframe', { src: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3586.971653483244!2d32.593179!3d-25.96897!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1ee69bfe2dccc6a7%3A0xe72f04de0d760ff5!2sNYUMBA%20Food%20Concept!5e0!3m2!1sen!2spt!4v1767146297198!5m2!1sen!2spt', className: 'w-full h-full rounded-[2.4rem]', style: { border: 0 } })
+                    ),
+
+                    e('section', { className: 'w-full flex justify-center pt-2' },
+                        e('div', { className: 'w-full glass weather-mask shadow-2xl' },
+                            e('a', { className: 'weatherwidget-io', href: 'https://forecast7.com/en/n25d8232d49/maputo-city/', 'data-label_1': 'MAPUTO CITY', 'data-label_2': 'WEATHER', 'data-mode': 'Current', 'data-theme': 'gray' }, 'MAPUTO CITY WEATHER')
+                        )
+                    )
+                ),
+
+                e('footer', { className: 'py-12 text-center px-6 opacity-30 mt-auto' }, e('p', { className: 'text-[8px] font-black uppercase tracking-[0.4em]' }, t.footer)),
+
+                // MODAL PEDIDO
+                modals.order && e('div', { className: 'modal-full custom-scrollbar' },
+                    e('div', { className: 'max-w-lg mx-auto py-4 pb-32' },
+                        e('div', { className: 'flex justify-between items-center mb-8' }, e('h2', { className: 'font-heading text-2xl text-nyumba-clay italic' }, t.orderBtn), e('button', { onClick: () => setModals({ ...modals, order: false }), className: 'w-10 h-10 rounded-full glass flex items-center justify-center' }, '✕')),
+                        e('div', { className: 'space-y-5' },
+                            e('div', { className: 'grid grid-cols-2 gap-2 glass p-1 rounded-xl' },
+                                ['comer_local', 'takeaway', 'entrega', 'evento'].map(type =>
+                                    e('button', { key: type, onClick: () => setForm({ ...form, tipo: type }), className: `py-3 rounded-lg text-[9px] font-black uppercase transition-all ${form.tipo === type ? 'bg-nyumba-clay text-white shadow-lg' : 'opacity-40'}` }, t.types[type])
+                                )
+                            ),
+                            e('div', { className: 'space-y-3' },
+                                e('input', { value: form.nome, placeholder: t.name, className: 'w-full glass rounded-xl px-4 py-4 text-sm outline-none text-white', onChange: e => setForm({ ...form, nome: e.target.value }) }),
+                                e('div', { className: 'relative' },
+                                    e('div', { className: 'flex gap-2' },
+                                        e('button', {
+                                            onClick: () => setIsCountryPickerOpen(!isCountryPickerOpen),
+                                            className: 'glass rounded-xl px-3 py-4 flex items-center gap-2 min-w-[90px] justify-center transition-all active:scale-95'
+                                        },
+                                            e('span', { className: 'text-lg' }, selectedCountry.f),
+                                            e('span', { className: 'text-xs font-bold' }, selectedCountry.c)
+                                        ),
+                                        e('input', {
+                                            value: form.telemovel,
+                                            type: 'tel',
+                                            maxLength: 12,
+                                            placeholder: '9 dígitos...',
+                                            className: `flex-1 glass rounded-xl px-4 py-4 text-sm outline-none text-white ${phoneInvalid ? 'pulse-border-red' : ''}`,
+                                            onChange: e => {
+                                                const val = e.target.value.replace(/\D/g, '').slice(0, 9);
+                                                setPhoneInvalid(false);
+                                                setForm({ ...form, telemovel: val });
+                                            }
+                                        })
+                                    ),
+                                    isCountryPickerOpen && e('div', { className: 'absolute left-0 top-[110%] w-full z-[300] glass rounded-2xl shadow-2xl p-2 animate-in fade-in slide-in-from-top-2 duration-200' },
+                                        e('input', {
+                                            autoFocus: true,
+                                            placeholder: 'Pesquisar país...',
+                                            value: countrySearch,
+                                            onChange: e => setCountrySearch(e.target.value),
+                                            className: 'w-full bg-white/5 rounded-lg px-3 py-2 text-xs outline-none mb-2 border border-white/10'
+                                        }),
+                                        e('div', { className: 'max-h-[250px] overflow-y-auto custom-scrollbar' },
+                                            COUNTRIES.filter(c => c.n.toLowerCase().includes(countrySearch.toLowerCase()) || c.c.includes(countrySearch))
+                                                .map(c => e('button', {
+                                                    key: c.c + c.n,
+                                                    onClick: () => { setSelectedCountry(c); setIsCountryPickerOpen(false); setCountrySearch(''); },
+                                                    className: 'w-full flex items-center justify-between p-3 hover:bg-white/10 rounded-xl transition-colors text-left'
+                                                },
+                                                    e('div', { className: 'flex items-center gap-3' },
+                                                        e('span', { className: 'text-xl' }, c.f),
+                                                        e('span', { className: 'text-xs font-bold' }, c.n)
+                                                    ),
+                                                    e('span', { className: 'text-[10px] font-black opacity-40' }, c.c)
+                                                ))
+                                        )
+                                    )
+                                ),
+                                e('div', { className: 'grid grid-cols-2 gap-3' },
+                                    e('div', { className: 'flex flex-col gap-1.5' },
+                                        e('label', { className: 'text-[10px] font-black text-nyumba-clay uppercase pl-1' }, t.date),
+                                        e('input', { value: form.data, type: 'date', className: 'glass rounded-xl px-4 py-4 text-sm outline-none text-white w-full', onChange: e => setForm({ ...form, data: e.target.value }) })
+                                    ),
+                                    e('div', { className: 'flex flex-col gap-1.5' },
+                                        e('label', { className: 'text-[10px] font-black text-nyumba-clay uppercase pl-1' }, t.time),
+                                        e('input', { value: form.hora, type: 'time', className: 'glass rounded-xl px-4 py-4 text-sm outline-none text-white w-full', onChange: e => setForm({ ...form, hora: e.target.value }) })
+                                    )
+                                )
+                            ),
+                            e('div', { className: 'glass rounded-[1.5rem] overflow-hidden' },
+                                e('button', { onClick: () => setIsMenuExpanded(!isMenuExpanded), className: 'w-full p-5 flex justify-between items-center bg-white/5 active:bg-white/10' },
+                                    e('span', { className: 'text-xs font-black uppercase tracking-widest text-nyumba-clay' }, t.selectItems),
+                                    e('i', { className: `fas fa-chevron-${isMenuExpanded ? 'up' : 'down'}` })
+                                ),
+                                isMenuExpanded && e('div', { className: 'p-5 space-y-4 max-h-[45vh] overflow-y-auto custom-scrollbar' },
+                                    dayType.isRestricted && e('div', { className: 'p-4 bg-nyumba-clay/10 border border-nyumba-clay/30 rounded-xl text-[10px] italic text-center' }, t.weekendNotice),
+                                    availableItems.map(it => e(MenuItem, { key: it.id, item: it }))
+                                )
+                            ),
+                            form.tipo === 'entrega' && e('input', { value: form.morada, placeholder: t.addressLabel, className: 'w-full glass rounded-xl px-4 py-4 text-sm pulse-border text-white outline-none', onChange: e => setForm({ ...form, morada: e.target.value }) }),
+                            e('textarea', { value: form.detalhes, placeholder: t.notesPlaceholders[form.tipo], className: 'w-full glass rounded-xl px-4 py-4 text-sm h-28 outline-none text-white', onChange: e => setForm({ ...form, detalhes: e.target.value }) }),
+
+                            (form.tipo === 'takeaway' || form.tipo === 'entrega') && e('div', { className: 'p-4 bg-nyumba-clay/5 border border-nyumba-clay/10 rounded-xl space-y-2' },
+                                e('p', { className: 'text-[9px] font-black text-nyumba-clay uppercase' }, 'INFO:'),
+                                e('p', { className: 'text-[10px] italic opacity-80 leading-snug' }, t.paymentNotice),
+                                form.tipo === 'entrega' && e('p', { className: 'text-[10px] italic font-bold text-nyumba-clay leading-snug' }, t.deliveryNotice)
+                            ),
+
+                            totalPrice > 0 && e('div', { className: 'bg-nyumba-clay/20 border border-nyumba-clay/30 rounded-xl p-5 space-y-3' },
+                                deliveryFee > 0 && e('div', { className: 'flex justify-between items-center opacity-60' },
+                                    e('span', { className: 'text-[10px] font-black uppercase' }, 'Subtotal'),
+                                    e('span', { className: 'text-sm font-bold' }, `${basePrice.toLocaleString()} MT`)
+                                ),
+                                deliveryFee > 0 && e('div', { className: 'flex justify-between items-center opacity-60' },
+                                    e('span', { className: 'text-[10px] font-black uppercase' }, t.feeLabel),
+                                    e('span', { className: 'text-sm font-bold' }, `${deliveryFee.toLocaleString()} MT`)
+                                ),
+                                e('div', { className: 'flex justify-between items-center' },
+                                    e('span', { className: 'text-[10px] font-black uppercase' }, t.total),
+                                    e('span', { className: 'text-lg font-heading italic text-nyumba-clay' }, `${totalPrice.toLocaleString()} MT`)
+                                )
+                            ),
+
+                            (form.tipo === 'takeaway' || form.tipo === 'entrega') && totalPrice > 0 && e('div', { className: 'glass rounded-2xl p-6 space-y-4 border-nyumba-clay/30 border' },
+                                e('div', { className: 'flex items-center gap-3 border-b border-white/10 pb-3 mb-2' },
+                                    e('i', { className: 'fas fa-wallet text-nyumba-clay text-lg' }),
+                                    e('span', { className: 'text-xs font-black uppercase tracking-widest text-nyumba-clay' }, t.paymentTitle)
+                                ),
+                                e('div', { className: 'space-y-3' },
+                                    e('div', { className: 'flex justify-between items-center bg-white/5 rounded-xl p-3' },
+                                        e('div', null, e('p', { className: 'text-[9px] opacity-40 uppercase' }, t.phoneLabel), e('p', { className: 'text-sm font-bold' }, "84 669 5390")),
+                                        e('button', { onClick: () => { copyToClipboard("846695390"); alert(t.copied); }, className: 'glass px-3 py-2 rounded-lg text-[9px] font-black uppercase' }, t.copyNumber)
+                                    ),
+                                    e('div', { className: 'flex justify-between items-center bg-white/5 rounded-xl p-3' },
+                                        e('div', null, e('p', { className: 'text-[9px] opacity-40 uppercase' }, t.total), e('p', { className: 'text-sm font-bold' }, `${totalPrice.toLocaleString()} MT`)),
+                                        e('button', { onClick: () => { copyToClipboard(totalPrice.toString()); alert(t.copied); }, className: 'glass px-3 py-2 rounded-lg text-[9px] font-black uppercase' }, t.copyTotal)
+                                    )
+                                ),
+                                e('div', { className: 'grid grid-cols-2 gap-3 pt-2' },
+                                    e('a', { href: 'tel:*111#', className: 'bg-[#EF233C] text-white py-4 rounded-xl flex flex-col items-center justify-center gap-1 shadow-lg active:scale-95 transition-all text-center' },
+                                        e('span', { className: 'text-[7px] font-black uppercase opacity-60' }, 'M-Pesa (Vodacom)'),
+                                        e('span', { className: 'text-xs font-black uppercase tracking-widest' }, '*111#')
+                                    ),
+                                    e('a', { href: 'tel:*120#', className: 'bg-[#EF233C] text-white py-4 rounded-xl flex flex-col items-center justify-center gap-1 shadow-lg active:scale-95 transition-all text-center' },
+                                        e('span', { className: 'text-[7px] font-black uppercase opacity-60' }, 'M-Pesa (Outros)'),
+                                        e('span', { className: 'text-xs font-black uppercase tracking-widest' }, '*120#')
+                                    ),
+                                    e('a', { href: 'tel:*898#', className: 'col-span-2 bg-[#F26A21] text-white py-4 rounded-xl flex flex-col items-center justify-center gap-1 shadow-lg active:scale-95 transition-all text-center' },
+                                        e('span', { className: 'text-[8px] font-black uppercase opacity-60' }, 'e-Mola (Movitel)'),
+                                        e('span', { className: 'text-xs font-black uppercase tracking-widest' }, '*898#')
+                                    )
+                                )
+                            ),
+
+                            e('div', { className: 'flex flex-col gap-3 relative' },
+                                isValidating && e('div', { className: 'absolute inset-0 z-50 glass rounded-xl flex flex-col items-center justify-center gap-2 animate-in fade-in duration-200' },
+                                    e('div', { className: 'w-6 h-6 border-2 border-nyumba-clay border-t-transparent rounded-full animate-spin' }),
+                                    e('span', { className: 'text-[9px] font-black uppercase text-nyumba-clay' }, t.verifyingAddress)
+                                ),
+                                e('button', { onClick: sendWA, className: 'w-full bg-[#25D366] text-white py-6 rounded-xl font-black uppercase text-xs flex items-center justify-center gap-3 active:scale-95 transition-all shadow-xl' }, e('i', { className: 'fab fa-whatsapp text-lg' }), t.sendWa),
+                                e('button', { onClick: () => { setCart({}); setForm({ tipo: 'comer_local', nome: '', telemovel: '', data: '', hora: '', morada: '', detalhes: '' }); }, className: 'w-full glass py-4 rounded-xl font-black uppercase text-[9px] opacity-40' }, t.resetBtn)
+                            )
+                        )
+                    )
+                ),
+
+                // MODAL SEMANAL
+                modals.weekly && e('div', { className: 'modal-full custom-scrollbar' },
+                    e('div', { className: 'max-w-xl mx-auto py-6' },
+                        e('div', { className: 'flex justify-between items-center mb-8' }, e('h2', { className: 'font-heading text-3xl text-nyumba-clay italic uppercase' }, t.weeklyBtn), e('button', { onClick: () => setModals({ ...modals, weekly: false }), className: 'w-10 h-10 rounded-full glass flex items-center justify-center' }, '✕')),
+                        Object.entries(MENU_DATA).map(([day, wd]) => e('div', { key: day, className: 'mb-8 p-6 glass rounded-[2rem]' },
+                            e('h3', { className: 'text-nyumba-clay font-heading text-xl mb-6 border-l-4 border-nyumba-clay pl-4 italic uppercase tracking-tighter' }, wd[lang]),
+                            e('div', { className: 'space-y-6' },
+                                e(MenuItem, { item: { id: `W_${day}_S`, n_pt: wd.sopa.pt, n_en: wd.sopa.en, p: wd.sopa.p, cat: t.sections.starter } }),
+                                wd.pratos.map((p, i) => e(MenuItem, { key: i, item: { id: `W_${day}_P${i}`, n_pt: p.pt, n_en: p.en, p: p.p, cat: t.sections.main, desc_pt: p.d_pt, desc_en: p.d_en } })),
+                                e(MenuItem, { item: { id: `W_${day}_D`, n_pt: wd.sobremesa.pt, n_en: wd.sobremesa.en, p: wd.sobremesa.p, cat: t.sections.dessert } })
+                            )
+                        )),
+                        e('button', { onClick: () => setModals({ ...modals, weekly: false }), className: 'w-full glass py-5 rounded-xl font-black uppercase text-[10px] mt-6' }, t.close)
+                    )
+                ),
+
+                // MODAL ALACARTE
+                modals.alacarte && e('div', { className: 'modal-full custom-scrollbar' },
+                    e('div', { className: 'max-w-xl mx-auto py-6' },
+                        e('div', { className: 'flex justify-between items-center mb-8' }, e('h2', { className: 'font-heading text-3xl text-nyumba-clay italic uppercase' }, t.alacarteBtn), e('button', { onClick: () => setModals({ ...modals, alacarte: false }), className: 'w-10 h-10 rounded-full glass flex items-center justify-center' }, '✕')),
+                        Object.entries(ALACARTE_DATA).map(([cat, list]) => e('div', { key: cat, className: 'mb-8 p-6 glass rounded-[2rem]' },
+                            e('h3', { className: 'text-nyumba-clay font-heading text-xl mb-6 border-l-4 border-nyumba-clay pl-4 italic uppercase tracking-tighter' }, t.sections[cat] || cat.toUpperCase()),
+                            list.map((it, idx) => e(MenuItem, { key: idx, item: { id: `A_${cat}_${idx}`, n_pt: it.pt, n_en: it.en, p: it.p, cat: t.sections[cat] || cat.toUpperCase(), desc_pt: it.d_pt, desc_en: it.d_en } }))
+                        )),
+                        e('button', { onClick: () => setModals({ ...modals, alacarte: false }), className: 'w-full glass py-5 rounded-xl font-black uppercase text-[10px] mt-6' }, t.close)
+                    )
+                )
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(e(App));
+    </script>
+</body>
+
+</html>
