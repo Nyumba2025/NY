@@ -849,9 +849,8 @@
         }
 
         // Carregar dados quando a secção users ou settings for aberta
-        const originalOpenSection = openSection;
-        // Patch openSection for extra sections
         const _openSectionOrig = openSection;
+        // Patch openSection for extra sections
         window.openSection = function(sectionId) {
             _openSectionOrig(sectionId);
             if (sectionId === 'users') loadUsersData();

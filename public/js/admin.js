@@ -201,6 +201,7 @@ document.addEventListener('click', (e) => {
 // ==================== CARREGAMENTO DE DADOS ====================
 async function loadInitialData() {
     await Promise.all([
+        loadDashboardData(),
         loadHomeData(),
         loadGalleryData(),
         loadMenuData()

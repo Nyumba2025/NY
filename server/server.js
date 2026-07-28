@@ -16,14 +16,15 @@ const app = express();
 const logger = createLogger('server');
 const port = process.env.PORT || 3000;
 
-// Criar diretórios necessários
+// Criar diretórios necessários (usar caminhos absolutos para funcionar no .exe)
 async function createDirectories() {
+    const base = process.env.APP_BASE_PATH || path.join(__dirname, '..');
     const dirs = [
-        './data',
-        './data/backups',
-        './temp',
-        './logs',
-        './public/uploads'
+        path.join(base, 'data'),
+        path.join(base, 'data', 'backups'),
+        path.join(base, 'temp'),
+        path.join(base, 'logs'),
+        path.join(base, 'uploads')
     ];
     
     for (const dir of dirs) {
@@ -31,7 +32,10 @@ async function createDirectories() {
             await fs.mkdir(dir, { recursive: true });
             logger.info(`Diretório criado: ${dir}`);
         } catch (error) {
-            logger.error(`Erro ao criar diretório ${dir}:`, error);
+            // Ignorar erro se já existir
+            if (error.code !== 'EEXIST') {
+                logger.error(`Erro ao criar diretório ${dir}:`, error);
+            }
         }
     }
 }

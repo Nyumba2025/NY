@@ -10,7 +10,10 @@ const config = require('../utils/config');
 
 const logger = createLogger('admin-api');
 const dataDir = config.get('paths.data');
-const jsDir = path.join(__dirname, '../../public/js');
+// Em produção (.exe) APP_BASE_PATH aponta para a pasta do executável;
+// em desenvolvimento aponta para a raiz do projeto
+const _appBase = process.env.APP_BASE_PATH || path.join(__dirname, '../..');
+const jsDir = path.join(_appBase, 'public', 'js');
 
 // Aplicar middlewares
 router.use(accessLogger);

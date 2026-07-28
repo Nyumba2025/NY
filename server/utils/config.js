@@ -5,7 +5,7 @@ const { createLogger } = require('./logger');
 const logger = createLogger('config');
 
 // Diretório base: ao lado do .exe em produção, raiz do projeto em desenvolvimento
-const appBase = process.env.APP_BASE_PATH || path.join(__dirname, '../..');
+const appBase = process.env.APP_BASE_PATH || (typeof process.pkg !== 'undefined' ? path.dirname(process.execPath) : path.join(__dirname, '../..'));
 // Ficheiros estáticos (public/) ficam embebidos no pkg; em dev usamos o caminho normal
 const publicBase = typeof process.pkg !== 'undefined'
     ? path.join(__dirname, '../../public')   // virtual fs dentro do .exe

@@ -5,8 +5,10 @@ const { createLogger } = require('../utils/logger');
 const config = require('../utils/config');
 
 const logger = createLogger('git-service');
+// Em produção (.exe), APP_BASE_PATH é a pasta do executável; em dev é a raiz do projeto
+const _gitBase = process.env.APP_BASE_PATH || process.cwd();
 const git = simpleGit({
-    baseDir: process.cwd(),
+    baseDir: _gitBase,
     binary: 'git',
     maxConcurrentProcesses: 6
 });
