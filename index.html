@@ -506,7 +506,8 @@
                     ? `⚠️ *ACÇÃO NECESSÁRIA*\n---------------------------\n💳 *PAGAMENTO ANTECIPADO*\nESTE PEDIDO SÓ DEVE SER PROCESSADO APÓS PAGAMENTO.\n\n👉 *POR FAVOR CONTACTE O CLIENTE AGORA.*\n---------------------------\n\n`
                     : '';
                 const msg = `${alertStr}*PEDIDO NYUMBA*\n📍 *Tipo:* ${t.types[form.tipo]}\n👤 *Nome:* ${form.nome}\n📞 *WhatsApp:* ${fullPhone}\n📅 *Data:* ${form.data} ${form.hora}\n\n*ITENS:*\n${itens}\n\n💰 *SUBTOTAL:* ${basePrice.toLocaleString()} MT${deliveryStr}\n✨ *TOTAL:* ${totalPrice.toLocaleString()} MT\n\n*NOTAS:* ${form.detalhes}${form.tipo === 'entrega' ? `\n🏠 *Morada:* ${form.morada}` : ''}`;
-                window.open(`https://wa.me/258846695390?text=${encodeURIComponent(msg)}`, '_blank');
+                const waNum = _H.whatsappNumber || "258846695390";
+                window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
             };
 
             const Flash = () => flash && e('div', { className: 'fixed top-24 left-1/2 -translate-x-1/2 z-[1000] bg-red-600/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/20 animate-in fade-in slide-in-from-top-4 duration-300' },
@@ -558,13 +559,13 @@
                             e('p', { className: 'text-[11px] opacity-70 leading-relaxed italic' }, t.socialCallText)
                         ),
                         e('div', { className: 'flex justify-center gap-5 sm:gap-8' },
-                            e('a', { href: "https://www.instagram.com/nyumbafoodconcept", target: "_blank", rel: "noopener noreferrer", className: "btn-social-xl" }, e('i', { className: "fab fa-instagram" })),
-                            e('a', { href: "https://www.facebook.com/people/Nyumbafoodconcept/61578702685238/", target: "_blank", rel: "noopener noreferrer", className: "btn-social-xl" }, e('i', { className: "fab fa-facebook-f" })),
-                            e('a', { href: "https://www.tripadvisor.pt/Restaurant_Review-g293819-d33987869-Reviews-Nyumba_Food_Concept-Maputo_Maputo_Province.html", target: "_blank", className: "btn-social-xl", rel: "noopener noreferrer" },
+                            e('a', { href: _H.instagramUrl || "https://www.instagram.com/nyumbafoodconcept", target: "_blank", rel: "noopener noreferrer", className: "btn-social-xl" }, e('i', { className: "fab fa-instagram" })),
+                            e('a', { href: _H.facebookUrl || "https://www.facebook.com/people/Nyumbafoodconcept/61578702685238/", target: "_blank", rel: "noopener noreferrer", className: "btn-social-xl" }, e('i', { className: "fab fa-facebook-f" })),
+                            e('a', { href: _H.tripadvisorUrl || "https://www.tripadvisor.pt/Restaurant_Review-g293819-d33987869-Reviews-Nyumba_Food_Concept-Maputo_Maputo_Province.html", target: "_blank", className: "btn-social-xl", rel: "noopener noreferrer" },
                                 e('svg', { viewBox: "0 0 512 512" }, e('path', { d: "M128 128c-35.4 0-64 28.6-64 64s28.6 64 64 64 64-28.6 64-64-28.6-64-64-64zm0 110c-25.4 0-46-20.6-46-46s20.6-46 46-46 46 20.6 46 46-20.6 46-46 46zm0-78c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm256-32c-35.4 0-64 28.6-64 64s28.6 64 64 64 64-28.6 64-64-28.6-64-64-64zm0 110c-25.4 0-46-20.6-46-46s20.6-46 46-46 46 20.6 46 46-20.6 46-46 46zm0-78c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm90.2-26.8l37.7-37.4h-76.4C392.9 29 321.8 0 255.9 0c-66 0-136.5 29-179.3 63.8H0l37.7 37.4C14.4 124.4 0 156.5 0 192c0 70.8 57.4 128.2 128.2 128.2 32.5 0 62.2-12.1 84.8-32.1l43.4 31.9 42.9-31.2-.5-1.2c22.7 20.2 52.5 32.5 85.3 32.5 70.8 0 128.2-57.4 128.2-128.2-.1-35.4-14.6-67.5-37.9-90.7zM368 64.8c-60.7 7.6-108.3 57.6-111.9 119.5-3.7-62-51.4-112.1-112.3-119.5 30.6-22 69.6-32.8 112.1-32.8S337.4 42.8 368 64.8z" }))
                             )
                         ),
-                        e('a', { href: "https://www.google.com/maps/place/NYUMBA+Food+Concept/@-25.96897,32.593179,17z/data=!4m8!3m7!1s0x1ee69bfe2dccc6a7:0xe72f04de0d760ff5!8m2!3d-25.96897!4d32.593179!9m1!1b1!16s%2Fg%2F11vsw0q663", target: "_blank", className: "w-full py-4 glass rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black tracking-[0.2em] bg-white/5 active:bg-nyumba-clay" },
+                        e('a', { href: _H.googleMapsUrl || "https://www.google.com/maps/place/NYUMBA+Food+Concept/@-25.96897,32.593179,17z/data=!4m8!3m7!1s0x1ee69bfe2dccc6a7:0xe72f04de0d760ff5!8m2!3d-25.96897!4d32.593179!9m1!1b1!16s%2Fg%2F11vsw0q663", target: "_blank", className: "w-full py-4 glass rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black tracking-[0.2em] bg-white/5 active:bg-nyumba-clay" },
                             e('i', { className: "fas fa-star text-yellow-500" }), t.reviewGoogle
                         )
                     ),
@@ -573,8 +574,8 @@
                         e('div', { className: 'grid grid-cols-1 sm:grid-cols-2 gap-6' },
                             e('div', { className: 'flex gap-3 items-center' }, e('i', { className: 'fas fa-location-dot text-nyumba-clay text-lg' }), e('div', null, e('p', { className: 'font-black text-xs uppercase' }, t.location), e('p', { className: 'text-[9px] opacity-50 uppercase leading-tight' }, t.address))),
                             e('div', { className: 'flex gap-3 items-center' }, e('i', { className: 'fas fa-clock text-nyumba-sand text-lg' }), e('div', null, e('p', { className: 'font-black text-xs uppercase' }, t.hours), e('p', { className: 'text-[9px] opacity-50 leading-tight whitespace-pre-line' }, t.hoursDetail))),
-                            e('div', { className: 'flex gap-3 items-center' }, e('i', { className: 'fas fa-phone text-nyumba-sand text-lg' }), e('div', null, e('p', { className: 'font-black text-xs uppercase' }, t.phoneLabel), e('a', { href: 'tel:+258846695390', className: 'text-[9px] opacity-50 uppercase' }, "+258 84 669 5390"))),
-                            e('div', { className: 'flex gap-3 items-center' }, e('i', { className: 'fas fa-envelope text-nyumba-sand text-lg' }), e('div', null, e('p', { className: 'font-black text-xs uppercase' }, t.emailLabel), e('a', { href: 'mailto:nyumba.maputo@gmail.com', className: 'text-[9px] opacity-50 lowercase' }, "nyumba.maputo@gmail.com")))
+                            e('div', { className: 'flex gap-3 items-center' }, e('i', { className: 'fas fa-phone text-nyumba-sand text-lg' }), e('div', null, e('p', { className: 'font-black text-xs uppercase' }, t.phoneLabel), e('a', { href: 'tel:' + (_H.phone || '+258846695390'), className: 'text-[9px] opacity-50 uppercase' }, _H.phone || "+258 84 669 5390"))),
+                            e('div', { className: 'flex gap-3 items-center' }, e('i', { className: 'fas fa-envelope text-nyumba-sand text-lg' }), e('div', null, e('p', { className: 'font-black text-xs uppercase' }, t.emailLabel), e('a', { href: 'mailto:' + (_H.email || 'nyumba.maputo@gmail.com'), className: 'text-[9px] opacity-50 lowercase' }, _H.email || "nyumba.maputo@gmail.com")))
                         )
                     ),
 

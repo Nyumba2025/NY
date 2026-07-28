@@ -253,13 +253,14 @@ document.addEventListener('click', (e) => {
 
 // ==================== CARREGAMENTO DE DADOS ====================
 async function loadInitialData() {
-    // Primeiro carregar os dados base em paralelo
+    // Carregar todos os dados base em paralelo
     await Promise.all([
         loadHomeData(),
-        loadGalleryData(),
-        loadMenuData()
+        loadWeeklyMenuData(),
+        loadAlacarteData(),
+        loadGalleryData()
     ]);
-    // Só depois atualizar o dashboard (que depende dos dados acima)
+    // Atualizar o dashboard
     await loadDashboardData();
 }
 
@@ -280,8 +281,13 @@ async function loadHomeData() {
         document.getElementById('info-address').value = homeData.address || 'Av. Mártires da Machava';
         document.getElementById('info-hours').value = homeData.hoursDetail || 'Aberto todos os dias\n09:00 – 22:00';
         
-        document.getElementById('info-phone').value = homeData.phone || '+258 84 123 4567';
-        document.getElementById('info-email').value = homeData.email || 'info@nyumbafood.com';
+        document.getElementById('info-phone').value = homeData.phone || '+258 84 669 5390';
+        document.getElementById('info-email').value = homeData.email || 'nyumba.maputo@gmail.com';
+        document.getElementById('info-whatsapp').value = homeData.whatsappNumber || '258846695390';
+        document.getElementById('info-instagram').value = homeData.instagramUrl || 'https://www.instagram.com/nyumbafoodconcept';
+        document.getElementById('info-facebook').value = homeData.facebookUrl || 'https://www.facebook.com/people/Nyumbafoodconcept/61578702685238/';
+        document.getElementById('info-tripadvisor').value = homeData.tripadvisorUrl || 'https://www.tripadvisor.pt/Restaurant_Review-g293819-d33987869-Reviews-Nyumba_Food_Concept-Maputo_Maputo_Province.html';
+        document.getElementById('info-googlemaps').value = homeData.googleMapsUrl || 'https://www.google.com/maps/place/NYUMBA+Food+Concept/@-25.96897,32.593179,17z/data=!4m8!3m7!1s0x1ee69bfe2dccc6a7:0xe72f04de0d760ff5!8m2!3d-25.96897!4d32.593179!9m1!1b1!16s%2Fg%2F11vsw0q663';
         document.getElementById('info-footer').value = homeData.footer || 'Nyumba Food Concept © 2026 | José Freire • Criação';
         
     } catch (error) {
@@ -468,6 +474,11 @@ async function saveHomeData() {
             hoursDetail: document.getElementById('info-hours').value,
             phone: document.getElementById('info-phone').value,
             email: document.getElementById('info-email').value,
+            whatsappNumber: document.getElementById('info-whatsapp').value,
+            instagramUrl: document.getElementById('info-instagram').value,
+            facebookUrl: document.getElementById('info-facebook').value,
+            tripadvisorUrl: document.getElementById('info-tripadvisor').value,
+            googleMapsUrl: document.getElementById('info-googlemaps').value,
             footer: document.getElementById('info-footer').value
         };
         
@@ -691,200 +702,180 @@ function previewGallery() {
     });
 }
 
-// ==================== MENU ====================
-function renderMenuEditor() {
-    const container = document.getElementById('menu-editor');
+// ==================== MENU SEMANAL ====================
+let weeklyMenuData = {};
+
+async function loadWeeklyMenuData() {
+    try {
+        const response = await fetch('/api/admin/menu');
+        weeklyMenuData = await response.json();
+        renderWeeklyMenuEditor();
+    } catch (error) {
+        console.error('Erro ao carregar menu semanal:', error);
+    }
+}
+
+function renderWeeklyMenuEditor() {
+    const container = document.getElementById('weekly-menu-container');
+    if (!container) return;
     container.innerHTML = '';
-    
-    if (!menuData.categories || menuData.categories.length === 0) {
-        container.innerHTML = `
-            <div class="text-center">
-                <p>Nenhuma categoria no menu.</p>
-                <button class="btn btn-primary" onclick="addMenuCategory()">
-                    <i class="fas fa-plus"></i> Adicionar Primeira Categoria
+
+    const daysMap = {
+        '1': 'Segunda-feira',
+        '2': 'Terça-feira',
+        '3': 'Quarta-feira',
+        '4': 'Quinta-feira',
+        '5': 'Sexta-feira'
+    };
+
+    Object.keys(daysMap).forEach(dayKey => {
+        const dayData = weeklyMenuData[dayKey] || {
+            pt: daysMap[dayKey].split('-')[0],
+            en: 'Day',
+            sopa: { pt: '', en: '', p: '180MT' },
+            pratos: [],
+            sobremesa: { pt: '', en: '', p: '180MT' }
+        };
+
+        const dayCard = document.createElement('div');
+        dayCard.className = 'form-section';
+        dayCard.style.marginBottom = '25px';
+
+        let pratosHtml = '';
+        (dayData.pratos || []).forEach((prato, idx) => {
+            pratosHtml += `
+                <div class="prato-item-card" style="border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 12px; background: rgba(0,0,0,0.2);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <strong>Prato Principal ${idx + 1}</strong>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removePratoSemanal('${dayKey}', ${idx}); return false;">
+                            <i class="fas fa-trash"></i> Remover
+                        </button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="form-group">
+                            <label>Nome (Português)</label>
+                            <input type="text" class="form-control" value="${prato.pt || ''}" onchange="updatePratoSemanal('${dayKey}', ${idx}, 'pt', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Nome (Inglês)</label>
+                            <input type="text" class="form-control" value="${prato.en || ''}" onchange="updatePratoSemanal('${dayKey}', ${idx}, 'en', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição (Português)</label>
+                            <input type="text" class="form-control" value="${prato.d_pt || ''}" onchange="updatePratoSemanal('${dayKey}', ${idx}, 'd_pt', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição (Inglês)</label>
+                            <input type="text" class="form-control" value="${prato.d_en || ''}" onchange="updatePratoSemanal('${dayKey}', ${idx}, 'd_en', this.value)">
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Preço (ex: 500MT)</label>
+                            <input type="text" class="form-control" value="${prato.p || ''}" onchange="updatePratoSemanal('${dayKey}', ${idx}, 'p', this.value)">
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        dayCard.innerHTML = `
+            <h3><i class="fas fa-calendar-day"></i> ${daysMap[dayKey]}</h3>
+            
+            <div style="background: rgba(217, 108, 6, 0.05); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(217, 108, 6, 0.2);">
+                <h4 style="margin-top: 0; color: #D96C06;"><i class="fas fa-bowl-food"></i> Sopa do Dia</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 120px; gap: 10px;">
+                    <div class="form-group">
+                        <label>Nome (PT)</label>
+                        <input type="text" class="form-control" value="${dayData.sopa?.pt || ''}" onchange="updateSopaSemanal('${dayKey}', 'pt', this.value)">
+                    </div>
+                    <div class="form-group">
+                        <label>Nome (EN)</label>
+                        <input type="text" class="form-control" value="${dayData.sopa?.en || ''}" onchange="updateSopaSemanal('${dayKey}', 'en', this.value)">
+                    </div>
+                    <div class="form-group">
+                        <label>Preço</label>
+                        <input type="text" class="form-control" value="${dayData.sopa?.p || ''}" onchange="updateSopaSemanal('${dayKey}', 'p', this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <h4 style="margin-top: 0;"><i class="fas fa-utensils"></i> Pratos Principais</h4>
+                ${pratosHtml || '<p style="opacity: 0.6; font-style: italic;">Nenhum prato adicionado.</p>'}
+                <button type="button" class="btn btn-outline btn-sm" onclick="addPratoSemanal('${dayKey}'); return false;" style="margin-top: 5px;">
+                    <i class="fas fa-plus"></i> Adicionar Prato Principal
                 </button>
             </div>
-        `;
-        return;
-    }
-    
-    menuData.categories.forEach((category, catIndex) => {
-        const categoryDiv = document.createElement('div');
-        categoryDiv.className = 'form-container';
-        categoryDiv.innerHTML = `
-            <div class="form-section">
-                <h4>Categoria: ${category.name || 'Sem nome'}</h4>
-                <div class="form-group">
-                    <label>Nome da Categoria</label>
-                    <input type="text" class="form-control category-name" data-index="${catIndex}" 
-                        value="${category.name || ''}" placeholder="Ex: Entradas">
+
+            <div style="background: rgba(255, 255, 255, 0.03); padding: 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <h4 style="margin-top: 0;"><i class="fas fa-ice-cream"></i> Sobremesa do Dia</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 120px; gap: 10px;">
+                    <div class="form-group">
+                        <label>Nome (PT)</label>
+                        <input type="text" class="form-control" value="${dayData.sobremesa?.pt || ''}" onchange="updateSobremesaSemanal('${dayKey}', 'pt', this.value)">
+                    </div>
+                    <div class="form-group">
+                        <label>Nome (EN)</label>
+                        <input type="text" class="form-control" value="${dayData.sobremesa?.en || ''}" onchange="updateSobremesaSemanal('${dayKey}', 'en', this.value)">
+                    </div>
+                    <div class="form-group">
+                        <label>Preço</label>
+                        <input type="text" class="form-control" value="${dayData.sobremesa?.p || ''}" onchange="updateSobremesaSemanal('${dayKey}', 'p', this.value)">
+                    </div>
                 </div>
             </div>
         `;
-        
-        // Itens da categoria
-        const itemsDiv = document.createElement('div');
-        itemsDiv.className = 'form-section';
-        
-        if (category.items && category.items.length > 0) {
-            category.items.forEach((item, itemIndex) => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'form-group';
-                itemDiv.innerHTML = `
-                    <div class="form-group">
-                        <label>Nome do Item</label>
-                        <input type="text" class="form-control item-name" 
-                            data-cat="${catIndex}" data-item="${itemIndex}"
-                            value="${item.name || ''}" placeholder="Nome do prato">
-                    </div>
-                    <div class="form-group">
-                        <label>Preço (€)</label>
-                        <input type="text" class="form-control item-price" 
-                            data-cat="${catIndex}" data-item="${itemIndex}"
-                            value="${item.price || ''}" placeholder="9.99">
-                    </div>
-                    <div class="form-group">
-                        <label>Descrição</label>
-                        <textarea class="form-control item-description" 
-                            data-cat="${catIndex}" data-item="${itemIndex}"
-                            placeholder="Descrição do prato">${item.description || ''}</textarea>
-                    </div>
-                    <button class="btn btn-danger" onclick="removeMenuItem(${catIndex}, ${itemIndex})">
-                        <i class="fas fa-trash"></i> Remover Item
-                    </button>
-                `;
-                itemsDiv.appendChild(itemDiv);
-            });
-        } else {
-            itemsDiv.innerHTML = '<p>Nenhum item nesta categoria.</p>';
-        }
-        
-        categoryDiv.appendChild(itemsDiv);
-        
-        // Ações da categoria
-        const actionsDiv = document.createElement('div');
-        actionsDiv.className = 'form-actions';
-        actionsDiv.innerHTML = `
-            <button class="btn btn-success" onclick="addMenuItem(${catIndex})">
-                <i class="fas fa-plus"></i> Adicionar Item
-            </button>
-            <button class="btn btn-danger" onclick="removeMenuCategory(${catIndex})">
-                <i class="fas fa-trash"></i> Remover Categoria
-            </button>
-        `;
-        
-        categoryDiv.appendChild(actionsDiv);
-        container.appendChild(categoryDiv);
+
+        container.appendChild(dayCard);
     });
-    
-    // Ações gerais
-    const globalActions = document.createElement('div');
-    globalActions.className = 'form-actions';
-    globalActions.innerHTML = `
-        <button class="btn btn-primary" onclick="saveMenuData()">
-            <i class="fas fa-save"></i> Salvar Menu
-        </button>
-        <button class="btn btn-outline" onclick="addMenuCategory()">
-            <i class="fas fa-plus"></i> Nova Categoria
-        </button>
-        <button class="btn btn-outline" onclick="previewMenu()">
-            <i class="fas fa-eye"></i> Visualizar
+
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'form-actions';
+    actionsDiv.style.marginTop = '20px';
+    actionsDiv.innerHTML = `
+        <button type="button" class="btn btn-primary btn-lg" onclick="saveWeeklyMenuData(); return false;">
+            <i class="fas fa-save"></i> Guardar Menu Semanal
         </button>
     `;
-    
-    container.appendChild(globalActions);
-    
-    // Vincular eventos
-    setTimeout(() => {
-        document.querySelectorAll('.category-name').forEach(input => {
-            input.addEventListener('input', (e) => {
-                const index = parseInt(e.target.dataset.index);
-                if (!menuData.categories[index]) menuData.categories[index] = { items: [] };
-                menuData.categories[index].name = e.target.value;
-                setUnsavedChanges(true);
-            });
-        });
-        
-        document.querySelectorAll('.item-name').forEach(input => {
-            input.addEventListener('input', (e) => {
-                const catIndex = parseInt(e.target.dataset.cat);
-                const itemIndex = parseInt(e.target.dataset.item);
-                if (!menuData.categories[catIndex]) menuData.categories[catIndex] = { items: [] };
-                if (!menuData.categories[catIndex].items[itemIndex]) menuData.categories[catIndex].items[itemIndex] = {};
-                menuData.categories[catIndex].items[itemIndex].name = e.target.value;
-                setUnsavedChanges(true);
-            });
-        });
-        
-        document.querySelectorAll('.item-price').forEach(input => {
-            input.addEventListener('input', (e) => {
-                const catIndex = parseInt(e.target.dataset.cat);
-                const itemIndex = parseInt(e.target.dataset.item);
-                if (!menuData.categories[catIndex]) menuData.categories[catIndex] = { items: [] };
-                if (!menuData.categories[catIndex].items[itemIndex]) menuData.categories[catIndex].items[itemIndex] = {};
-                menuData.categories[catIndex].items[itemIndex].price = e.target.value;
-                setUnsavedChanges(true);
-            });
-        });
-        
-        document.querySelectorAll('.item-description').forEach(textarea => {
-            textarea.addEventListener('input', (e) => {
-                const catIndex = parseInt(e.target.dataset.cat);
-                const itemIndex = parseInt(e.target.dataset.item);
-                if (!menuData.categories[catIndex]) menuData.categories[catIndex] = { items: [] };
-                if (!menuData.categories[catIndex].items[itemIndex]) menuData.categories[catIndex].items[itemIndex] = {};
-                menuData.categories[catIndex].items[itemIndex].description = e.target.value;
-                setUnsavedChanges(true);
-            });
-        });
-    }, 100);
+    container.appendChild(actionsDiv);
 }
 
-function addMenuCategory() {
-    if (!menuData.categories) {
-        menuData.categories = [];
-    }
-    menuData.categories.push({
-        name: 'Nova Categoria',
-        items: []
-    });
-    renderMenuEditor();
+function updateSopaSemanal(dayKey, field, val) {
+    if (!weeklyMenuData[dayKey]) weeklyMenuData[dayKey] = { sopa: {}, pratos: [], sobremesa: {} };
+    if (!weeklyMenuData[dayKey].sopa) weeklyMenuData[dayKey].sopa = {};
+    weeklyMenuData[dayKey].sopa[field] = val;
     setUnsavedChanges(true);
 }
 
-function removeMenuCategory(index) {
-    if (confirm('Remover esta categoria e todos os seus itens?')) {
-        menuData.categories.splice(index, 1);
-        renderMenuEditor();
+function updateSobremesaSemanal(dayKey, field, val) {
+    if (!weeklyMenuData[dayKey]) weeklyMenuData[dayKey] = { sopa: {}, pratos: [], sobremesa: {} };
+    if (!weeklyMenuData[dayKey].sobremesa) weeklyMenuData[dayKey].sobremesa = {};
+    weeklyMenuData[dayKey].sobremesa[field] = val;
+    setUnsavedChanges(true);
+}
+
+function updatePratoSemanal(dayKey, idx, field, val) {
+    if (!weeklyMenuData[dayKey] || !weeklyMenuData[dayKey].pratos[idx]) return;
+    weeklyMenuData[dayKey].pratos[idx][field] = val;
+    setUnsavedChanges(true);
+}
+
+function addPratoSemanal(dayKey) {
+    if (!weeklyMenuData[dayKey]) weeklyMenuData[dayKey] = { pt: '', en: '', sopa: { pt: '', en: '', p: '180MT' }, pratos: [], sobremesa: { pt: '', en: '', p: '180MT' } };
+    if (!weeklyMenuData[dayKey].pratos) weeklyMenuData[dayKey].pratos = [];
+    weeklyMenuData[dayKey].pratos.push({ pt: '', en: '', d_pt: '', d_en: '', p: '500MT' });
+    renderWeeklyMenuEditor();
+    setUnsavedChanges(true);
+}
+
+function removePratoSemanal(dayKey, idx) {
+    if (confirm('Remover este prato principal?')) {
+        weeklyMenuData[dayKey].pratos.splice(idx, 1);
+        renderWeeklyMenuEditor();
         setUnsavedChanges(true);
     }
 }
 
-function addMenuItem(catIndex) {
-    if (!menuData.categories[catIndex]) {
-        menuData.categories[catIndex] = { name: 'Nova Categoria', items: [] };
-    }
-    if (!menuData.categories[catIndex].items) {
-        menuData.categories[catIndex].items = [];
-    }
-    menuData.categories[catIndex].items.push({
-        name: '',
-        price: '',
-        description: ''
-    });
-    renderMenuEditor();
-    setUnsavedChanges(true);
-}
-
-function removeMenuItem(catIndex, itemIndex) {
-    if (confirm('Remover este item?')) {
-        menuData.categories[catIndex].items.splice(itemIndex, 1);
-        renderMenuEditor();
-        setUnsavedChanges(true);
-    }
-}
-
-async function saveMenuData() {
+async function saveWeeklyMenuData() {
     try {
         const response = await fetch('/api/admin/menu', {
             method: 'POST',
@@ -892,19 +883,151 @@ async function saveMenuData() {
                 'Content-Type': 'application/json',
                 'X-CSRF-Token': getCsrfToken()
             },
-            body: JSON.stringify(menuData)
+            body: JSON.stringify(weeklyMenuData)
         });
-        
         const result = await response.json();
-        
         if (result.success) {
-            showToast('Menu salvo com sucesso!', 'success');
+            showToast('Menu Semanal salvo com sucesso!', 'success');
             setUnsavedChanges(false);
         } else {
-            showToast(result.message || 'Erro ao salvar', 'error');
+            showToast(result.error || 'Erro ao salvar menu semanal', 'error');
         }
     } catch (error) {
-        showToast('Erro ao salvar menu', 'error');
+        showToast('Erro ao salvar menu semanal', 'error');
+    }
+}
+
+// ==================== MENU À LA CARTE ====================
+let alacarteData = {};
+
+async function loadAlacarteData() {
+    try {
+        const response = await fetch('/api/admin/alacarte');
+        alacarteData = await response.json();
+        renderAlacarteEditor();
+    } catch (error) {
+        console.error('Erro ao carregar menu à la carte:', error);
+    }
+}
+
+function renderAlacarteEditor() {
+    const container = document.getElementById('alacarte-menu-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const categoriesMap = {
+        'appetizers': 'Petiscos (Appetizers)',
+        'starter': 'Entradas / Sopas (Starters)',
+        'snacks': 'Snacks',
+        'sandwiches': 'No Pão (Sandwiches)',
+        'plates': 'No Prato (On Plate)',
+        'dessert': 'Sobremesas (Desserts)'
+    };
+
+    Object.keys(categoriesMap).forEach(catKey => {
+        const items = alacarteData[catKey] || [];
+        const catCard = document.createElement('div');
+        catCard.className = 'form-section';
+        catCard.style.marginBottom = '25px';
+
+        let itemsHtml = '';
+        items.forEach((item, idx) => {
+            itemsHtml += `
+                <div style="border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 12px; background: rgba(0,0,0,0.2);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <strong>Item ${idx + 1}: ${item.pt || 'Sem nome'}</strong>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeAlacarteItem('${catKey}', ${idx}); return false;">
+                            <i class="fas fa-trash"></i> Remover
+                        </button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="form-group">
+                            <label>Nome (Português)</label>
+                            <input type="text" class="form-control" value="${item.pt || ''}" onchange="updateAlacarteItem('${catKey}', ${idx}, 'pt', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Nome (Inglês)</label>
+                            <input type="text" class="form-control" value="${item.en || ''}" onchange="updateAlacarteItem('${catKey}', ${idx}, 'en', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição (Português)</label>
+                            <input type="text" class="form-control" value="${item.d_pt || ''}" onchange="updateAlacarteItem('${catKey}', ${idx}, 'd_pt', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição (Inglês)</label>
+                            <input type="text" class="form-control" value="${item.d_en || ''}" onchange="updateAlacarteItem('${catKey}', ${idx}, 'd_en', this.value)">
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Preço (ex: 350MT)</label>
+                            <input type="text" class="form-control" value="${item.p || ''}" onchange="updateAlacarteItem('${catKey}', ${idx}, 'p', this.value)">
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        catCard.innerHTML = `
+            <h3><i class="fas fa-list"></i> ${categoriesMap[catKey]}</h3>
+            ${itemsHtml || '<p style="opacity: 0.6; font-style: italic;">Nenhum item nesta categoria.</p>'}
+            <button type="button" class="btn btn-outline btn-sm" onclick="addAlacarteItem('${catKey}'); return false;" style="margin-top: 5px;">
+                <i class="fas fa-plus"></i> Adicionar Item a ${categoriesMap[catKey].split(' ')[0]}
+            </button>
+        `;
+
+        container.appendChild(catCard);
+    });
+
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'form-actions';
+    actionsDiv.style.marginTop = '20px';
+    actionsDiv.innerHTML = `
+        <button type="button" class="btn btn-primary btn-lg" onclick="saveAlacarteData(); return false;">
+            <i class="fas fa-save"></i> Guardar Menu À La Carte
+        </button>
+    `;
+    container.appendChild(actionsDiv);
+}
+
+function updateAlacarteItem(catKey, idx, field, val) {
+    if (!alacarteData[catKey] || !alacarteData[catKey][idx]) return;
+    alacarteData[catKey][idx][field] = val;
+    setUnsavedChanges(true);
+}
+
+function addAlacarteItem(catKey) {
+    if (!alacarteData[catKey]) alacarteData[catKey] = [];
+    alacarteData[catKey].push({ pt: '', en: '', d_pt: '', d_en: '', p: '350MT' });
+    renderAlacarteEditor();
+    setUnsavedChanges(true);
+}
+
+function removeAlacarteItem(catKey, idx) {
+    if (confirm('Remover este item?')) {
+        alacarteData[catKey].splice(idx, 1);
+        renderAlacarteEditor();
+        setUnsavedChanges(true);
+    }
+}
+
+async function saveAlacarteData() {
+    try {
+        const response = await fetch('/api/admin/alacarte', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': getCsrfToken()
+            },
+            body: JSON.stringify(alacarteData)
+        });
+        const result = await response.json();
+        if (result.success) {
+            showToast('Menu À La Carte salvo com sucesso!', 'success');
+            setUnsavedChanges(false);
+        } else {
+            showToast(result.error || 'Erro ao salvar à la carte', 'error');
+        }
+    } catch (error) {
+        showToast('Erro ao salvar menu à la carte', 'error');
     }
 }
 

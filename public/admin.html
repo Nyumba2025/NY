@@ -50,13 +50,17 @@
                 <i class="fas fa-home"></i>
                 <span>Página Principal</span>
             </a>
+            <a href="#" data-section="menu" class="menu-item" onclick="openSection('menu'); return false;">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Menu Semanal</span>
+            </a>
+            <a href="#" data-section="alacarte" class="menu-item" onclick="openSection('alacarte'); return false;">
+                <i class="fas fa-book-open"></i>
+                <span>Menu À La Carte</span>
+            </a>
             <a href="#" data-section="gallery" class="menu-item" onclick="openSection('gallery'); return false;">
                 <i class="fas fa-images"></i>
                 <span>Galeria</span>
-            </a>
-            <a href="#" data-section="menu" class="menu-item" onclick="openSection('menu'); return false;">
-                <i class="fas fa-utensils"></i>
-                <span>Menu</span>
             </a>
             <a href="#" data-section="preview" class="menu-item" onclick="openSection('preview'); return false;">
                 <i class="fas fa-eye"></i>
@@ -236,16 +240,36 @@
                     </div>
                 </div>
 
-                <!-- Contactos & Rodapé -->
+                <!-- Contactos, WhatsApp & Redes Sociais -->
                 <div class="form-section">
-                    <h3><i class="fas fa-envelope"></i> Contactos & Rodapé</h3>
+                    <h3><i class="fas fa-envelope"></i> Contactos & Redes Sociais</h3>
                     <div class="form-group">
-                        <label for="info-phone">Telefone / WhatsApp</label>
-                        <input type="text" id="info-phone" class="form-control" placeholder="Ex: +258 84 123 4567">
+                        <label for="info-phone">Telefone de Contacto</label>
+                        <input type="text" id="info-phone" class="form-control" placeholder="Ex: +258 84 669 5390">
                     </div>
                     <div class="form-group">
                         <label for="info-email">Email</label>
-                        <input type="text" id="info-email" class="form-control" placeholder="Ex: info@nyumbafood.com">
+                        <input type="text" id="info-email" class="form-control" placeholder="Ex: nyumba.maputo@gmail.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="info-whatsapp">Número WhatsApp para Receber Pedidos (apenas dígitos com código de país)</label>
+                        <input type="text" id="info-whatsapp" class="form-control" placeholder="Ex: 258846695390">
+                    </div>
+                    <div class="form-group">
+                        <label for="info-instagram">Link Instagram</label>
+                        <input type="text" id="info-instagram" class="form-control" placeholder="https://www.instagram.com/nyumbafoodconcept">
+                    </div>
+                    <div class="form-group">
+                        <label for="info-facebook">Link Facebook</label>
+                        <input type="text" id="info-facebook" class="form-control" placeholder="https://www.facebook.com/people/Nyumbafoodconcept/61578702685238/">
+                    </div>
+                    <div class="form-group">
+                        <label for="info-tripadvisor">Link TripAdvisor</label>
+                        <input type="text" id="info-tripadvisor" class="form-control" placeholder="https://www.tripadvisor.pt/Restaurant_Review...">
+                    </div>
+                    <div class="form-group">
+                        <label for="info-googlemaps">Link Google Maps (Avaliação)</label>
+                        <input type="text" id="info-googlemaps" class="form-control" placeholder="https://www.google.com/maps/place/NYUMBA+Food+Concept...">
                     </div>
                     <div class="form-group">
                         <label for="info-footer">Texto do Rodapé</label>
@@ -274,14 +298,24 @@
             <div id="gallery-editor"></div>
         </div>
 
-        <!-- ==================== MENU ==================== -->
+        <!-- ==================== MENU SEMANAL ==================== -->
         <div id="menu" class="content-section">
             <div class="section-header">
-                <h1><i class="fas fa-utensils"></i> Menu</h1>
-                <p>Gerir categorias e pratos do menu do restaurante</p>
+                <h1><i class="fas fa-calendar-alt"></i> Menu Semanal (Segunda a Sexta)</h1>
+                <p>Edite os pratos do dia, sopas e sobremesas de Segunda a Sexta-feira</p>
             </div>
 
-            <div id="menu-editor"></div>
+            <div id="weekly-menu-container" class="form-container"></div>
+        </div>
+
+        <!-- ==================== MENU À LA CARTE ==================== -->
+        <div id="alacarte" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-book-open"></i> Menu À La Carte</h1>
+                <p>Gerir Petiscos, Entradas, Snacks, No Pão, No Prato e Sobremesas</p>
+            </div>
+
+            <div id="alacarte-menu-container" class="form-container"></div>
         </div>
 
         <!-- ==================== PREVIEW ==================== -->
