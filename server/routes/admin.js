@@ -123,12 +123,13 @@ router.post('/home', async (req, res) => {
         await fs.writeFile(homePath, JSON.stringify(homeData, null, 2));
         await buildNyumbaDataBundle();
         
-        await gitService.commit('Atualização do Conceito e Informações Rápidas', req.session.user.username);
+        const gitResult = await gitService.commit('Atualização do Conceito e Informações Rápidas', req.session.user.username);
         
         logger.info(`Home atualizado por ${req.session.user.username}`);
         res.json({ 
             success: true, 
-            message: 'Informações do Conceito salvas com sucesso!' 
+            message: gitResult.message || 'Informações do Conceito salvas com sucesso!',
+            gitResult 
         });
     } catch (error) {
         logger.error('Erro ao salvar home:', error);
@@ -156,12 +157,13 @@ router.post('/gallery', async (req, res) => {
         await backupService.createBackup('gallery');
         await fs.writeFile(galleryPath, JSON.stringify(galleryData, null, 2));
         await buildNyumbaDataBundle();
-        await gitService.commit('Atualização da galeria', req.session.user.username);
+        const gitResult = await gitService.commit('Atualização da galeria', req.session.user.username);
         
         logger.info(`Galeria atualizada por ${req.session.user.username}`);
         res.json({ 
             success: true, 
-            message: 'Galeria salva com sucesso!' 
+            message: gitResult.message || 'Galeria salva com sucesso!',
+            gitResult 
         });
     } catch (error) {
         logger.error('Erro ao salvar galeria:', error);
@@ -189,12 +191,13 @@ router.post('/menu', async (req, res) => {
         await backupService.createBackup('menu');
         await fs.writeFile(menuPath, JSON.stringify(menuData, null, 2));
         await buildNyumbaDataBundle();
-        await gitService.commit('Atualização do Menu Semanal', req.session.user.username);
+        const gitResult = await gitService.commit('Atualização do Menu Semanal', req.session.user.username);
         
         logger.info(`Menu semanal atualizado por ${req.session.user.username}`);
         res.json({ 
             success: true, 
-            message: 'Menu semanal salvo com sucesso!' 
+            message: gitResult.message || 'Menu semanal salvo com sucesso!',
+            gitResult 
         });
     } catch (error) {
         logger.error('Erro ao salvar menu:', error);
@@ -222,16 +225,34 @@ router.post('/alacarte', async (req, res) => {
         await backupService.createBackup('alacarte');
         await fs.writeFile(alacartePath, JSON.stringify(alacarteData, null, 2));
         await buildNyumbaDataBundle();
-        await gitService.commit('Atualização do Menu À La Carte', req.session.user.username);
+        const gitResult = await gitService.commit('Atualização do Menu À La Carte', req.session.user.username);
         
         logger.info(`Menu à la carte atualizado por ${req.session.user.username}`);
         res.json({ 
             success: true, 
-            message: 'Menu À La Carte salvo com sucesso!' 
+            message: gitResult.message || 'Menu À La Carte salvo com sucesso!',
+            gitResult 
         });
     } catch (error) {
         logger.error('Erro ao salvar alacarte:', error);
         res.status(500).json({ error: 'Erro ao salvar menu à la carte' });
+    }
+});
+
+// ========== PUBLICAR AGORA (PUSH PARA GITHUB) ==========
+router.post('/publish', async (req, res) => {
+    try {
+        await buildNyumbaDataBundle();
+        const gitResult = await gitService.commit('Publicação manual do Menu Digital', req.session.user.username);
+        res.json({
+            success: gitResult.success,
+            message: gitResult.message,
+            pushed: gitResult.pushed,
+            gitResult
+        });
+    } catch (error) {
+        logger.error('Erro na publicação manual:', error);
+        res.status(500).json({ error: 'Erro ao publicar no GitHub: ' + error.message });
     }
 });
 

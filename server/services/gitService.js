@@ -62,31 +62,70 @@ class GitService {
         }
     }
 
-    async commit(message, author) {
+    async commit(message, author = 'Admin') {
         try {
-            // Adicionar todos os arquivos modificados
-            await git.add(['./data/*', './public/js/*-data.js']);
+            // Adicionar todos os arquivos modificados (data, nyumba-data.js, index.html)
+            await git.add(['.']);
             
-            // Fazer commit
-            const commitOptions = {};
-            if (author) {
-                commitOptions['--author'] = `${author} <${author}@nyumba.com>`;
-            }
+            const status = await git.status();
+            let committed = false;
             
-            await git.commit(message, commitOptions);
-            
-            // Push para o repositório remoto (se configurado)
-            const remotes = await git.getRemotes();
-            if (remotes.length > 0) {
-                await git.push();
-                logger.info(`Commit realizado e enviado: ${message}`);
+            if (status.staged.length > 0 || status.modified.length > 0) {
+                const commitOptions = {};
+                if (author) {
+                    commitOptions['--author'] = `${author} <${author}@nyumba.com>`;
+                }
+                await git.commit(message, commitOptions);
+                logger.info(`Commit realizado com sucesso: ${message}`);
+                committed = true;
             } else {
-                logger.info(`Commit realizado: ${message}`);
+                logger.info('Nenhuma alteração pendente para commit');
             }
             
-            return { success: true, message: 'Commit realizado' };
+            // Tentar Push para o GitHub
+            let pushed = false;
+            let pushError = null;
+            
+            try {
+                const remotes = await git.getRemotes();
+                if (remotes.length > 0) {
+                    await git.push('origin', 'master');
+                    pushed = true;
+                    logger.info(`Push realizado com sucesso para origin/master!`);
+                }
+            } catch (err1) {
+                try {
+                    await git.push('origin', 'main');
+                    pushed = true;
+                    logger.info(`Push realizado com sucesso para origin/main!`);
+                } catch (err2) {
+                    pushError = err2.message || err1.message;
+                    logger.warn(`Push falhou: ${pushError}`);
+                }
+            }
+            
+            if (pushed) {
+                return { 
+                    success: true, 
+                    pushed: true, 
+                    message: 'Alterações salvas e publicadas no GitHub com sucesso!' 
+                };
+            } else if (committed) {
+                return { 
+                    success: true, 
+                    pushed: false, 
+                    error: pushError,
+                    message: `Alterações salvas localmente. Falha no Push para o GitHub (${pushError || 'Autenticação'}).` 
+                };
+            } else {
+                return { 
+                    success: true, 
+                    pushed: false, 
+                    message: 'Sem alterações pendentes para guardar.' 
+                };
+            }
         } catch (error) {
-            logger.error('Erro ao fazer commit:', error);
+            logger.error('Erro ao fazer commit/push:', error);
             return { success: false, error: error.message };
         }
     }

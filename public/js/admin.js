@@ -185,7 +185,10 @@ function openSection(sectionId) {
                 loadGalleryData();
                 break;
             case 'menu':
-                loadMenuData();
+                loadWeeklyMenuData();
+                break;
+            case 'alacarte':
+                loadAlacarteData();
                 break;
             case 'history':
                 loadHistory();
@@ -207,6 +210,7 @@ function openSection(sectionId) {
         console.error('Erro em openSection:', err);
     }
 }
+
 
 function toggleDropdown() {
     const menu = document.getElementById('dropdownMenu');
@@ -1788,38 +1792,447 @@ async function resetUserPassword(userId) {
 
 async function loadSystemInfo() {
     try {
-        const response = await fetch('/api/admin/status');
-        const data = await response.json();
-
-        if (data.success) {
-            const status = data.status;
-            const uptime = Math.floor(status.system.uptime);
-            const hours = Math.floor(uptime / 3600);
-            const minutes = Math.floor((uptime % 3600) / 60);
-            const memMB = Math.round(status.system.memory.heapUsed / 1024 / 1024);
-
-            const sysElem = document.getElementById('systemInfo');
-            if (sysElem) {
-                sysElem.innerHTML = `
-                    <div class="backup-stats" style="margin-bottom: 0;">
-                        <div class="stat-item">
-                            <i class="fas fa-clock" style="color: #3498db;"></i>
-                            <div><h3>${hours}h ${minutes}m</h3><p>Uptime</p></div>
-                        </div>
-                        <div class="stat-item">
-                            <i class="fas fa-memory" style="color: #2ecc71;"></i>
-                            <div><h3>${memMB} MB</h3><p>Memória Usada</p></div>
-                        </div>
-                        <div class="stat-item">
-                            <i class="fab fa-node-js" style="color: #68a063;"></i>
-                            <div><h3>${status.system.nodeVersion}</h3><p>Node.js</p></div>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-    } catch (error) {
-        const sysElem = document.getElementById('systemInfo');
-        if (sysElem) sysElem.innerHTML = '<p>Erro ao carregar informações do sistema.</p>';
-    }
+        const response = await fetch('/api/admin/status');\r
+        const data = await response.json();\r
+\r
+        if (data.success) {\r
+            const status = data.status;\r
+            const uptime = Math.floor(status.system.uptime);\r
+            const hours = Math.floor(uptime / 3600);\r
+            const minutes = Math.floor((uptime % 3600) / 60);\r
+            const memMB = Math.round(status.system.memory.heapUsed / 1024 / 1024);\r
+\r
+            const sysElem = document.getElementById('systemInfo');\r
+            if (sysElem) {\r
+                sysElem.innerHTML = `\r
+                    <div class="backup-stats" style="margin-bottom: 0;">\r
+                        <div class="stat-item">\r
+                            <i class="fas fa-clock" style="color: #3498db;"></i>\r
+                            <div><h3>${hours}h ${minutes}m</h3><p>Uptime</p></div>\r
+                        </div>\r
+                        <div class="stat-item">\r
+                            <i class="fas fa-memory" style="color: #2ecc71;"></i>\r
+                            <div><h3>${memMB} MB</h3><p>Memória Usada</p></div>\r
+                        </div>\r
+                        <div class="stat-item">\r
+                            <i class="fab fa-node-js" style="color: #68a063;"></i>\r
+                            <div><h3>${status.system.nodeVersion}</h3><p>Node.js</p></div>\r
+                        </div>\r
+                    </div>\r
+                `;\r
+            }\r
+        }\r
+    } catch (error) {\r
+        const sysElem = document.getElementById('systemInfo');\r
+        if (sysElem) sysElem.innerHTML = '<p>Erro ao carregar informações do sistema.</p>';\r
+    }\r
+}\r
+\r
+// ==================== MENU SEMANAL ====================\r
+let weeklyMenuData = {};\r
+\r
+async function loadWeeklyMenuData() {\r
+    try {\r
+        const response = await fetch('/api/admin/menu');\r
+        if (!response.ok) throw new Error('Falha ao carregar');\r
+        weeklyMenuData = await response.json();\r
+        renderWeeklyMenuEditor();\r
+    } catch (error) {\r
+        console.error('Erro ao carregar menu semanal:', error);\r
+        weeklyMenuData = {};\r
+    }\r
+}\r
+\r
+const DAYS = [\r
+    { key: '1', pt: 'Segunda-feira', en: 'Monday' },\r
+    { key: '2', pt: 'Terça-feira',   en: 'Tuesday' },\r
+    { key: '3', pt: 'Quarta-feira',  en: 'Wednesday' },\r
+    { key: '4', pt: 'Quinta-feira',  en: 'Thursday' },\r
+    { key: '5', pt: 'Sexta-feira',   en: 'Friday' }\r
+];\r
+\r
+function renderWeeklyMenuEditor() {\r
+    const container = document.getElementById('weekly-menu-container');\r
+    if (!container) return;\r
+    container.innerHTML = '';\r
+\r
+    // Botões de guardar e publicar no topo\r
+    const topActions = document.createElement('div');\r
+    topActions.className = 'form-actions';\r
+    topActions.style.cssText = 'margin-bottom:24px; display:flex; gap:12px; flex-wrap:wrap;';\r
+    topActions.innerHTML = `\r
+        <button class="btn btn-primary" onclick="saveWeeklyMenuData()">\r
+            <i class="fas fa-save"></i> Guardar Menu Semanal\r
+        </button>\r
+        <button class="btn btn-success" onclick="publishToGitHub()" style="background:#27ae60;">\r
+            <i class="fab fa-github"></i> Publicar no GitHub\r
+        </button>\r
+    `;\r
+    container.appendChild(topActions);\r
+\r
+    DAYS.forEach(day => {\r
+        const dayData = weeklyMenuData[day.key] || { sopa: {}, pratos: [], sobremesa: {} };\r
+        if (!dayData.pratos) dayData.pratos = [];\r
+        weeklyMenuData[day.key] = dayData;\r
+\r
+        const section = document.createElement('div');\r
+        section.className = 'form-section';\r
+        section.style.cssText = 'margin-bottom:24px; border:1px solid #eee; border-radius:8px; padding:20px;';\r
+\r
+        let pratosHtml = dayData.pratos.map((p, i) => `\r
+            <div class="prato-item" id="prato-${day.key}-${i}" style="border:1px dashed #ccc; border-radius:6px; padding:12px; margin-bottom:10px; background:#fafafa;">\r
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">\r
+                    <strong style="color:#555;">Prato ${i + 1}</strong>\r
+                    <button class="btn btn-danger" style="padding:4px 10px; font-size:12px;" onclick="removePrato('${day.key}', ${i})">\r
+                        <i class="fas fa-trash"></i> Remover\r
+                    </button>\r
+                </div>\r
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">\r
+                    <div class="form-group" style="margin:0;">\r
+                        <label style="font-size:12px;">Nome (PT)</label>\r
+                        <input type="text" class="form-control" id="prato-${day.key}-${i}-pt" value="${p.pt || ''}" placeholder="Nome em português">\r
+                    </div>\r
+                    <div class="form-group" style="margin:0;">\r
+                        <label style="font-size:12px;">Nome (EN)</label>\r
+                        <input type="text" class="form-control" id="prato-${day.key}-${i}-en" value="${p.en || ''}" placeholder="Name in English">\r
+                    </div>\r
+                    <div class="form-group" style="margin:0;">\r
+                        <label style="font-size:12px;">Descrição (PT)</label>\r
+                        <input type="text" class="form-control" id="prato-${day.key}-${i}-d_pt" value="${p.d_pt || ''}" placeholder="Descrição PT">\r
+                    </div>\r
+                    <div class="form-group" style="margin:0;">\r
+                        <label style="font-size:12px;">Descrição (EN)</label>\r
+                        <input type="text" class="form-control" id="prato-${day.key}-${i}-d_en" value="${p.d_en || ''}" placeholder="Description EN">\r
+                    </div>\r
+                    <div class="form-group" style="margin:0;">\r
+                        <label style="font-size:12px;">Preço (MT)</label>\r
+                        <input type="text" class="form-control" id="prato-${day.key}-${i}-p" value="${p.p || ''}" placeholder="Ex: 500MT">\r
+                    </div>\r
+                </div>\r
+            </div>\r
+        `).join('');\r
+\r
+        section.innerHTML = `\r
+            <h3 style="color:#e67e22; margin-bottom:16px;"><i class="fas fa-calendar-day"></i> ${day.pt}</h3>\r
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px;">\r
+                <div class="form-group" style="margin:0;">\r
+                    <label><i class="fas fa-soup"></i> Sopa (PT)</label>\r
+                    <input type="text" class="form-control" id="sopa-${day.key}-pt" value="${dayData.sopa?.pt || ''}" placeholder="Nome da sopa PT">\r
+                </div>\r
+                <div class="form-group" style="margin:0;">\r
+                    <label><i class="fas fa-soup"></i> Sopa (EN)</label>\r
+                    <input type="text" class="form-control" id="sopa-${day.key}-en" value="${dayData.sopa?.en || ''}" placeholder="Soup name EN">\r
+                </div>\r
+                <div class="form-group" style="margin:0;">\r
+                    <label>Preço Sopa (MT)</label>\r
+                    <input type="text" class="form-control" id="sopa-${day.key}-p" value="${dayData.sopa?.p || ''}" placeholder="Ex: 180MT">\r
+                </div>\r
+            </div>\r
+\r
+            <h4 style="margin-bottom:10px; color:#555;">Pratos Principais</h4>\r
+            <div id="pratos-container-${day.key}">${pratosHtml}</div>\r
+            <button class="btn btn-outline" style="margin-bottom:16px;" onclick="addPrato('${day.key}')">\r
+                <i class="fas fa-plus"></i> Adicionar Prato\r
+            </button>\r
+\r
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">\r
+                <div class="form-group" style="margin:0;">\r
+                    <label><i class="fas fa-ice-cream"></i> Sobremesa (PT)</label>\r
+                    <input type="text" class="form-control" id="sobremesa-${day.key}-pt" value="${dayData.sobremesa?.pt || ''}" placeholder="Nome PT">\r
+                </div>\r
+                <div class="form-group" style="margin:0;">\r
+                    <label><i class="fas fa-ice-cream"></i> Sobremesa (EN)</label>\r
+                    <input type="text" class="form-control" id="sobremesa-${day.key}-en" value="${dayData.sobremesa?.en || ''}" placeholder="Name EN">\r
+                </div>\r
+                <div class="form-group" style="margin:0;">\r
+                    <label>Preço Sobremesa (MT)</label>\r
+                    <input type="text" class="form-control" id="sobremesa-${day.key}-p" value="${dayData.sobremesa?.p || ''}" placeholder="Ex: 150MT">\r
+                </div>\r
+            </div>\r
+        `;\r
+        container.appendChild(section);\r
+    });\r
+\r
+    // Botão de guardar no fundo também\r
+    const bottomActions = document.createElement('div');\r
+    bottomActions.className = 'form-actions';\r
+    bottomActions.style.cssText = 'margin-top:16px; display:flex; gap:12px; flex-wrap:wrap;';\r
+    bottomActions.innerHTML = `\r
+        <button class="btn btn-primary" onclick="saveWeeklyMenuData()">\r
+            <i class="fas fa-save"></i> Guardar Menu Semanal\r
+        </button>\r
+        <button class="btn btn-success" onclick="publishToGitHub()" style="background:#27ae60;">\r
+            <i class="fab fa-github"></i> Publicar no GitHub\r
+        </button>\r
+    `;\r
+    container.appendChild(bottomActions);\r
+}\r
+\r
+function addPrato(dayKey) {\r
+    if (!weeklyMenuData[dayKey]) weeklyMenuData[dayKey] = { sopa: {}, pratos: [], sobremesa: {} };\r
+    if (!weeklyMenuData[dayKey].pratos) weeklyMenuData[dayKey].pratos = [];\r
+    weeklyMenuData[dayKey].pratos.push({ pt: '', en: '', d_pt: '', d_en: '', p: '' });\r
+    renderWeeklyMenuEditor();\r
+}\r
+\r
+function removePrato(dayKey, index) {\r
+    if (!confirm('Remover este prato?')) return;\r
+    weeklyMenuData[dayKey].pratos.splice(index, 1);\r
+    renderWeeklyMenuEditor();\r
+}\r
+\r
+function collectWeeklyMenuFromForm() {\r
+    const data = {};\r
+    DAYS.forEach(day => {\r
+        const pratos = [];\r
+        const count = weeklyMenuData[day.key]?.pratos?.length || 0;\r
+        for (let i = 0; i < count; i++) {\r
+            pratos.push({\r
+                pt:   (document.getElementById(`prato-${day.key}-${i}-pt`)?.value || '').trim(),\r
+                en:   (document.getElementById(`prato-${day.key}-${i}-en`)?.value || '').trim(),\r
+                d_pt: (document.getElementById(`prato-${day.key}-${i}-d_pt`)?.value || '').trim(),\r
+                d_en: (document.getElementById(`prato-${day.key}-${i}-d_en`)?.value || '').trim(),\r
+                p:    (document.getElementById(`prato-${day.key}-${i}-p`)?.value || '').trim()\r
+            });\r
+        }\r
+        data[day.key] = {\r
+            pt: day.pt.split('-')[0].trim(),\r
+            en: day.en,\r
+            sopa: {\r
+                pt: (document.getElementById(`sopa-${day.key}-pt`)?.value || '').trim(),\r
+                en: (document.getElementById(`sopa-${day.key}-en`)?.value || '').trim(),\r
+                p:  (document.getElementById(`sopa-${day.key}-p`)?.value || '').trim()\r
+            },\r
+            pratos,\r
+            sobremesa: {\r
+                pt: (document.getElementById(`sobremesa-${day.key}-pt`)?.value || '').trim(),\r
+                en: (document.getElementById(`sobremesa-${day.key}-en`)?.value || '').trim(),\r
+                p:  (document.getElementById(`sobremesa-${day.key}-p`)?.value || '').trim()\r
+            }\r
+        };\r
+    });\r
+    return data;\r
+}\r
+\r
+async function saveWeeklyMenuData() {\r
+    try {\r
+        showLoading();\r
+        const data = collectWeeklyMenuFromForm();\r
+        weeklyMenuData = data;\r
+\r
+        const response = await fetch('/api/admin/menu', {\r
+            method: 'POST',\r
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },\r
+            body: JSON.stringify(data)\r
+        });\r
+        const result = await response.json();\r
+        hideLoading();\r
+\r
+        if (result.success) {\r
+            const pushed = result.gitResult?.pushed;\r
+            showToast(pushed\r
+                ? '✅ Menu Semanal guardado e publicado no GitHub!'\r
+                : '💾 Menu Semanal guardado localmente. Push pendente.',\r
+                pushed ? 'success' : 'warning');\r
+        } else {\r
+            showToast(result.error || 'Erro ao guardar menu semanal', 'error');\r
+        }\r
+    } catch (error) {\r
+        hideLoading();\r
+        showToast('Erro de ligação ao guardar menu semanal', 'error');\r
+        console.error(error);\r
+    }\r
+}\r
+\r
+// ==================== MENU À LA CARTE ====================\r
+let alacarteData = {};\r
+\r
+const ALACARTE_CATEGORIES = [\r
+    { key: 'appetizers', label: 'Petiscos',           icon: 'fas fa-drumstick-bite' },\r
+    { key: 'starter',    label: 'Entradas / Sopas',   icon: 'fas fa-soup' },\r
+    { key: 'snacks',     label: 'Snacks',              icon: 'fas fa-cookie-bite' },\r
+    { key: 'sandwiches', label: 'No Pão (Burgers & Tostas)', icon: 'fas fa-hamburger' },\r
+    { key: 'plates',     label: 'No Prato',            icon: 'fas fa-concierge-bell' },\r
+    { key: 'dessert',    label: 'Sobremesas',          icon: 'fas fa-ice-cream' }\r
+];\r
+\r
+async function loadAlacarteData() {\r
+    try {\r
+        const response = await fetch('/api/admin/alacarte');\r
+        if (!response.ok) throw new Error('Falha ao carregar');\r
+        alacarteData = await response.json();\r
+        renderAlacarteEditor();\r
+    } catch (error) {\r
+        console.error('Erro ao carregar à la carte:', error);\r
+        alacarteData = {};\r
+    }\r
+}\r
+\r
+function renderAlacarteEditor() {\r
+    const container = document.getElementById('alacarte-menu-container');\r
+    if (!container) return;\r
+    container.innerHTML = '';\r
+\r
+    const topActions = document.createElement('div');\r
+    topActions.className = 'form-actions';\r
+    topActions.style.cssText = 'margin-bottom:24px; display:flex; gap:12px; flex-wrap:wrap;';\r
+    topActions.innerHTML = `\r
+        <button class="btn btn-primary" onclick="saveAlacarteData()">\r
+            <i class="fas fa-save"></i> Guardar À La Carte\r
+        </button>\r
+        <button class="btn btn-success" onclick="publishToGitHub()" style="background:#27ae60;">\r
+            <i class="fab fa-github"></i> Publicar no GitHub\r
+        </button>\r
+    `;\r
+    container.appendChild(topActions);\r
+\r
+    ALACARTE_CATEGORIES.forEach(cat => {\r
+        if (!alacarteData[cat.key]) alacarteData[cat.key] = [];\r
+        const items = alacarteData[cat.key];\r
+\r
+        const section = document.createElement('div');\r
+        section.className = 'form-section';\r
+        section.style.cssText = 'margin-bottom:24px; border:1px solid #eee; border-radius:8px; padding:20px;';\r
+\r
+        let itemsHtml = items.map((item, i) => `\r
+            <div id="alacarte-${cat.key}-${i}" style="border:1px dashed #ccc; border-radius:6px; padding:12px; margin-bottom:10px; background:#fafafa;">\r
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">\r
+                    <strong style="color:#555;">Item ${i + 1}: ${item.pt || ''}</strong>\r
+                    <button class="btn btn-danger" style="padding:4px 10px; font-size:12px;" onclick="removeAlacarteItem('${cat.key}', ${i})">\r
+                        <i class="fas fa-trash"></i> Remover\r
+                    </button>\r
+                </div>\r
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">\r
+                    <div class="form-group" style="margin:0;">\r
+                        <label style="font-size:12px;">Nome (PT)</label>\r
+                        <input type="text" class="form-control" id="ac-${cat.key}-${i}-pt" value="${item.pt || ''}">\r
+                    </div>\r
+                    <div class="form-group" style="margin:0;">\r
+                        <label style="font-size:12px;">Nome (EN)</label>\r
+                        <input type="text" class="form-control" id="ac-${cat.key}-${i}-en" value="${item.en || ''}">\r
+                    </div>\r
+                    <div class="form-group" style="margin:0;">\r
+                        <label style="font-size:12px;">Preço (MT)</label>\r
+                        <input type="text" class="form-control" id="ac-${cat.key}-${i}-p" value="${item.p || ''}">\r
+                    </div>\r
+                    <div class="form-group" style="margin:0; grid-column:span 1.5;">\r
+                        <label style="font-size:12px;">Descrição (PT)</label>\r
+                        <input type="text" class="form-control" id="ac-${cat.key}-${i}-d_pt" value="${item.d_pt || ''}">\r
+                    </div>\r
+                    <div class="form-group" style="margin:0;">\r
+                        <label style="font-size:12px;">Descrição (EN)</label>\r
+                        <input type="text" class="form-control" id="ac-${cat.key}-${i}-d_en" value="${item.d_en || ''}">\r
+                    </div>\r
+                </div>\r
+            </div>\r
+        `).join('');\r
+\r
+        section.innerHTML = `\r
+            <h3 style="color:#8e44ad; margin-bottom:16px;"><i class="${cat.icon}"></i> ${cat.label}</h3>\r
+            <div id="ac-items-${cat.key}">${itemsHtml}</div>\r
+            <button class="btn btn-outline" onclick="addAlacarteItem('${cat.key}')">\r
+                <i class="fas fa-plus"></i> Adicionar Item\r
+            </button>\r
+        `;\r
+        container.appendChild(section);\r
+    });\r
+\r
+    const bottomActions = document.createElement('div');\r
+    bottomActions.className = 'form-actions';\r
+    bottomActions.style.cssText = 'margin-top:16px; display:flex; gap:12px; flex-wrap:wrap;';\r
+    bottomActions.innerHTML = `\r
+        <button class="btn btn-primary" onclick="saveAlacarteData()">\r
+            <i class="fas fa-save"></i> Guardar À La Carte\r
+        </button>\r
+        <button class="btn btn-success" onclick="publishToGitHub()" style="background:#27ae60;">\r
+            <i class="fab fa-github"></i> Publicar no GitHub\r
+        </button>\r
+    `;\r
+    container.appendChild(bottomActions);\r
+}\r
+\r
+function addAlacarteItem(catKey) {\r
+    if (!alacarteData[catKey]) alacarteData[catKey] = [];\r
+    alacarteData[catKey].push({ pt: '', en: '', d_pt: '', d_en: '', p: '' });\r
+    renderAlacarteEditor();\r
+}\r
+\r
+function removeAlacarteItem(catKey, index) {\r
+    if (!confirm('Remover este item?')) return;\r
+    alacarteData[catKey].splice(index, 1);\r
+    renderAlacarteEditor();\r
+}\r
+\r
+function collectAlacarteFromForm() {\r
+    const data = {};\r
+    ALACARTE_CATEGORIES.forEach(cat => {\r
+        const items = alacarteData[cat.key] || [];\r
+        data[cat.key] = items.map((_, i) => ({\r
+            pt:   (document.getElementById(`ac-${cat.key}-${i}-pt`)?.value || '').trim(),\r
+            en:   (document.getElementById(`ac-${cat.key}-${i}-en`)?.value || '').trim(),\r
+            p:    (document.getElementById(`ac-${cat.key}-${i}-p`)?.value || '').trim(),\r
+            d_pt: (document.getElementById(`ac-${cat.key}-${i}-d_pt`)?.value || '').trim(),\r
+            d_en: (document.getElementById(`ac-${cat.key}-${i}-d_en`)?.value || '').trim()\r
+        }));\r
+    });\r
+    return data;\r
+}\r
+\r
+async function saveAlacarteData() {\r
+    try {\r
+        showLoading();\r
+        const data = collectAlacarteFromForm();\r
+        alacarteData = data;\r
+\r
+        const response = await fetch('/api/admin/alacarte', {\r
+            method: 'POST',\r
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },\r
+            body: JSON.stringify(data)\r
+        });\r
+        const result = await response.json();\r
+        hideLoading();\r
+\r
+        if (result.success) {\r
+            const pushed = result.gitResult?.pushed;\r
+            showToast(pushed\r
+                ? '✅ Menu À La Carte guardado e publicado no GitHub!'\r
+                : '💾 Menu À La Carte guardado localmente. Push pendente.',\r
+                pushed ? 'success' : 'warning');\r
+        } else {\r
+            showToast(result.error || 'Erro ao guardar à la carte', 'error');\r
+        }\r
+    } catch (error) {\r
+        hideLoading();\r
+        showToast('Erro de ligação ao guardar à la carte', 'error');\r
+        console.error(error);\r
+    }\r
+}\r
+\r
+// ==================== PUBLICAR NO GITHUB ====================\r
+async function publishToGitHub() {\r
+    try {\r
+        showLoading();\r
+        const response = await fetch('/api/admin/publish', {\r
+            method: 'POST',\r
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },\r
+            body: JSON.stringify({})\r
+        });\r
+        const result = await response.json();\r
+        hideLoading();\r
+\r
+        if (result.pushed) {\r
+            showToast('✅ Publicado com sucesso no GitHub! O site será atualizado em breve.', 'success');\r
+        } else if (result.success) {\r
+            showToast('⚠️ Guardado localmente, mas o push falhou. Verifique as credenciais do GitHub.', 'warning');\r
+            if (result.gitResult?.error) {\r
+                console.warn('Erro git push:', result.gitResult.error);\r
+            }\r
+        } else {\r
+            showToast('❌ Erro ao publicar: ' + (result.error || 'Verifique os logs do servidor'), 'error');\r
+        }\r
+    } catch (error) {\r
+        hideLoading();\r
+        showToast('Erro de ligação ao publicar no GitHub', 'error');\r
+        console.error(error);\r
+    }\r
 }
