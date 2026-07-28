@@ -1,0 +1,25 @@
+{
+  "hero": {
+    "title": "Bem-vindo ao Restaurante Nyumba",
+    "subtitle": "Autêntica cozinha moçambicana em Lisboa",
+    "buttonText": "Ver Menu"
+  },
+  "about": {
+    "title": "A Nossa História",
+    "description": "O Nyumba nasceu da paixão pela culinária tradicional moçambicana..."
+  },
+  "services": [
+    {
+      "title": "Comida Tradicional",
+      "description": "Pratos autênticos preparados com ingredientes frescos"
+    },
+    {
+      "title": "Ambiente Acolhedor",
+      "description": "Um espaço familiar e confortável para todas as ocasiões"
+    }
+  ],
+  "footer": {
+    "copyright": "© 2024 Restaurante Nyumba. Todos os direitos reservados.",
+    "contact": "Contacte-nos: +351 123 456 789 | info@nyumba.com"
+  }
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "id": "mrnmtm1dwgs0c0wgiq",
+    "username": "admin",
+    "email": "admin@nyumba.com",
+    "password": "$2a$12$RrYuzVPb1HaCt/O4UTprMu/2/.7ifYZit7D9cu0coizOUv51bjW1u",
+    "role": "admin",
+    "active": true,
+    "createdAt": "2026-07-16T14:56:28.369Z",
+    "lastLogin": "2026-07-16T15:17:33.898Z",
+    "fullName": "Administrador",
+    "avatar": null
+  }
+]

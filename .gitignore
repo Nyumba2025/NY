@@ -1,0 +1,9 @@
+node_modules/
+.env
+dist/
+temp/
+logs/
+data/backups/
+.vscode/
+*.exe
+.DS_Store

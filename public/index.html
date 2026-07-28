@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurante Nyumba - Cozinha Moçambicana em Lisboa</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <i class="fas fa-utensils"></i>
+                    <span>Nyumba</span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#home" class="nav-link active">Home</a></li>
+                    <li><a href="#about" class="nav-link">Sobre</a></li>
+                    <li><a href="#menu" class="nav-link">Menu</a></li>
+                    <li><a href="#gallery" class="nav-link">Galeria</a></li>
+                    <li><a href="#contact" class="nav-link">Contato</a></li>
+                    <li><a href="/admin" class="nav-link admin-link"><i class="fas fa-cog"></i> Admin</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 id="hero-title">Bem-vindo ao Restaurante Nyumba</h1>
+                <p id="hero-subtitle">Autêntica cozinha moçambicana em Lisboa</p>
+                <a href="#menu" class="btn btn-primary" id="hero-button">Ver Menu</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h2 id="about-title">A Nossa História</h2>
+                <div class="underline"></div>
+            </div>
+            <div class="about-content">
+                <div class="about-text">
+                    <p id="about-description">
+                        O Nyumba nasceu da paixão pela culinária tradicional moçambicana. 
+                        Com mais de 10 anos de experiência, trazemos até si os sabores e 
+                        aromas da nossa terra, preparados com ingredientes frescos e muito carinho.
+                    </p>
+                    <div class="about-stats">
+                        <div class="stat">
+                            <h3>10+</h3>
+                            <p>Anos de Experiência</p>
+                        </div>
+                        <div class="stat">
+                            <h3>50+</h3>
+                            <p>Pratos Tradicionais</p>
+                        </div>
+                        <div class="stat">
+                            <h3>1000+</h3>
+                            <p>Clientes Satisfeitos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <img src="images/about.jpg" alt="Interior do Restaurante Nyumba">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h2>Porque Escolher o Nyumba</h2>
+                <div class="underline"></div>
+            </div>
+            <div class="services-grid" id="services-container">
+                <!-- Os serviços serão carregados dinamicamente aqui -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section id="menu" class="menu section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h2>O Nosso Menu</h2>
+                <div class="underline"></div>
+                <p>Descubra os sabores autênticos de Moçambique</p>
+            </div>
+            <div class="menu-tabs">
+                <button class="tab-btn active" data-category="all">Todos</button>
+                <button class="tab-btn" data-category="entradas">Entradas</button>
+                <button class="tab-btn" data-category="pratos">Pratos Principais</button>
+                <button class="tab-btn" data-category="sobremesas">Sobremesas</button>
+                <button class="tab-btn" data-category="bebidas">Bebidas</button>
+            </div>
+            <div class="menu-grid" id="menu-container">
+                <!-- Os itens do menu serão carregados dinamicamente aqui -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="gallery section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h2>A Nossa Galeria</h2>
+                <div class="underline"></div>
+                <p>Momentos especiais no Nyumba</p>
+            </div>
+            <div class="gallery-grid" id="gallery-container">
+                <!-- As imagens da galeria serão carregadas dinamicamente aqui -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h2>Entre em Contato</h2>
+                <div class="underline"></div>
+            </div>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h3>Endereço</h3>
+                            <p>Rua da Moçambique, 123<br>Lisboa, Portugal</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <h3>Telefone</h3>
+                            <p>+351 123 456 789</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h3>Email</h3>
+                            <p>info@nyumba.com</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <h3>Horário</h3>
+                            <p>Segunda - Sexta: 12h - 23h<br>Sábado - Domingo: 12h - 00h</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <input type="text" placeholder="Seu Nome" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" placeholder="Seu Email" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea placeholder="Sua Mensagem" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enviar Mensagem</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-utensils"></i>
+                    <span>Nyumba</span>
+                </div>
+                <div class="footer-links">
+                    <h3>Links Rápidos</h3>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">Sobre</a></li>
+                        <li><a href="#menu">Menu</a></li>
+                        <li><a href="#gallery">Galeria</a></li>
+                        <li><a href="#contact">Contato</a></li>
+                    </ul>
+                </div>
+                <div class="footer-social">
+                    <h3>Siga-nos</h3>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-tripadvisor"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p id="footer-copyright">© 2024 Restaurante Nyumba. Todos os direitos reservados.</p>
+                <p id="footer-contact">Contacte-nos: +351 123 456 789 | info@nyumba.com</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/home-data.js"></script>
+    <script src="js/gallery-data.js"></script>
+    <script src="js/menu-data.js"></script>
+    <script src="js/site.js"></script>
+    <script>
+        // Inicialização do site
+        document.addEventListener('DOMContentLoaded', function() {
+            // Preencher dados da página principal
+            if (typeof homeData !== 'undefined') {
+                // Hero section
+                const heroTitle = document.getElementById('hero-title');
+                const heroSubtitle = document.getElementById('hero-subtitle');
+                const heroButton = document.getElementById('hero-button');
+                
+                if (heroTitle && homeData.hero && homeData.hero.title) {
+                    heroTitle.textContent = homeData.hero.title;
+                }
+                if (heroSubtitle && homeData.hero && homeData.hero.subtitle) {
+                    heroSubtitle.textContent = homeData.hero.subtitle;
+                }
+                if (heroButton && homeData.hero && homeData.hero.buttonText) {
+                    heroButton.textContent = homeData.hero.buttonText;
+                }
+                
+                // About section
+                const aboutTitle = document.getElementById('about-title');
+                const aboutDescription = document.getElementById('about-description');
+                
+                if (aboutTitle && homeData.about && homeData.about.title) {
+                    aboutTitle.textContent = homeData.about.title;
+                }
+                if (aboutDescription && homeData.about && homeData.about.description) {
+                    aboutDescription.textContent = homeData.about.description;
+                }
+                
+                // Services section
+                const servicesContainer = document.getElementById('services-container');
+                if (servicesContainer && homeData.services && homeData.services.length > 0) {
+                    servicesContainer.innerHTML = '';
+                    homeData.services.forEach(service => {
+                        const serviceElement = document.createElement('div');
+                        serviceElement.className = 'service-card';
+                        serviceElement.innerHTML = `
+                            <div class="service-icon">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <h3>${service.title}</h3>
+                            <p>${service.description}</p>
+                        `;
+                        servicesContainer.appendChild(serviceElement);
+                    });
+                }
+                
+                // Footer
+                const footerCopyright = document.getElementById('footer-copyright');
+                const footerContact = document.getElementById('footer-contact');
+                
+                if (footerCopyright && homeData.footer && homeData.footer.copyright) {
+                    footerCopyright.textContent = homeData.footer.copyright;
+                }
+                if (footerContact && homeData.footer && homeData.footer.contact) {
+                    footerContact.textContent = homeData.footer.contact;
+                }
+            }
+            
+            // Preencher galeria
+            if (typeof galleryItems !== 'undefined') {
+                const galleryContainer = document.getElementById('gallery-container');
+                if (galleryContainer && galleryItems.length > 0) {
+                    galleryContainer.innerHTML = '';
+                    galleryItems.forEach(item => {
+                        const galleryItem = document.createElement('div');
+                        galleryItem.className = 'gallery-item';
+                        galleryItem.innerHTML = `
+                            <img src="${item.src}" alt="${item.caption}" loading="lazy">
+                            <div class="gallery-overlay">
+                                <p>${item.caption}</p>
+                            </div>
+                        `;
+                        galleryContainer.appendChild(galleryItem);
+                    });
+                }
+            }
+            
+            // Preencher menu
+            if (typeof menuItems !== 'undefined') {
+                const menuContainer = document.getElementById('menu-container');
+                if (menuContainer && menuItems.length > 0) {
+                    menuContainer.innerHTML = '';
+                    menuItems.forEach(category => {
+                        // Cabeçalho da categoria
+                        const categoryHeader = document.createElement('div');
+                        categoryHeader.className = 'menu-category-header';
+                        categoryHeader.innerHTML = `<h3>${category.name}</h3>`;
+                        menuContainer.appendChild(categoryHeader);
+                        
+                        // Itens da categoria
+                        category.items.forEach(item => {
+                            const menuItem = document.createElement('div');
+                            menuItem.className = 'menu-item';
+                            menuItem.setAttribute('data-category', category.name.toLowerCase());
+                            menuItem.innerHTML = `
+                                <div class="menu-item-content">
+                                    <h4>${item.name}</h4>
+                                    <p>${item.description || ''}</p>
+                                </div>
+                                <div class="menu-item-price">
+                                    <span>${item.price} €</span>
+                                </div>
+                            `;
+                            menuContainer.appendChild(menuItem);
+                        });
+                    });
+                }
+            }
+            
+            // Ativar tabs do menu
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const menuItems = document.querySelectorAll('.menu-item');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remover active de todos os botões
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    // Adicionar active ao botão clicado
+                    this.classList.add('active');
+                    
+                    const category = this.getAttribute('data-category');
+                    
+                    // Filtrar itens do menu
+                    menuItems.forEach(item => {
+                        if (category === 'all' || item.getAttribute('data-category') === category) {
+                            item.style.display = 'flex';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+            
+            // Menu mobile
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            
+            if (hamburger && navMenu) {
+                hamburger.addEventListener('click', function() {
+                    hamburger.classList.toggle('active');
+                    navMenu.classList.toggle('active');
+                });
+                
+                // Fechar menu ao clicar em um link
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', function() {
+                        hamburger.classList.remove('active');
+                        navMenu.classList.remove('active');
+                    });
+                });
+            }
+            
+            // Smooth scroll para links âncora
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Formulário de contato
+            const contactForm = document.getElementById('contactForm');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    // Simular envio
+                    alert('Obrigado pela sua mensagem! Entraremos em contato em breve.');
+                    this.reset();
+                });
+            }
+            
+            // Adicionar classe active ao header durante scroll
+            window.addEventListener('scroll', function() {
+                const header = document.querySelector('.header');
+                if (window.scrollY > 100) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+                
+                // Ativar link ativo na navegação
+                const sections = document.querySelectorAll('section');
+                const navLinks = document.querySelectorAll('.nav-link');
+                
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (scrollY >= sectionTop - 200) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

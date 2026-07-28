@@ -1,0 +1,10 @@
+{
+  "ignore": [
+    "data/*",
+    "temp/*",
+    "logs/*",
+    "backups/*",
+    "public/js/*-data.js"
+  ],
+  "ext": "js,mjs,cjs,json,html,css"
+}
