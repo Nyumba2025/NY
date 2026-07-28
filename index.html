@@ -189,26 +189,29 @@
 <body>
     <div id="root"></div>
 
+    <script src="nyumba-data.js?v=20260728"></script>
     <script>
         const e = React.createElement;
         const { useState, useEffect, useMemo, useCallback } = React;
 
         const MOZ_HOLIDAYS = ["01-01", "02-03", "04-07", "05-01", "06-25", "09-07", "09-25", "10-04", "12-25"];
 
+        const _H = window.NYUMBA_HOME || {};
+
         const TRANSLATIONS = {
             pt: {
                 statusOpen: "ABERTO", statusClosed: "FECHADO",
                 timeLeft: "Faltam", toClose: "p/ fechar", toOpen: "p/ abrir",
-                conceptTitle: "O CONCEITO",
-                conceptText: "Há espaços onde se come. E depois há o Nyumba Food — Concept, onde cada prato parece ter sido criado para impressionar. Instalado no ambiente calmo e encantador da FEIMA, este quiosque transforma cada refeição numa viagem bem guiada.\n\nO Menu é uma celebração de fronteiras gastronómicas inteligentemente atravessadas: a cozinha moçambicana no seu esplendor e a herança portuguesa tratada com respeito e criatividade.",
-                socialCallTitle: "A NOSSA CASA É A SUA",
-                socialCallText: "A sua opinião ajuda-nos a crescer! Siga-nos e, por favor, deixe a sua avaliação no Google Maps e no TripAdvisor. A sua interação é o nosso ingrediente secreto.",
+                conceptTitle: _H.conceptTitle || "O CONCEITO",
+                conceptText: _H.conceptText || "Há espaços onde se come. E depois há o Nyumba Food — Concept, onde cada prato parece ter sido criado para impressionar. Instalado no ambiente calmo e encantador da FEIMA, este quiosque transforma cada refeição numa viagem bem guiada.\n\nO Menu é uma celebração de fronteiras gastronómicas inteligentemente atravessadas: a cozinha moçambicana no seu esplendor e a herança portuguesa tratada com respeito e criatividade.",
+                socialCallTitle: _H.socialCallTitle || "A NOSSA CASA É A SUA",
+                socialCallText: _H.socialCallText || "A sua opinião ajuda-nos a crescer! Siga-nos e, por favor, deixe a sua avaliação no Google Maps e no TripAdvisor. A sua interação é o nosso ingrediente secreto.",
                 reviewGoogle: "AVALIAR NO GOOGLE MAPS",
                 orderBtn: "PEDIR VIA WHATSAPP", weeklyBtn: "MENU SEMANAL", alacarteBtn: "À LA CARTE",
-                location: "FEIMA - MAPUTO", address: "Av. Mártires da Machava",
-                hours: "HORÁRIO", hoursDetail: "Aberto todos os dias\n09:00 – 22:00",
+                location: _H.location || "FEIMA - MAPUTO", address: _H.address || "Av. Mártires da Machava",
+                hours: _H.hours || "HORÁRIO", hoursDetail: _H.hoursDetail || "Aberto todos os dias\n09:00 – 22:00",
                 phoneLabel: "TELEFONE", emailLabel: "EMAIL",
-                footer: "Nyumba Food Concept © 2026 | José Freire • Criação",
+                footer: _H.footer || "Nyumba Food Concept © 2026 | José Freire • Criação",
                 name: "O teu nome *", phone: "Contacto com WhatsApp *", date: "Data do Pedido", time: "Hora",
                 addressLabel: "Morada de entrega (OBRIGATÓRIO) *",
                 notesGenericLabel: "Notas e Observações",
@@ -268,7 +271,7 @@
             }
         };
 
-        const MENU_DATA = {
+        const MENU_DATA = window.NYUMBA_MENU || {
             1: { pt: "Segunda", en: "Monday", sopa: { pt: "Creme de Cenoura", en: "Carrot Cream", p: "180MT" }, pratos: [{ pt: "Costeleta de Porco", en: "Pork Chop", p: "500MT", d_pt: "Grelhada com arroz e batata frita", d_en: "Grilled with rice and fries" }, { pt: "Língua de Vaca", en: "Beef Tongue", p: "500MT", d_pt: "Estufada com puré de batata", d_en: "Braised with mashed potatoes" }], sobremesa: { pt: "Salada de Fruta", en: "Fruit Salad", p: "150MT" } },
             2: { pt: "Terça", en: "Tuesday", sopa: { pt: "Caldo Verde", en: "Green Broth", p: "180MT" }, pratos: [{ pt: "Bife à Cerveja", en: "Beer Steak", p: "500MT", d_pt: "Com batata frita e ovo", d_en: "With fries and egg" }, { pt: "Pescadinha Frita", en: "Fried Whiting", p: "400MT", d_pt: "Com arroz de feijão", d_en: "With bean rice" }], sobremesa: { pt: "Pudim", en: "Caramel Pudding", p: "180MT" } },
             3: { pt: "Quarta", en: "Wednesday", sopa: { pt: "Sopa de Mandioca", en: "Cassava Soup", p: "150MT" }, pratos: [{ pt: "Posta de Peixe", en: "Fish Steak", p: "500MT", d_pt: "Grelhada com legumes", d_en: "Grilled with vegetables" }, { pt: "Arroz de Pato", en: "Duck Rice", p: "500MT", d_pt: "Tradicional no forno com chouriço", d_en: "Traditional oven-baked with chorizo" }], sobremesa: { pt: "Bolo de Cenoura", en: "Carrot Cake", p: "250MT" } },
@@ -276,7 +279,7 @@
             5: { pt: "Sexta", en: "Friday", sopa: { pt: "Creme de Abóbora", en: "Pumpkin Cream", p: "180MT" }, pratos: [{ pt: "Matapa c/ Caranguejo", en: "Matapa w/ Crab", p: "350MT", d_pt: "Prato tradicional com arroz branco", d_en: "Traditional dish with white rice" }, { pt: "Pernil no Forno", en: "Roasted Pork Shank", p: "750MT", d_pt: "Assado lentamente com guarnição", d_en: "Slow roasted with sides" }], sobremesa: { pt: "Doce de Mandioca", en: "Cassava Sweet", p: "180MT" } }
         };
 
-        const ALACARTE_DATA = {
+        const ALACARTE_DATA = window.NYUMBA_ALACARTE || {
             appetizers: [
                 { pt: "Rabada", en: "Oxtail", p: "350MT", d_pt: "Estufada tradicional", d_en: "Traditional stew" },
                 { pt: "Amêijoas à NYUMBA", en: "Clams NYUMBA", p: "400MT", d_pt: "Com molho especial da casa", d_en: "With house sauce" },

@@ -93,10 +93,12 @@ class GitService {
 
     async getHistory(limit = 20, page = 1) {
         try {
-            const log = await git.log({
-                maxCount: limit,
-                skip: (page - 1) * limit
-            });
+            const skipCount = (page - 1) * limit;
+            // Usar array de argumentos para garantir formato correto (--skip=N, não skip=N)
+            const logArgs = [`--max-count=${limit}`];
+            if (skipCount > 0) logArgs.push(`--skip=${skipCount}`);
+
+            const log = await git.log(logArgs);
             
             return {
                 commits: log.all.map(commit => ({

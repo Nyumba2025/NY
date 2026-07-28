@@ -1,25 +1,15 @@
 {
-  "hero": {
-    "title": "Bem-vindo ao Restaurante Nyumba",
-    "subtitle": "Autêntica cozinha moçambicana em Lisboa",
-    "buttonText": "Ver Menu"
-  },
-  "about": {
-    "title": "A Nossa História",
-    "description": "O Nyumba nasceu da paixão pela culinária tradicional moçambicana..."
-  },
-  "services": [
-    {
-      "title": "Comida Tradicional",
-      "description": "Pratos autênticos preparados com ingredientes frescos"
-    },
-    {
-      "title": "Ambiente Acolhedor",
-      "description": "Um espaço familiar e confortável para todas as ocasiões"
-    }
-  ],
-  "footer": {
-    "copyright": "© 2024 Restaurante Nyumba. Todos os direitos reservados.",
-    "contact": "Contacte-nos: +351 123 456 789 | info@nyumba.com"
-  }
+  "conceptTitle": "O CONCEITO",
+  "conceptText": "Há espaços onde se come. E depois há o Nyumba Food — Concept, onde cada prato parece ter sido criado para impressionar. Instalado no ambiente calmo e encantador da FEIMA, este quiosque transforma cada refeição numa viagem bem guiada.\n\nO Menu é uma celebração de fronteiras gastronómicas inteligentemente atravessadas: a cozinha moçambicana no seu esplendor e a herança portuguesa tratada com respeito e criatividade.",
+  "conceptTitleEn": "THE CONCEPT",
+  "conceptTextEn": "There are places where you eat. And then there is Nyumba Food — Concept, where every dish seems to have been created to impress. Located in the calm environment of FEIMA, this kiosk transforms every meal into a well-guided journey.\n\nThe Menu is a celebration of intelligently crossed gastronomic borders: Mozambican cuisine in its splendor and Portuguese heritage treated with respect and creativity.",
+  "socialCallTitle": "A NOSSA CASA É A SUA",
+  "socialCallText": "A sua opinião ajuda-nos a crescer! Siga-nos e, por favor, deixe a sua avaliação no Google Maps e no TripAdvisor. A sua interação é o nosso ingrediente secreto.",
+  "location": "FEIMA - MAPUTO",
+  "address": "Av. Mártires da Machava",
+  "hours": "HORÁRIO",
+  "hoursDetail": "Aberto todos os dias\n09:00 – 22:00",
+  "phone": "+258 84 123 4567",
+  "email": "info@nyumbafood.com",
+  "footer": "Nyumba Food Concept © 2026 | José Freire • Criação"
 }

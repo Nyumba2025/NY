@@ -84,6 +84,14 @@ app.use(session({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Desativar cache do browser para garantir carregamento dos ficheiros atualizados
+app.use((req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+});
+
 // Ficheiros estáticos
 // Dentro do .exe: public/ fica copiado ao lado do NyumbaAdmin.exe
 // Em dev: dentro de public/ no projeto
@@ -91,7 +99,7 @@ const exeDir = process.env.APP_BASE_PATH || path.join(__dirname, '..');
 const publicDir  = path.join(exeDir, 'public');
 const uploadsDir = path.join(exeDir, 'uploads');
 
-app.use(express.static(publicDir));
+app.use(express.static(publicDir, { etag: false, maxAge: 0 }));
 app.use('/uploads', express.static(uploadsDir));
 
 

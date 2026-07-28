@@ -1,3 +1,47 @@
 {
-  "categories": []
+  "1": {
+    "pt": "Segunda", "en": "Monday",
+    "sopa": { "pt": "Creme de Cenoura", "en": "Carrot Cream", "p": "180MT" },
+    "pratos": [
+      { "pt": "Costeleta de Porco", "en": "Pork Chop", "p": "500MT", "d_pt": "Grelhada com arroz e batata frita", "d_en": "Grilled with rice and fries" },
+      { "pt": "Língua de Vaca", "en": "Beef Tongue", "p": "500MT", "d_pt": "Estufada com puré de batata", "d_en": "Braised with mashed potatoes" }
+    ],
+    "sobremesa": { "pt": "Salada de Fruta", "en": "Fruit Salad", "p": "150MT" }
+  },
+  "2": {
+    "pt": "Terça", "en": "Tuesday",
+    "sopa": { "pt": "Caldo Verde", "en": "Green Broth", "p": "180MT" },
+    "pratos": [
+      { "pt": "Bife à Cerveja", "en": "Beer Steak", "p": "500MT", "d_pt": "Com batata frita e ovo", "d_en": "With fries and egg" },
+      { "pt": "Pescadinha Frita", "en": "Fried Whiting", "p": "400MT", "d_pt": "Com arroz de feijão", "d_en": "With bean rice" }
+    ],
+    "sobremesa": { "pt": "Pudim", "en": "Caramel Pudding", "p": "180MT" }
+  },
+  "3": {
+    "pt": "Quarta", "en": "Wednesday",
+    "sopa": { "pt": "Sopa de Mandioca", "en": "Cassava Soup", "p": "150MT" },
+    "pratos": [
+      { "pt": "Posta de Peixe", "en": "Fish Steak", "p": "500MT", "d_pt": "Grelhada com legumes", "d_en": "Grilled with vegetables" },
+      { "pt": "Arroz de Pato", "en": "Duck Rice", "p": "500MT", "d_pt": "Tradicional no forno com chouriço", "d_en": "Traditional oven-baked with chorizo" }
+    ],
+    "sobremesa": { "pt": "Bolo de Cenoura", "en": "Carrot Cake", "p": "250MT" }
+  },
+  "4": {
+    "pt": "Quinta", "en": "Thursday",
+    "sopa": { "pt": "Sopa de Feijão", "en": "Bean Soup", "p": "150MT" },
+    "pratos": [
+      { "pt": "Polvo a Lagareiro", "en": "Octopus Lagareiro", "p": "750MT", "d_pt": "Com batata a murro e azeite", "d_en": "With punched potatoes and olive oil" },
+      { "pt": "Cabrito no Forno", "en": "Roasted Goat", "p": "750MT", "d_pt": "Com batata assada e arroz", "d_en": "With roasted potatoes and rice" }
+    ],
+    "sobremesa": { "pt": "Arroz-Doce", "en": "Rice Pudding", "p": "180MT" }
+  },
+  "5": {
+    "pt": "Sexta", "en": "Friday",
+    "sopa": { "pt": "Creme de Abóbora", "en": "Pumpkin Cream", "p": "180MT" },
+    "pratos": [
+      { "pt": "Matapa c/ Caranguejo", "en": "Matapa w/ Crab", "p": "350MT", "d_pt": "Prato tradicional com arroz branco", "d_en": "Traditional dish with white rice" },
+      { "pt": "Pernil no Forno", "en": "Roasted Pork Shank", "p": "750MT", "d_pt": "Assado lentamente com guarnição", "d_en": "Slow roasted with sides" }
+    ],
+    "sobremesa": { "pt": "Doce de Mandioca", "en": "Cassava Sweet", "p": "180MT" }
+  }
 }

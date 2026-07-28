@@ -77,41 +77,40 @@ async function initializeFiles() {
     await initializeFiles();
 })();
 
-// Helper para atualizar arquivos JS
-async function updateJsFile(dataType, data) {
-    let jsContent = '';
-    
-    switch (dataType) {
-        case 'home':
-            jsContent = `var homeData = ${JSON.stringify(data, null, 2)};`;
-            break;
-        case 'gallery':
-            jsContent = `var galleryItems = ${JSON.stringify(data.items || [], null, 2)};`;
-            break;
-        case 'menu':
-            jsContent = `var menuItems = ${JSON.stringify(data.categories || [], null, 2)};`;
-            break;
+// Helper para gerar o bundle nyumba-data.js consumido pelo site público (index.html)
+async function buildNyumbaDataBundle() {
+    try {
+        const homePath = path.join(dataDir, 'home.json');
+        const menuPath = path.join(dataDir, 'menu.json');
+        const alacartePath = path.join(dataDir, 'alacarte.json');
+
+        const homeData = JSON.parse(await fs.readFile(homePath, 'utf8').catch(() => '{}'));
+        const menuData = JSON.parse(await fs.readFile(menuPath, 'utf8').catch(() => '{}'));
+        const alacarteData = JSON.parse(await fs.readFile(alacartePath, 'utf8').catch(() => '{}'));
+
+        const bundleContent = `window.NYUMBA_HOME = ${JSON.stringify(homeData, null, 2)};\n` +
+            `window.NYUMBA_MENU = ${JSON.stringify(menuData, null, 2)};\n` +
+            `window.NYUMBA_ALACARTE = ${JSON.stringify(alacarteData, null, 2)};\n`;
+
+        const rootJs = path.join(_appBase, 'nyumba-data.js');
+        const publicJs = path.join(_appBase, 'public', 'nyumba-data.js');
+
+        await fs.writeFile(rootJs, bundleContent, 'utf8');
+        await fs.writeFile(publicJs, bundleContent, 'utf8');
+    } catch(e) {
+        logger.error('Erro ao gerar nyumba-data.js:', e);
     }
-    
-    const jsPath = path.join(jsDir, `${dataType}-data.js`);
-    await fs.writeFile(jsPath, jsContent);
 }
 
-// ========== HOME ==========
+// ========== HOME (Conceito & Contactos) ==========
 router.get('/home', async (req, res) => {
     try {
         const homePath = path.join(dataDir, 'home.json');
-        let data = '{}';
-        try {
-            data = await fs.readFile(homePath, 'utf8');
-        } catch (e) {
-            // Arquivo no existe na primeira execuo, retorna default
-            data = JSON.stringify({ hero: { title: '', subtitle: '' }, about: { title: '', text: '' }, features: [], testimonials: [] });
-        }
+        const data = await fs.readFile(homePath, 'utf8').catch(() => '{}');
         res.json(JSON.parse(data));
     } catch (error) {
         logger.error('Erro ao ler home:', error);
-        res.status(500).json({ error: 'Erro ao ler dados da página principal' });
+        res.status(500).json({ error: 'Erro ao ler dados do conceito' });
     }
 });
 
@@ -120,24 +119,20 @@ router.post('/home', async (req, res) => {
         const homeData = req.body;
         const homePath = path.join(dataDir, 'home.json');
         
-        // Criar backup antes de salvar
         await backupService.createBackup('home');
-        
-        // Salvar dados
         await fs.writeFile(homePath, JSON.stringify(homeData, null, 2));
-        await updateJsFile('home', homeData);
+        await buildNyumbaDataBundle();
         
-        // Commit no Git
-        await gitService.commit('Atualização da página principal', req.session.user.username);
+        await gitService.commit('Atualização do Conceito e Informações Rápidas', req.session.user.username);
         
         logger.info(`Home atualizado por ${req.session.user.username}`);
         res.json({ 
             success: true, 
-            message: 'Página principal salva com sucesso!' 
+            message: 'Informações do Conceito salvas com sucesso!' 
         });
     } catch (error) {
         logger.error('Erro ao salvar home:', error);
-        res.status(500).json({ error: 'Erro ao salvar página principal' });
+        res.status(500).json({ error: 'Erro ao salvar informações do conceito' });
     }
 });
 
@@ -145,12 +140,7 @@ router.post('/home', async (req, res) => {
 router.get('/gallery', async (req, res) => {
     try {
         const galleryPath = path.join(dataDir, 'gallery.json');
-        let data = '{"items":[]}';
-        try {
-            data = await fs.readFile(galleryPath, 'utf8');
-        } catch (e) {
-            // Arquivo no existe na primeira execuo
-        }
+        const data = await fs.readFile(galleryPath, 'utf8').catch(() => '{"items":[]}');
         res.json(JSON.parse(data));
     } catch (error) {
         logger.error('Erro ao ler galeria:', error);
@@ -165,8 +155,7 @@ router.post('/gallery', async (req, res) => {
         
         await backupService.createBackup('gallery');
         await fs.writeFile(galleryPath, JSON.stringify(galleryData, null, 2));
-        await updateJsFile('gallery', galleryData);
-        
+        await buildNyumbaDataBundle();
         await gitService.commit('Atualização da galeria', req.session.user.username);
         
         logger.info(`Galeria atualizada por ${req.session.user.username}`);
@@ -180,20 +169,15 @@ router.post('/gallery', async (req, res) => {
     }
 });
 
-// ========== MENU ==========
+// ========== MENU SEMANAL ==========
 router.get('/menu', async (req, res) => {
     try {
         const menuPath = path.join(dataDir, 'menu.json');
-        let data = '{"categories":[]}';
-        try {
-            data = await fs.readFile(menuPath, 'utf8');
-        } catch (e) {
-            // Arquivo no existe na primeira execuo
-        }
+        const data = await fs.readFile(menuPath, 'utf8').catch(() => '{}');
         res.json(JSON.parse(data));
     } catch (error) {
         logger.error('Erro ao ler menu:', error);
-        res.status(500).json({ error: 'Erro ao ler dados do menu' });
+        res.status(500).json({ error: 'Erro ao ler dados do menu semanal' });
     }
 });
 
@@ -204,18 +188,50 @@ router.post('/menu', async (req, res) => {
         
         await backupService.createBackup('menu');
         await fs.writeFile(menuPath, JSON.stringify(menuData, null, 2));
-        await updateJsFile('menu', menuData);
+        await buildNyumbaDataBundle();
+        await gitService.commit('Atualização do Menu Semanal', req.session.user.username);
         
-        await gitService.commit('Atualização do menu', req.session.user.username);
-        
-        logger.info(`Menu atualizado por ${req.session.user.username}`);
+        logger.info(`Menu semanal atualizado por ${req.session.user.username}`);
         res.json({ 
             success: true, 
-            message: 'Menu salvo com sucesso!' 
+            message: 'Menu semanal salvo com sucesso!' 
         });
     } catch (error) {
         logger.error('Erro ao salvar menu:', error);
-        res.status(500).json({ error: 'Erro ao salvar menu' });
+        res.status(500).json({ error: 'Erro ao salvar menu semanal' });
+    }
+});
+
+// ========== MENU À LA CARTE ==========
+router.get('/alacarte', async (req, res) => {
+    try {
+        const alacartePath = path.join(dataDir, 'alacarte.json');
+        const data = await fs.readFile(alacartePath, 'utf8').catch(() => '{}');
+        res.json(JSON.parse(data));
+    } catch (error) {
+        logger.error('Erro ao ler alacarte:', error);
+        res.status(500).json({ error: 'Erro ao ler dados do menu à la carte' });
+    }
+});
+
+router.post('/alacarte', async (req, res) => {
+    try {
+        const alacarteData = req.body;
+        const alacartePath = path.join(dataDir, 'alacarte.json');
+        
+        await backupService.createBackup('alacarte');
+        await fs.writeFile(alacartePath, JSON.stringify(alacarteData, null, 2));
+        await buildNyumbaDataBundle();
+        await gitService.commit('Atualização do Menu À La Carte', req.session.user.username);
+        
+        logger.info(`Menu à la carte atualizado por ${req.session.user.username}`);
+        res.json({ 
+            success: true, 
+            message: 'Menu À La Carte salvo com sucesso!' 
+        });
+    } catch (error) {
+        logger.error('Erro ao salvar alacarte:', error);
+        res.status(500).json({ error: 'Erro ao salvar menu à la carte' });
     }
 });
 

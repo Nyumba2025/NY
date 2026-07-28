@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="">
     <title>Nyumba Admin - Gestão Completa</title>
     <meta name="description" content="Painel de administração do Restaurante Nyumba - Gestão de conteúdos, galeria, menu e backups.">
-    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/admin.css?v=20260728_v2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -19,7 +19,7 @@
         <div class="user-info">
             <span id="username"></span>
             <div class="user-dropdown">
-                <button class="user-btn" onclick="toggleDropdown()">
+                <button class="user-btn" type="button" onclick="toggleDropdown(); return false;">
                     <i class="fas fa-user-circle"></i>
                     <i class="fas fa-chevron-down"></i>
                 </button>
@@ -42,43 +42,43 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-menu">
-            <a href="#" class="menu-item active" onclick="openSection('dashboard')">
+            <a href="#" data-section="dashboard" class="menu-item active" onclick="openSection('dashboard'); return false;">
                 <i class="fas fa-tachometer-alt"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="#" class="menu-item" onclick="openSection('principal')">
+            <a href="#" data-section="principal" class="menu-item" onclick="openSection('principal'); return false;">
                 <i class="fas fa-home"></i>
                 <span>Página Principal</span>
             </a>
-            <a href="#" class="menu-item" onclick="openSection('gallery')">
+            <a href="#" data-section="gallery" class="menu-item" onclick="openSection('gallery'); return false;">
                 <i class="fas fa-images"></i>
                 <span>Galeria</span>
             </a>
-            <a href="#" class="menu-item" onclick="openSection('menu')">
+            <a href="#" data-section="menu" class="menu-item" onclick="openSection('menu'); return false;">
                 <i class="fas fa-utensils"></i>
                 <span>Menu</span>
             </a>
-            <a href="#" class="menu-item" onclick="openSection('preview')">
+            <a href="#" data-section="preview" class="menu-item" onclick="openSection('preview'); return false;">
                 <i class="fas fa-eye"></i>
                 <span>Preview</span>
             </a>
-            <a href="#" class="menu-item" onclick="openSection('history')">
+            <a href="#" data-section="history" class="menu-item" onclick="openSection('history'); return false;">
                 <i class="fas fa-history"></i>
                 <span>Histórico</span>
             </a>
-            <a href="#" class="menu-item" onclick="openSection('backup')">
+            <a href="#" data-section="backup" class="menu-item" onclick="openSection('backup'); return false;">
                 <i class="fas fa-database"></i>
                 <span>Backup</span>
             </a>
-            <a href="#" class="menu-item" onclick="openSection('deploy')" id="deployMenuItem">
+            <a href="#" data-section="deploy" class="menu-item" onclick="openSection('deploy'); return false;" id="deployMenuItem">
                 <i class="fas fa-rocket"></i>
                 <span>Deploy</span>
             </a>
-            <a href="#" class="menu-item" onclick="openSection('users')" id="usersMenuItem">
+            <a href="#" data-section="users" class="menu-item" onclick="openSection('users'); return false;" id="usersMenuItem">
                 <i class="fas fa-users"></i>
                 <span>Utilizadores</span>
             </a>
-            <a href="#" class="menu-item" onclick="openSection('settings')">
+            <a href="#" data-section="settings" class="menu-item" onclick="openSection('settings'); return false;">
                 <i class="fas fa-cog"></i>
                 <span>Configurações</span>
             </a>
@@ -161,19 +161,19 @@
             <div class="quick-actions">
                 <h2><i class="fas fa-bolt"></i> Ações Rápidas</h2>
                 <div class="actions-grid">
-                    <button class="action-btn" onclick="openSection('principal')">
+                    <button type="button" class="action-btn" onclick="openSection('principal'); return false;">
                         <i class="fas fa-edit"></i>
                         <span>Editar Página</span>
                     </button>
-                    <button class="action-btn" onclick="createPreview()">
+                    <button type="button" class="action-btn" onclick="createPreview(); return false;">
                         <i class="fas fa-eye"></i>
                         <span>Visualizar Site</span>
                     </button>
-                    <button class="action-btn" onclick="createBackup()">
+                    <button type="button" class="action-btn" onclick="createBackup(); return false;">
                         <i class="fas fa-save"></i>
                         <span>Criar Backup</span>
                     </button>
-                    <button class="action-btn" onclick="checkStatus()">
+                    <button type="button" class="action-btn" onclick="checkStatus(); return false;">
                         <i class="fas fa-heartbeat"></i>
                         <span>Verificar Status</span>
                     </button>
@@ -184,71 +184,80 @@
         <!-- ==================== PÁGINA PRINCIPAL ==================== -->
         <div id="principal" class="content-section">
             <div class="section-header">
-                <h1><i class="fas fa-home"></i> Página Principal</h1>
-                <p>Edite o conteúdo da página principal do restaurante</p>
+                <h1><i class="fas fa-home"></i> O Conceito & Informações Rápidas</h1>
+                <p>Edite os textos do Conceito, Apelo Social, Localização e Horários do Nyumba Food Concept</p>
             </div>
 
             <div class="form-container">
-                <!-- Hero Section -->
+                <!-- O Conceito -->
                 <div class="form-section">
-                    <h3><i class="fas fa-star"></i> Secção Hero</h3>
+                    <h3><i class="fas fa-star"></i> O Conceito</h3>
                     <div class="form-group">
-                        <label for="hero-title">Título Principal</label>
-                        <input type="text" id="hero-title" class="form-control" placeholder="Ex: Bem-vindo ao Restaurante Nyumba">
+                        <label for="concept-title">Título (Português)</label>
+                        <input type="text" id="concept-title" class="form-control" placeholder="Ex: O CONCEITO">
                     </div>
                     <div class="form-group">
-                        <label for="hero-subtitle">Subtítulo</label>
-                        <input type="text" id="hero-subtitle" class="form-control" placeholder="Ex: Autêntica cozinha moçambicana em Lisboa">
+                        <label for="concept-text">Texto (Português)</label>
+                        <textarea id="concept-text" class="form-control" rows="5" placeholder="Descrição do conceito em português..."></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="hero-button">Texto do Botão</label>
-                        <input type="text" id="hero-button" class="form-control" placeholder="Ex: Ver Menu">
+                        <label for="concept-text-en">Texto (Inglês)</label>
+                        <textarea id="concept-text-en" class="form-control" rows="4" placeholder="Descrição do conceito em inglês..."></textarea>
                     </div>
                 </div>
 
-                <!-- About Section -->
+                <!-- Apelo Social -->
                 <div class="form-section">
-                    <h3><i class="fas fa-info-circle"></i> Secção Sobre Nós</h3>
+                    <h3><i class="fas fa-comments"></i> Apelo Social (Avaliações)</h3>
                     <div class="form-group">
-                        <label for="about-title">Título</label>
-                        <input type="text" id="about-title" class="form-control" placeholder="Ex: A Nossa História">
+                        <label for="social-title">Título</label>
+                        <input type="text" id="social-title" class="form-control" placeholder="Ex: A NOSSA CASA É A SUA">
                     </div>
                     <div class="form-group">
-                        <label for="about-description">Descrição</label>
-                        <textarea id="about-description" class="form-control" rows="5" placeholder="Conte a história do restaurante..."></textarea>
+                        <label for="social-text">Texto de Apelo</label>
+                        <textarea id="social-text" class="form-control" rows="3" placeholder="Mensagem a pedir avaliação no Google Maps/TripAdvisor..."></textarea>
                     </div>
                 </div>
 
-                <!-- Services Section -->
+                <!-- Localização & Horários -->
                 <div class="form-section">
-                    <h3><i class="fas fa-concierge-bell"></i> Serviços</h3>
-                    <div id="services-container"></div>
-                    <button class="btn btn-outline" onclick="addService()" style="margin-top: 15px;">
-                        <i class="fas fa-plus"></i> Adicionar Serviço
-                    </button>
-                </div>
-
-                <!-- Footer Section -->
-                <div class="form-section">
-                    <h3><i class="fas fa-footer"></i> Rodapé</h3>
+                    <h3><i class="fas fa-map-marker-alt"></i> Localização & Horários</h3>
                     <div class="form-group">
-                        <label for="footer-copyright">Copyright</label>
-                        <input type="text" id="footer-copyright" class="form-control" placeholder="Ex: © 2024 Restaurante Nyumba">
+                        <label for="info-location">Localização Principal</label>
+                        <input type="text" id="info-location" class="form-control" placeholder="Ex: FEIMA - MAPUTO">
                     </div>
                     <div class="form-group">
-                        <label for="footer-contact">Contacto</label>
-                        <input type="text" id="footer-contact" class="form-control" placeholder="Ex: +351 123 456 789">
+                        <label for="info-address">Morada / Endereço</label>
+                        <input type="text" id="info-address" class="form-control" placeholder="Ex: Av. Mártires da Machava">
+                    </div>
+                    <div class="form-group">
+                        <label for="info-hours">Horário de Funcionamento</label>
+                        <textarea id="info-hours" class="form-control" rows="2" placeholder="Ex: Aberto todos os dias&#10;09:00 – 22:00"></textarea>
+                    </div>
+                </div>
+
+                <!-- Contactos & Rodapé -->
+                <div class="form-section">
+                    <h3><i class="fas fa-envelope"></i> Contactos & Rodapé</h3>
+                    <div class="form-group">
+                        <label for="info-phone">Telefone / WhatsApp</label>
+                        <input type="text" id="info-phone" class="form-control" placeholder="Ex: +258 84 123 4567">
+                    </div>
+                    <div class="form-group">
+                        <label for="info-email">Email</label>
+                        <input type="text" id="info-email" class="form-control" placeholder="Ex: info@nyumbafood.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="info-footer">Texto do Rodapé</label>
+                        <input type="text" id="info-footer" class="form-control" placeholder="Ex: Nyumba Food Concept © 2026 | José Freire • Criação">
                     </div>
                 </div>
 
                 <div class="form-actions">
-                    <button class="btn btn-secondary" onclick="resetHomeForm()">
+                    <button type="button" class="btn btn-secondary" onclick="resetHomeForm(); return false;">
                         <i class="fas fa-undo"></i> Repor
                     </button>
-                    <button class="btn btn-outline" onclick="previewHome()">
-                        <i class="fas fa-eye"></i> Pré-visualizar
-                    </button>
-                    <button class="btn btn-primary" onclick="saveHomeData()">
+                    <button type="button" class="btn btn-primary" onclick="saveHomeData(); return false;">
                         <i class="fas fa-save"></i> Guardar Alterações
                     </button>
                 </div>
@@ -627,236 +636,13 @@
     <div id="toastContainer" class="toast-container"></div>
 
     <!-- Scripts -->
-    <script src="js/admin.js"></script>
+    <script src="js/admin.js?v=20260728_v2"></script>
     <script>
-        // ==================== FUNÇÕES EXTRA DO ADMIN ==================== 
-
-        // Criar Preview (Dashboard)
-        function createPreview() {
-            window.open('/preview', '_blank');
-        }
-
-        // Criar Backup (Dashboard)
-        function createBackup() {
-            createManualBackup();
-        }
-
-        // Verificar Status (Dashboard)
-        async function checkStatus() {
-            try {
-                const response = await fetch('/api/admin/status');
-                const data = await response.json();
-                if (data.success) {
-                    const uptime = Math.floor(data.status.system.uptime / 60);
-                    showToast(`Sistema OK! Uptime: ${uptime} minutos`, 'success');
-                }
-            } catch (error) {
-                showToast('Erro ao verificar estado do sistema', 'error');
-            }
-        }
-
         // Preview Controls
-        function refreshPreview() {
-            const frame = document.getElementById('previewFrame');
-            const select = document.getElementById('previewType');
-            frame.src = select.value + '?t=' + Date.now();
-        }
-
-        function openPreviewInNewTab() {
-            const select = document.getElementById('previewType');
-            window.open(select.value, '_blank');
-        }
-
         document.getElementById('previewType')?.addEventListener('change', function() {
-            document.getElementById('previewFrame').src = this.value;
+            const frame = document.getElementById('previewFrame');
+            if (frame) frame.src = this.value;
         });
-
-        // Utilizadores
-        async function loadUsersData() {
-            try {
-                const response = await fetch('/api/auth/users');
-                const data = await response.json();
-
-                const tbody = document.getElementById('usersTableBody');
-                tbody.innerHTML = '';
-
-                if (!data.users || data.users.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Nenhum utilizador encontrado.</td></tr>';
-                    return;
-                }
-
-                data.users.forEach(user => {
-                    const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleString('pt') : 'Nunca';
-                    const roleLabels = { admin: 'Administrador', editor: 'Editor', viewer: 'Visualizador' };
-                    const statusBadge = user.active !== false
-                        ? '<span class="badge badge-success">Ativo</span>'
-                        : '<span class="badge badge-danger">Inativo</span>';
-
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><strong>${user.username}</strong>${user.fullName ? `<br><small>${user.fullName}</small>` : ''}</td>
-                        <td>${user.email || '-'}</td>
-                        <td><span class="badge">${roleLabels[user.role] || user.role}</span></td>
-                        <td>${statusBadge}</td>
-                        <td><small>${lastLogin}</small></td>
-                        <td>
-                            <button class="btn btn-sm btn-warning" onclick="resetUserPassword('${user.id || user.username}')">
-                                <i class="fas fa-key"></i>
-                            </button>
-                            ${user.username !== currentUser?.username ? `
-                            <button class="btn btn-sm btn-danger" onclick="deleteUser('${user.id || user.username}')">
-                                <i class="fas fa-trash"></i>
-                            </button>` : ''}
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            } catch (error) {
-                document.getElementById('usersTableBody').innerHTML =
-                    '<tr><td colspan="6" class="text-center">Erro ao carregar utilizadores.</td></tr>';
-            }
-        }
-
-        function showCreateUserModal() {
-            document.getElementById('newUserUsername').value = '';
-            document.getElementById('newUserEmail').value = '';
-            document.getElementById('newUserFullName').value = '';
-            document.getElementById('newUserPassword').value = '';
-            document.getElementById('newUserConfirmPassword').value = '';
-            document.getElementById('newUserRole').value = 'editor';
-            showModal('createUserModal');
-        }
-
-        async function createUser() {
-            const username = document.getElementById('newUserUsername').value.trim();
-            const email = document.getElementById('newUserEmail').value.trim();
-            const fullName = document.getElementById('newUserFullName').value.trim();
-            const password = document.getElementById('newUserPassword').value;
-            const confirmPassword = document.getElementById('newUserConfirmPassword').value;
-            const role = document.getElementById('newUserRole').value;
-
-            if (password !== confirmPassword) {
-                showToast('As senhas não coincidem', 'error');
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-Token': getCsrfToken()
-                    },
-                    body: JSON.stringify({ username, email, fullName, password, confirmPassword, role })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showToast('Utilizador criado com sucesso!', 'success');
-                    closeModal('createUserModal');
-                    loadUsersData();
-                } else {
-                    showToast(data.message || 'Erro ao criar utilizador', 'error');
-                }
-            } catch (error) {
-                showToast('Erro ao criar utilizador', 'error');
-            }
-        }
-
-        async function deleteUser(userId) {
-            if (!confirm('Eliminar este utilizador?')) return;
-
-            try {
-                const response = await fetch(`/api/auth/users/${userId}`, {
-                    method: 'DELETE',
-                    headers: { 'X-CSRF-Token': getCsrfToken() }
-                });
-                const data = await response.json();
-
-                if (data.success) {
-                    showToast('Utilizador eliminado!', 'success');
-                    loadUsersData();
-                } else {
-                    showToast(data.message || 'Erro ao eliminar utilizador', 'error');
-                }
-            } catch (error) {
-                showToast('Erro ao eliminar utilizador', 'error');
-            }
-        }
-
-        async function resetUserPassword(userId) {
-            const newPass = prompt('Nova senha para o utilizador (mínimo 8 caracteres):');
-            if (!newPass || newPass.length < 8) {
-                if (newPass !== null) showToast('Senha deve ter pelo menos 8 caracteres', 'error');
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/auth/users/${userId}/reset-password`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-Token': getCsrfToken()
-                    },
-                    body: JSON.stringify({ newPassword: newPass })
-                });
-                const data = await response.json();
-
-                if (data.success) {
-                    showToast('Senha reposta com sucesso!', 'success');
-                } else {
-                    showToast(data.message || 'Erro ao repor senha', 'error');
-                }
-            } catch (error) {
-                showToast('Erro ao repor senha', 'error');
-            }
-        }
-
-        // Configurações - Informações do sistema
-        async function loadSystemInfo() {
-            try {
-                const response = await fetch('/api/admin/status');
-                const data = await response.json();
-
-                if (data.success) {
-                    const status = data.status;
-                    const uptime = Math.floor(status.system.uptime);
-                    const hours = Math.floor(uptime / 3600);
-                    const minutes = Math.floor((uptime % 3600) / 60);
-                    const memMB = Math.round(status.system.memory.heapUsed / 1024 / 1024);
-
-                    document.getElementById('systemInfo').innerHTML = `
-                        <div class="backup-stats" style="margin-bottom: 0;">
-                            <div class="stat-item">
-                                <i class="fas fa-clock" style="color: #3498db;"></i>
-                                <div><h3>${hours}h ${minutes}m</h3><p>Uptime</p></div>
-                            </div>
-                            <div class="stat-item">
-                                <i class="fas fa-memory" style="color: #2ecc71;"></i>
-                                <div><h3>${memMB} MB</h3><p>Memória Usada</p></div>
-                            </div>
-                            <div class="stat-item">
-                                <i class="fab fa-node-js" style="color: #68a063;"></i>
-                                <div><h3>${status.system.nodeVersion}</h3><p>Node.js</p></div>
-                            </div>
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                document.getElementById('systemInfo').innerHTML = '<p>Erro ao carregar informações do sistema.</p>';
-            }
-        }
-
-        // Carregar dados quando a secção users ou settings for aberta
-        const _openSectionOrig = openSection;
-        // Patch openSection for extra sections
-        window.openSection = function(sectionId) {
-            _openSectionOrig(sectionId);
-            if (sectionId === 'users') loadUsersData();
-            if (sectionId === 'settings') loadSystemInfo();
-            if (sectionId === 'dashboard') loadDashboardData();
-        };
 
         // CSRF token - buscar ao inicializar
         (async function initCsrf() {
@@ -864,7 +650,8 @@
                 const resp = await fetch('/api/auth/csrf-token');
                 const data = await resp.json();
                 if (data.csrfToken) {
-                    document.querySelector('meta[name="csrf-token"]').content = data.csrfToken;
+                    const meta = document.querySelector('meta[name="csrf-token"]');
+                    if (meta) meta.content = data.csrfToken;
                 }
             } catch(e) { console.warn('Erro ao obter CSRF token'); }
         })();

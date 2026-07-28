@@ -1,0 +1,46 @@
+{
+  "appetizers": [
+    { "pt": "Rabada", "en": "Oxtail", "p": "350MT", "d_pt": "Estufada tradicional", "d_en": "Traditional stew" },
+    { "pt": "Amêijoas à NYUMBA", "en": "Clams NYUMBA", "p": "400MT", "d_pt": "Com molho especial da casa", "d_en": "With house sauce" },
+    { "pt": "Cabeça de Salmão", "en": "Salmon Head", "p": "350MT", "d_pt": "Grelhada no ponto", "d_en": "Perfectly grilled" },
+    { "pt": "Camarão Alinho", "en": "Shrimp Alinho", "p": "350MT", "d_pt": "Com alho e ervas aromáticas", "d_en": "Garlic and herbs" },
+    { "pt": "Chouriço", "en": "Chorizo", "p": "400MT", "d_pt": "Com batata e salada", "d_en": "Served with potatoes and salad" },
+    { "pt": "Tábua de 7 Queijos & Broa", "en": "7 Cheese Board", "p": "750MT", "d_pt": "Seleção premium com broa", "d_en": "Premium selection with bread" },
+    { "pt": "Dobradinha", "en": "Tripe Stew", "p": "350MT", "d_pt": "Tradicional e suculenta", "d_en": "Traditional and juicy" }
+  ],
+  "starter": [
+    { "pt": "Creme de Cenoura", "en": "Carrot Cream", "p": "150MT", "d_pt": "Nutritiva", "d_en": "Nutritious" },
+    { "pt": "Creme de Abóbora", "en": "Pumpkin Cream", "p": "180MT", "d_pt": "Suave", "d_en": "Smooth" },
+    { "pt": "Sopa de Mandioca", "en": "Cassava Soup", "p": "150MT", "d_pt": "Sabor local", "d_en": "Local flavor" },
+    { "pt": "Caldo Verde", "en": "Green Broth", "p": "180MT", "d_pt": "Com chouriço", "d_en": "With chorizo" },
+    { "pt": "Sopa de Feijão", "en": "Bean Soup", "p": "150MT", "d_pt": "Reconfortante", "d_en": "Comforting" },
+    { "pt": "Sopa de Legumes", "en": "Vegetable Soup", "p": "150MT", "d_pt": "Legumes frescos", "d_en": "Fresh vegetables" }
+  ],
+  "snacks": [
+    { "pt": "Salgados (4 unidades)", "en": "Savory Pastries (4)", "p": "250MT", "d_pt": "Mix de salgadinhos fritos na hora", "d_en": "Freshly fried savory mix" }
+  ],
+  "sandwiches": [
+    { "pt": "Hamburguer Simples", "en": "Simple Burger", "p": "250MT", "d_pt": "Com ovo ou queijo e batata frita", "d_en": "With egg or cheese and French fries" },
+    { "pt": "Hamburguer Completo", "en": "Complete Burger", "p": "350MT", "d_pt": "Queijo, ovo, alface, cheddar, maionese caseira, cebola caramelizada e batata frita", "d_en": "Cheese, egg, lettuce, cheddar, homemade mayo, caramelized onion and fries" },
+    { "pt": "Nyumba Burguer", "en": "Nyumba Burger", "p": "500MT", "d_pt": "Maionese caseira, fiambre ou bacon, mozzarella, batata frita, cebola caramelizada, picles e rúcula", "d_en": "Homemade mayo, ham or bacon, mozzarella, fries, caramelized onion, pickles and arugula" },
+    { "pt": "Hamburguer de Alheira", "en": "Alheira Burger", "p": "600MT", "d_pt": "Com ovo, rúcula, mozzarella e batata frita", "d_en": "With egg, arugula, mozzarella and French fries" },
+    { "pt": "Hamburguer de Frango", "en": "Chicken Burger", "p": "350MT", "d_pt": "Com ovo, mozzarella, alface e batata", "d_en": "With egg, mozzarella, lettuce and potatoes" },
+    { "pt": "Prego no pão", "en": "Steak Sandwich", "p": "350MT", "d_pt": "Bife suculento em pão fresco", "d_en": "Juicy steak in fresh bread" },
+    { "pt": "Cachorro Quente", "en": "Hot Dog", "p": "350MT", "d_pt": "Acompanhado com batatas", "d_en": "Served with French fries" },
+    { "pt": "Tosta Mista", "en": "Ham & Cheese Toast", "p": "280MT", "d_pt": "Pão tostado com fiambre e queijo", "d_en": "Toasted bread with ham and cheese" },
+    { "pt": "Tosta de Atum", "en": "Tuna Toast", "p": "250MT", "d_pt": "Pasta de atum artesanal", "d_en": "Handmade tuna spread" },
+    { "pt": "Tosta de Caranguejo", "en": "Crab Toast", "p": "250MT", "d_pt": "Recheio cremoso de caranguejo", "d_en": "Creamy crab filling" },
+    { "pt": "Tosta de Frango", "en": "Chicken Toast", "p": "250MT", "d_pt": "Frango desfiado temperado", "d_en": "Seasoned shredded chicken" }
+  ],
+  "plates": [
+    { "pt": "Matabicho Thafo", "en": "Thafo Breakfast", "p": "500MT", "d_pt": "2 ovos, tomate, salsichas, torradas, feijão doce e bacon", "d_en": "2 eggs, tomato, sausages, toast, baked beans and bacon" }
+  ],
+  "dessert": [
+    { "pt": "Sorvete", "en": "Ice Cream", "p": "180MT", "d_pt": "Vários sabores disponíveis", "d_en": "Various flavors available" },
+    { "pt": "Salada de Fruta", "en": "Fruit Salad", "p": "180MT", "d_pt": "Fruta fresca da época", "d_en": "Fresh seasonal fruit" },
+    { "pt": "Pudim", "en": "Caramel Pudding", "p": "180MT", "d_pt": "Caseiro e cremoso", "d_en": "Homemade and creamy" },
+    { "pt": "Bolo de Chocolate", "en": "Chocolate Cake", "p": "250MT", "d_pt": "Fatia generosa e húmida", "d_en": "Generous moist slice" },
+    { "pt": "Doce de Mandioca", "en": "Cassava Sweet", "p": "180MT", "d_pt": "Sobremesa tradicional", "d_en": "Traditional dessert" },
+    { "pt": "Arroz Doce", "en": "Rice Pudding", "p": "180MT", "d_pt": "Cremoso com canela", "d_en": "Creamy with cinnamon" }
+  ]
+}

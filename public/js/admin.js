@@ -21,14 +21,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
     
-    // Carregar dados do usuário
-    await loadUserData();
-    
-    // Carregar dados iniciais
-    await loadInitialData();
-    
-    // Esconder loading
-    hideLoading();
+    try {
+        // Carregar dados do usuário
+        await loadUserData();
+        
+        // Carregar dados iniciais
+        await loadInitialData();
+    } catch(e) {
+        console.error('Erro na inicialização:', e);
+    } finally {
+        // Esconder loading — sempre, mesmo em caso de erro
+        hideLoading();
+    }
     
     // Iniciar polling de status
     startStatusPolling();
@@ -139,28 +143,37 @@ async function submitPasswordChange() {
 
 // ==================== NAVEGAÇÃO ====================
 function openSection(sectionId) {
-    // Esconder todas as seções
-    document.querySelectorAll('.content-section').forEach(section => {
-        section.classList.remove('active');
-    });
-    
-    // Remover active de todos os itens do menu
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    
-    // Mostrar seção selecionada
-    const section = document.getElementById(sectionId);
-    if (section) {
-        section.classList.add('active');
+    try {
+        console.log('openSection chamada para:', sectionId);
         
-        // Ativar item do menu correspondente
-        const menuItem = document.querySelector(`.menu-item[onclick="openSection('${sectionId}')"]`);
-        if (menuItem) {
-            menuItem.classList.add('active');
+        // Esconder todas as seções
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        
+        // Remover active de todos os itens do menu
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        // Mostrar seção selecionada
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) {
+            targetSection.classList.add('active');
+        } else {
+            console.warn('Seção não encontrada por ID:', sectionId);
         }
         
-        // Carregar dados específicos da seção se necessário
+        // Ativar item do menu correspondente
+        document.querySelectorAll('.menu-item').forEach(item => {
+            const attrClick = item.getAttribute('onclick') || '';
+            const dataSec = item.getAttribute('data-section') || '';
+            if (dataSec === sectionId || attrClick.includes(`'${sectionId}'`)) {
+                item.classList.add('active');
+            }
+        });
+        
+        // Carregar dados específicos da seção
         switch(sectionId) {
             case 'dashboard':
                 loadDashboardData();
@@ -183,29 +196,71 @@ function openSection(sectionId) {
             case 'deploy':
                 loadDeployData();
                 break;
+            case 'users':
+                if (typeof loadUsersData === 'function') loadUsersData();
+                break;
+            case 'settings':
+                if (typeof loadSystemInfo === 'function') loadSystemInfo();
+                break;
         }
+    } catch(err) {
+        console.error('Erro em openSection:', err);
     }
 }
 
 function toggleDropdown() {
-    dropdownMenu.classList.toggle('show');
+    const menu = document.getElementById('dropdownMenu');
+    if (menu) {
+        menu.classList.toggle('show');
+    }
 }
 
 // Fechar dropdown ao clicar fora
 document.addEventListener('click', (e) => {
     if (!e.target.closest('.user-dropdown')) {
-        dropdownMenu.classList.remove('show');
+        const menu = document.getElementById('dropdownMenu');
+        if (menu) menu.classList.remove('show');
+    }
+});
+
+// Listener de delegação global à prova de falhas para navegação e botões
+document.addEventListener('click', (e) => {
+    // Interceptar cliques em itens de menu lateral ou botões com data-section ou onclick openSection
+    const menuItem = e.target.closest('.menu-item') || e.target.closest('.action-btn');
+    if (menuItem) {
+        const dataSec = menuItem.getAttribute('data-section');
+        const onclickAttr = menuItem.getAttribute('onclick') || '';
+        const match = onclickAttr.match(/openSection\s*\(\s*'([^']+)'\s*\)/);
+        const sectionId = dataSec || (match ? match[1] : null);
+        
+        if (sectionId) {
+            e.preventDefault();
+            e.stopPropagation();
+            openSection(sectionId);
+            return false;
+        }
+    }
+
+    // Interceptar clique no botão do perfil (canto superior direito)
+    const userBtn = e.target.closest('.user-btn');
+    if (userBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleDropdown();
+        return false;
     }
 });
 
 // ==================== CARREGAMENTO DE DADOS ====================
 async function loadInitialData() {
+    // Primeiro carregar os dados base em paralelo
     await Promise.all([
-        loadDashboardData(),
         loadHomeData(),
         loadGalleryData(),
         loadMenuData()
     ]);
+    // Só depois atualizar o dashboard (que depende dos dados acima)
+    await loadDashboardData();
 }
 
 async function loadHomeData() {
@@ -213,34 +268,24 @@ async function loadHomeData() {
         const response = await fetch('/api/admin/home');
         homeData = await response.json();
         
-        // Preencher formulário
-        if (homeData.hero) {
-            document.getElementById('hero-title').value = homeData.hero.title || '';
-            document.getElementById('hero-subtitle').value = homeData.hero.subtitle || '';
-            document.getElementById('hero-button').value = homeData.hero.buttonText || '';
-        }
+        // Preencher formulário com os dados reais
+        document.getElementById('concept-title').value = homeData.conceptTitle || 'O CONCEITO';
+        document.getElementById('concept-text').value = homeData.conceptText || '';
+        document.getElementById('concept-text-en').value = homeData.conceptTextEn || '';
         
-        if (homeData.about) {
-            document.getElementById('about-title').value = homeData.about.title || '';
-            document.getElementById('about-description').value = homeData.about.description || '';
-        }
+        document.getElementById('social-title').value = homeData.socialCallTitle || 'A NOSSA CASA É A SUA';
+        document.getElementById('social-text').value = homeData.socialCallText || '';
         
-        if (homeData.footer) {
-            document.getElementById('footer-copyright').value = homeData.footer.copyright || '';
-            document.getElementById('footer-contact').value = homeData.footer.contact || '';
-        }
+        document.getElementById('info-location').value = homeData.location || 'FEIMA - MAPUTO';
+        document.getElementById('info-address').value = homeData.address || 'Av. Mártires da Machava';
+        document.getElementById('info-hours').value = homeData.hoursDetail || 'Aberto todos os dias\n09:00 – 22:00';
         
-        // Renderizar serviços
-        renderServices();
+        document.getElementById('info-phone').value = homeData.phone || '+258 84 123 4567';
+        document.getElementById('info-email').value = homeData.email || 'info@nyumbafood.com';
+        document.getElementById('info-footer').value = homeData.footer || 'Nyumba Food Concept © 2026 | José Freire • Criação';
         
     } catch (error) {
-        console.error('Erro ao carregar dados da página principal:', error);
-        homeData = {
-            hero: {},
-            about: {},
-            services: [],
-            footer: {}
-        };
+        console.error('Erro ao carregar dados do conceito:', error);
     }
 }
 
@@ -412,21 +457,18 @@ function removeService(index) {
 
 async function saveHomeData() {
     try {
-        // Atualizar homeData com os valores atuais dos campos
-        homeData.hero = {
-            title: document.getElementById('hero-title').value,
-            subtitle: document.getElementById('hero-subtitle').value,
-            buttonText: document.getElementById('hero-button').value
-        };
-        
-        homeData.about = {
-            title: document.getElementById('about-title').value,
-            description: document.getElementById('about-description').value
-        };
-        
-        homeData.footer = {
-            copyright: document.getElementById('footer-copyright').value,
-            contact: document.getElementById('footer-contact').value
+        homeData = {
+            conceptTitle: document.getElementById('concept-title').value,
+            conceptText: document.getElementById('concept-text').value,
+            conceptTextEn: document.getElementById('concept-text-en').value,
+            socialCallTitle: document.getElementById('social-title').value,
+            socialCallText: document.getElementById('social-text').value,
+            location: document.getElementById('info-location').value,
+            address: document.getElementById('info-address').value,
+            hoursDetail: document.getElementById('info-hours').value,
+            phone: document.getElementById('info-phone').value,
+            email: document.getElementById('info-email').value,
+            footer: document.getElementById('info-footer').value
         };
         
         const response = await fetch('/api/admin/home', {
@@ -441,13 +483,13 @@ async function saveHomeData() {
         const result = await response.json();
         
         if (result.success) {
-            showToast('Página principal salva com sucesso!', 'success');
+            showToast('Informações do Conceito salvas com sucesso!', 'success');
             setUnsavedChanges(false);
         } else {
-            showToast(result.message || 'Erro ao salvar', 'error');
+            showToast(result.error || 'Erro ao salvar informações', 'error');
         }
     } catch (error) {
-        showToast('Erro ao salvar página principal', 'error');
+        showToast('Erro ao salvar informações', 'error');
     }
 }
 
@@ -1357,11 +1399,19 @@ function getCsrfToken() {
 }
 
 function showLoading() {
-    loadingOverlay.style.display = 'flex';
+    const el = document.getElementById('loadingOverlay');
+    if (el) {
+        el.classList.add('show');
+        el.style.display = 'flex';
+    }
 }
 
 function hideLoading() {
-    loadingOverlay.style.display = 'none';
+    const el = document.getElementById('loadingOverlay');
+    if (el) {
+        el.classList.remove('show');
+        el.style.display = 'none';
+    }
 }
 
 function showModal(modalId) {
@@ -1433,3 +1483,220 @@ document.addEventListener('click', (e) => {
         e.target.closest('.toast').remove();
     }
 });
+
+// ==================== FUNÇÕES AUXILIARES ==================== 
+function createPreview() {
+    window.open('/preview', '_blank');
+}
+
+function createBackup() {
+    createManualBackup();
+}
+
+async function checkStatus() {
+    try {
+        const response = await fetch('/api/admin/status');
+        const data = await response.json();
+        if (data.success) {
+            const uptime = Math.floor(data.status.system.uptime / 60);
+            showToast(`Sistema OK! Uptime: ${uptime} minutos`, 'success');
+        }
+    } catch (error) {
+        showToast('Erro ao verificar estado do sistema', 'error');
+    }
+}
+
+function refreshPreview() {
+    const frame = document.getElementById('previewFrame');
+    const select = document.getElementById('previewType');
+    if (frame && select) {
+        frame.src = select.value + '?t=' + Date.now();
+    }
+}
+
+function openPreviewInNewTab() {
+    const select = document.getElementById('previewType');
+    if (select) {
+        window.open(select.value, '_blank');
+    }
+}
+
+async function loadUsersData() {
+    try {
+        const response = await fetch('/api/auth/users');
+        const data = await response.json();
+
+        const tbody = document.getElementById('usersTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (!data.users || data.users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">Nenhum utilizador encontrado.</td></tr>';
+            return;
+        }
+
+        data.users.forEach(user => {
+            const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleString('pt') : 'Nunca';
+            const roleLabels = { admin: 'Administrador', editor: 'Editor', viewer: 'Visualizador' };
+            const statusBadge = user.active !== false
+                ? '<span class="badge badge-success">Ativo</span>'
+                : '<span class="badge badge-danger">Inativo</span>';
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${user.username}</strong>${user.fullName ? `<br><small>${user.fullName}</small>` : ''}</td>
+                <td>${user.email || '-'}</td>
+                <td><span class="badge">${roleLabels[user.role] || user.role}</span></td>
+                <td>${statusBadge}</td>
+                <td><small>${lastLogin}</small></td>
+                <td>
+                    <button class="btn btn-sm btn-warning" onclick="resetUserPassword('${user.id || user.username}')">
+                        <i class="fas fa-key"></i>
+                    </button>
+                    ${user.username !== currentUser?.username ? `
+                    <button class="btn btn-sm btn-danger" onclick="deleteUser('${user.id || user.username}')">
+                        <i class="fas fa-trash"></i>
+                    </button>` : ''}
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (error) {
+        const tbody = document.getElementById('usersTableBody');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center">Erro ao carregar utilizadores.</td></tr>';
+    }
+}
+
+function showCreateUserModal() {
+    document.getElementById('newUserUsername').value = '';
+    document.getElementById('newUserEmail').value = '';
+    document.getElementById('newUserFullName').value = '';
+    document.getElementById('newUserPassword').value = '';
+    document.getElementById('newUserConfirmPassword').value = '';
+    document.getElementById('newUserRole').value = 'editor';
+    showModal('createUserModal');
+}
+
+async function createUser() {
+    const username = document.getElementById('newUserUsername').value.trim();
+    const email = document.getElementById('newUserEmail').value.trim();
+    const fullName = document.getElementById('newUserFullName').value.trim();
+    const password = document.getElementById('newUserPassword').value;
+    const confirmPassword = document.getElementById('newUserConfirmPassword').value;
+    const role = document.getElementById('newUserRole').value;
+
+    if (password !== confirmPassword) {
+        showToast('As senhas não coincidem', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': getCsrfToken()
+            },
+            body: JSON.stringify({ username, email, fullName, password, confirmPassword, role })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('Utilizador criado com sucesso!', 'success');
+            closeModal('createUserModal');
+            loadUsersData();
+        } else {
+            showToast(data.message || 'Erro ao criar utilizador', 'error');
+        }
+    } catch (error) {
+        showToast('Erro ao criar utilizador', 'error');
+    }
+}
+
+async function deleteUser(userId) {
+    if (!confirm('Eliminar este utilizador?')) return;
+
+    try {
+        const response = await fetch(`/api/auth/users/${userId}`, {
+            method: 'DELETE',
+            headers: { 'X-CSRF-Token': getCsrfToken() }
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('Utilizador eliminado!', 'success');
+            loadUsersData();
+        } else {
+            showToast(data.message || 'Erro ao eliminar utilizador', 'error');
+        }
+    } catch (error) {
+        showToast('Erro ao eliminar utilizador', 'error');
+    }
+}
+
+async function resetUserPassword(userId) {
+    const newPass = prompt('Nova senha para o utilizador (mínimo 8 caracteres):');
+    if (!newPass || newPass.length < 8) {
+        if (newPass !== null) showToast('Senha deve ter pelo menos 8 caracteres', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/auth/users/${userId}/reset-password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': getCsrfToken()
+            },
+            body: JSON.stringify({ newPassword: newPass })
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('Senha reposta com sucesso!', 'success');
+        } else {
+            showToast(data.message || 'Erro ao repor senha', 'error');
+        }
+    } catch (error) {
+        showToast('Erro ao repor senha', 'error');
+    }
+}
+
+async function loadSystemInfo() {
+    try {
+        const response = await fetch('/api/admin/status');
+        const data = await response.json();
+
+        if (data.success) {
+            const status = data.status;
+            const uptime = Math.floor(status.system.uptime);
+            const hours = Math.floor(uptime / 3600);
+            const minutes = Math.floor((uptime % 3600) / 60);
+            const memMB = Math.round(status.system.memory.heapUsed / 1024 / 1024);
+
+            const sysElem = document.getElementById('systemInfo');
+            if (sysElem) {
+                sysElem.innerHTML = `
+                    <div class="backup-stats" style="margin-bottom: 0;">
+                        <div class="stat-item">
+                            <i class="fas fa-clock" style="color: #3498db;"></i>
+                            <div><h3>${hours}h ${minutes}m</h3><p>Uptime</p></div>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-memory" style="color: #2ecc71;"></i>
+                            <div><h3>${memMB} MB</h3><p>Memória Usada</p></div>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fab fa-node-js" style="color: #68a063;"></i>
+                            <div><h3>${status.system.nodeVersion}</h3><p>Node.js</p></div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    } catch (error) {
+        const sysElem = document.getElementById('systemInfo');
+        if (sysElem) sysElem.innerHTML = '<p>Erro ao carregar informações do sistema.</p>';
+    }
+}
