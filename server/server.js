@@ -118,7 +118,7 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/preview/:page?', (req, res) => {
-    res.sendFile(path.join(publicDir, 'preview.html'));
+    res.sendFile(path.join(publicDir, 'index.html'));
 });
 
 app.get('/history', (req, res) => {

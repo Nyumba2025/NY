@@ -3,882 +3,442 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nyumba - Preview</title>
-    <link rel="stylesheet" href="css/admin.css">
+    <title>Restaurante Nyumba - Cozinha Moçambicana em Lisboa</title>
+    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Estilos específicos para a página de preview */
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #f8f9fa;
-            color: #333;
-            padding: 20px;
-        }
-
-        .preview-header {
-            background: linear-gradient(135deg, #ff7c00, #ff5500);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(255, 124, 0, 0.2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .preview-header h1 {
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.8rem;
-        }
-
-        .preview-controls {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .preview-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-        }
-
-        .preview-btn.primary {
-            background: #2ecc71;
-            color: white;
-        }
-
-        .preview-btn.secondary {
-            background: #3498db;
-            color: white;
-        }
-
-        .preview-btn.warning {
-            background: #f39c12;
-            color: white;
-        }
-
-        .preview-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        .preview-container {
-            display: flex;
-            gap: 20px;
-            min-height: calc(100vh - 150px);
-        }
-
-        .preview-sidebar {
-            width: 300px;
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            height: fit-content;
-        }
-
-        .preview-content {
-            flex: 1;
-            background: white;
-            border-radius: 10px;
-            padding: 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .page-selector {
-            margin-bottom: 30px;
-        }
-
-        .page-selector h3 {
-            margin-bottom: 15px;
-            color: #2c3e50;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #eee;
-        }
-
-        .page-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .page-item {
-            padding: 12px 15px;
-            background: #f8f9fa;
-            border-radius: 5px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-
-        .page-item:hover {
-            background: #e9ecef;
-            border-color: #3498db;
-        }
-
-        .page-item.active {
-            background: #3498db;
-            color: white;
-            border-color: #2980b9;
-        }
-
-        .page-item i {
-            font-size: 1.2rem;
-        }
-
-        .preview-info {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-
-        .preview-info h4 {
-            margin: 0 0 10px 0;
-            color: #2c3e50;
-        }
-
-        .preview-info p {
-            margin: 5px 0;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-        }
-
-        .preview-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-            min-height: 800px;
-        }
-
-        .preview-tabs {
-            display: flex;
-            background: #f8f9fa;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .preview-tab {
-            padding: 15px 20px;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-            font-weight: 500;
-            color: #7f8c8d;
-        }
-
-        .preview-tab:hover {
-            background: #e9ecef;
-            color: #3498db;
-        }
-
-        .preview-tab.active {
-            background: white;
-            color: #3498db;
-            border-bottom-color: #3498db;
-        }
-
-        .preview-actions {
-            padding: 20px;
-            background: white;
-            border-top: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .device-selector {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .device-btn {
-            padding: 8px 15px;
-            background: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .device-btn.active {
-            background: #3498db;
-            color: white;
-            border-color: #3498db;
-        }
-
-        .preview-loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 400px;
-            color: #7f8c8d;
-        }
-
-        .preview-loading i {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            color: #3498db;
-        }
-
-        /* Estilos para simulação de dispositivos */
-        .mobile-frame {
-            width: 375px;
-            height: 667px;
-            border: 20px solid #333;
-            border-radius: 40px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            margin: 0 auto;
-        }
-
-        .mobile-frame::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40%;
-            height: 20px;
-            background: #333;
-            border-radius: 0 0 10px 10px;
-            z-index: 10;
-        }
-
-        .tablet-frame {
-            width: 768px;
-            height: 1024px;
-            border: 25px solid #333;
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            margin: 0 auto;
-        }
-
-        .desktop-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        @media (max-width: 1200px) {
-            .preview-container {
-                flex-direction: column;
-            }
-            
-            .preview-sidebar {
-                width: 100%;
-            }
-            
-            .tablet-frame {
-                width: 100%;
-                height: 800px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .preview-header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .preview-controls {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .mobile-frame {
-                width: 100%;
-                max-width: 375px;
-                height: 600px;
-            }
-            
-            .tablet-frame {
-                height: 600px;
-            }
-        }
-
-        /* Animações */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        /* Tooltip */
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-
-        .tooltip .tooltip-text {
-            visibility: hidden;
-            width: 200px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 10px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.9rem;
-            font-weight: normal;
-        }
-
-        .tooltip:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
-    <!-- Header -->
-    <div class="preview-header">
-        <h1>
-            <i class="fas fa-eye"></i>
-            Preview - Nyumba Restaurante
-        </h1>
-        <div class="preview-controls">
-            <button class="preview-btn warning" onclick="refreshPreview()">
-                <i class="fas fa-sync-alt"></i>
-                Atualizar
-            </button>
-            <button class="preview-btn secondary" onclick="closePreview()">
-                <i class="fas fa-times"></i>
-                Fechar
-            </button>
-            <button class="preview-btn primary" onclick="applyChanges()">
-                <i class="fas fa-check"></i>
-                Aplicar Alterações
-            </button>
+    <!-- Header & Navigation -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <i class="fas fa-utensils"></i>
+                    <span>Nyumba</span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#home" class="nav-link active">Home</a></li>
+                    <li><a href="#about" class="nav-link">Sobre</a></li>
+                    <li><a href="#menu" class="nav-link">Menu</a></li>
+                    <li><a href="#gallery" class="nav-link">Galeria</a></li>
+                    <li><a href="#contact" class="nav-link">Contato</a></li>
+                    <li><a href="/admin" class="nav-link admin-link"><i class="fas fa-cog"></i> Admin</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </nav>
         </div>
-    </div>
+    </header>
 
-    <!-- Main Container -->
-    <div class="preview-container">
-        <!-- Sidebar -->
-        <div class="preview-sidebar">
-            <div class="page-selector">
-                <h3>Páginas</h3>
-                <div class="page-list">
-                    <div class="page-item active" onclick="loadPage('home')">
-                        <i class="fas fa-home"></i>
-                        <span>Página Principal</span>
-                    </div>
-                    <div class="page-item" onclick="loadPage('gallery')">
-                        <i class="fas fa-images"></i>
-                        <span>Galeria</span>
-                    </div>
-                    <div class="page-item" onclick="loadPage('menu')">
-                        <i class="fas fa-utensils"></i>
-                        <span>Menu</span>
-                    </div>
-                    <div class="page-item" onclick="loadPage('about')">
-                        <i class="fas fa-info-circle"></i>
-                        <span>Sobre Nós</span>
-                    </div>
-                    <div class="page-item" onclick="loadPage('contact')">
-                        <i class="fas fa-envelope"></i>
-                        <span>Contacto</span>
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 id="hero-title">Bem-vindo ao Restaurante Nyumba</h1>
+                <p id="hero-subtitle">Autêntica cozinha moçambicana em Lisboa</p>
+                <a href="#menu" class="btn btn-primary" id="hero-button">Ver Menu</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h2 id="about-title">A Nossa História</h2>
+                <div class="underline"></div>
+            </div>
+            <div class="about-content">
+                <div class="about-text">
+                    <p id="about-description">
+                        O Nyumba nasceu da paixão pela culinária tradicional moçambicana. 
+                        Com mais de 10 anos de experiência, trazemos até si os sabores e 
+                        aromas da nossa terra, preparados com ingredientes frescos e muito carinho.
+                    </p>
+                    <div class="about-stats">
+                        <div class="stat">
+                            <h3>10+</h3>
+                            <p>Anos de Experiência</p>
+                        </div>
+                        <div class="stat">
+                            <h3>50+</h3>
+                            <p>Pratos Tradicionais</p>
+                        </div>
+                        <div class="stat">
+                            <h3>1000+</h3>
+                            <p>Clientes Satisfeitos</p>
+                        </div>
                     </div>
                 </div>
+                <div class="about-image">
+                    <img src="images/about.jpg" alt="Interior do Restaurante Nyumba">
+                </div>
             </div>
+        </div>
+    </section>
 
-            <div class="preview-info">
-                <h4>Informações do Preview</h4>
-                <p><strong>Página:</strong> <span id="currentPage">Principal</span></p>
-                <p><strong>Dispositivo:</strong> <span id="currentDevice">Desktop</span></p>
-                <p><strong>Última atualização:</strong> <span id="lastUpdate">Agora</span></p>
-                <p><strong>Status:</strong> <span id="previewStatus" class="status-online">Online</span></p>
-                
-                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
-                    <h5>Alterações Pendentes:</h5>
-                    <ul id="pendingChanges" style="margin: 10px 0 0 0; padding-left: 20px; color: #e74c3c; font-size: 0.9rem;">
-                        <li>Nenhuma alteração pendente</li>
+    <!-- Services Section -->
+    <section class="services section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h2>Porque Escolher o Nyumba</h2>
+                <div class="underline"></div>
+            </div>
+            <div class="services-grid" id="services-container">
+                <!-- Os serviços serão carregados dinamicamente aqui -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section id="menu" class="menu section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h2>O Nosso Menu</h2>
+                <div class="underline"></div>
+                <p>Descubra os sabores autênticos de Moçambique</p>
+            </div>
+            <div class="menu-tabs">
+                <button class="tab-btn active" data-category="all">Todos</button>
+                <button class="tab-btn" data-category="entradas">Entradas</button>
+                <button class="tab-btn" data-category="pratos">Pratos Principais</button>
+                <button class="tab-btn" data-category="sobremesas">Sobremesas</button>
+                <button class="tab-btn" data-category="bebidas">Bebidas</button>
+            </div>
+            <div class="menu-grid" id="menu-container">
+                <!-- Os itens do menu serão carregados dinamicamente aqui -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="gallery section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h2>A Nossa Galeria</h2>
+                <div class="underline"></div>
+                <p>Momentos especiais no Nyumba</p>
+            </div>
+            <div class="gallery-grid" id="gallery-container">
+                <!-- As imagens da galeria serão carregadas dinamicamente aqui -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h2>Entre em Contato</h2>
+                <div class="underline"></div>
+            </div>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h3>Endereço</h3>
+                            <p>Rua da Moçambique, 123<br>Lisboa, Portugal</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <h3>Telefone</h3>
+                            <p>+351 123 456 789</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h3>Email</h3>
+                            <p>info@nyumba.com</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <h3>Horário</h3>
+                            <p>Segunda - Sexta: 12h - 23h<br>Sábado - Domingo: 12h - 00h</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <input type="text" placeholder="Seu Nome" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" placeholder="Seu Email" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea placeholder="Sua Mensagem" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enviar Mensagem</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-utensils"></i>
+                    <span>Nyumba</span>
+                </div>
+                <div class="footer-links">
+                    <h3>Links Rápidos</h3>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">Sobre</a></li>
+                        <li><a href="#menu">Menu</a></li>
+                        <li><a href="#gallery">Galeria</a></li>
+                        <li><a href="#contact">Contato</a></li>
                     </ul>
                 </div>
-            </div>
-
-            <div style="margin-top: 20px; padding: 15px; background: #e8f4fc; border-radius: 5px;">
-                <h4 style="color: #3498db; margin: 0 0 10px 0;">
-                    <i class="fas fa-lightbulb"></i> Dica
-                </h4>
-                <p style="margin: 0; color: #2c3e50; font-size: 0.9rem;">
-                    Use este preview para visualizar as alterações antes de publicar. 
-                    As mudanças só serão aplicadas ao site quando clicar em "Aplicar Alterações".
-                </p>
-            </div>
-        </div>
-
-        <!-- Content Area -->
-        <div class="preview-content">
-            <!-- Tabs de Dispositivos -->
-            <div class="preview-tabs">
-                <div class="preview-tab active" onclick="setDevice('desktop')">
-                    <i class="fas fa-desktop"></i> Desktop
-                </div>
-                <div class="preview-tab" onclick="setDevice('tablet')">
-                    <i class="fas fa-tablet-alt"></i> Tablet
-                </div>
-                <div class="preview-tab" onclick="setDevice('mobile')">
-                    <i class="fas fa-mobile-alt"></i> Mobile
-                </div>
-            </div>
-
-            <!-- Frame Container -->
-            <div id="frameContainer" style="height: calc(100% - 120px);">
-                <!-- Loading State -->
-                <div id="loadingState" class="preview-loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Carregando preview...</p>
-                </div>
-
-                <!-- Desktop Frame -->
-                <div id="desktopFrame" class="frame-content" style="display: block; height: 100%;">
-                    <iframe id="previewFrame" class="desktop-frame" src="index.html?preview=true"></iframe>
-                </div>
-
-                <!-- Tablet Frame -->
-                <div id="tabletFrame" class="frame-content" style="display: none;">
-                    <div class="tablet-frame">
-                        <iframe id="tabletPreview" class="desktop-frame" src="index.html?preview=true"></iframe>
-                    </div>
-                </div>
-
-                <!-- Mobile Frame -->
-                <div id="mobileFrame" class="frame-content" style="display: none;">
-                    <div class="mobile-frame">
-                        <iframe id="mobilePreview" class="desktop-frame" src="index.html?preview=true"></iframe>
+                <div class="footer-social">
+                    <h3>Siga-nos</h3>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-tripadvisor"></i></a>
                     </div>
                 </div>
             </div>
-
-            <!-- Actions -->
-            <div class="preview-actions">
-                <div class="device-selector">
-                    <button class="device-btn active" onclick="setDevice('desktop')">
-                        <i class="fas fa-desktop"></i>
-                    </button>
-                    <button class="device-btn" onclick="setDevice('tablet')">
-                        <i class="fas fa-tablet-alt"></i>
-                    </button>
-                    <button class="device-btn" onclick="setDevice('mobile')">
-                        <i class="fas fa-mobile-alt"></i>
-                    </button>
-                </div>
-                <div>
-                    <button class="preview-btn warning" onclick="refreshPreview()">
-                        <i class="fas fa-sync-alt"></i>
-                        Atualizar
-                    </button>
-                    <button class="preview-btn primary" onclick="applyChanges()">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        Publicar
-                    </button>
-                </div>
+            <div class="footer-bottom">
+                <p id="footer-copyright">© 2024 Restaurante Nyumba. Todos os direitos reservados.</p>
+                <p id="footer-contact">Contacte-nos: +351 123 456 789 | info@nyumba.com</p>
             </div>
         </div>
-    </div>
+    </footer>
 
-    <!-- Toast Container -->
-    <div id="toastContainer" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
-
+    <!-- Scripts -->
+    <script src="js/home-data.js"></script>
+    <script src="js/gallery-data.js"></script>
+    <script src="js/menu-data.js"></script>
+    <script src="js/site.js"></script>
     <script>
-        // Estado global
-        let currentPage = 'home';
-        let currentDevice = 'desktop';
-        let pendingChanges = [];
-        let previewData = {};
-
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Verificar autenticação
-            const isAuthenticated = await checkAuth();
-            if (!isAuthenticated) {
-                window.location.href = '/login';
-                return;
-            }
-
-            // Carregar dados do preview
-            await loadPreviewData();
-            
-            // Configurar eventos
-            setupEventListeners();
-            
-            // Inicializar preview
-            initializePreview();
-            
-            // Esconder loading
-            setTimeout(() => {
-                document.getElementById('loadingState').style.display = 'none';
-            }, 500);
-        });
-
-        // Verificar autenticação
-        async function checkAuth() {
-            try {
-                const response = await fetch('/api/auth/session');
-                const data = await response.json();
-                return data.authenticated;
-            } catch (error) {
-                console.error('Erro na autenticação:', error);
-                return false;
-            }
-        }
-
-        // Carregar dados do preview
-        async function loadPreviewData() {
-            try {
-                // Carregar dados temporários do preview
-                const response = await fetch('/api/admin/preview');
-                if (response.ok) {
-                    previewData = await response.json();
+        // Inicialização do site
+        document.addEventListener('DOMContentLoaded', function() {
+            // Preencher dados da página principal
+            if (typeof homeData !== 'undefined') {
+                // Hero section
+                const heroTitle = document.getElementById('hero-title');
+                const heroSubtitle = document.getElementById('hero-subtitle');
+                const heroButton = document.getElementById('hero-button');
+                
+                if (heroTitle && homeData.hero && homeData.hero.title) {
+                    heroTitle.textContent = homeData.hero.title;
                 }
-            } catch (error) {
-                console.error('Erro ao carregar dados do preview:', error);
-            }
-        }
-
-        // Configurar event listeners
-        function setupEventListeners() {
-            // Listeners para iframes
-            document.getElementById('previewFrame').addEventListener('load', () => {
-                updatePreviewInfo();
-            });
-            
-            // Listeners para alterações de tamanho de tela
-            window.addEventListener('resize', () => {
-                updateFrameSizes();
-            });
-        }
-
-        // Inicializar preview
-        function initializePreview() {
-            // Carregar página inicial
-            loadPage('home');
-            
-            // Configurar dispositivo inicial
-            setDevice('desktop');
-            
-            // Iniciar polling de atualização
-            startPreviewPolling();
-        }
-
-        // Carregar página
-        function loadPage(page) {
-            currentPage = page;
-            
-            // Atualizar UI
-            document.querySelectorAll('.page-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event.target.closest('.page-item').classList.add('active');
-            
-            // Atualizar informações
-            document.getElementById('currentPage').textContent = 
-                page === 'home' ? 'Principal' :
-                page === 'gallery' ? 'Galeria' :
-                page === 'menu' ? 'Menu' :
-                page === 'about' ? 'Sobre Nós' : 'Contacto';
-            
-            // Atualizar iframes
-            updateIframes();
-            
-            // Registrar ação
-            logAction(`Página alterada para: ${page}`);
-        }
-
-        // Configurar dispositivo
-        function setDevice(device) {
-            currentDevice = device;
-            
-            // Atualizar UI
-            document.querySelectorAll('.preview-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.device-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Ativar aba e botão correspondentes
-            document.querySelector(`.preview-tab[onclick*="${device}"]`).classList.add('active');
-            document.querySelector(`.device-btn[onclick*="${device}"]`).classList.add('active');
-            
-            // Atualizar informações
-            document.getElementById('currentDevice').textContent = 
-                device === 'desktop' ? 'Desktop' :
-                device === 'tablet' ? 'Tablet' : 'Mobile';
-            
-            // Mostrar frame correto
-            document.querySelectorAll('.frame-content').forEach(frame => {
-                frame.style.display = 'none';
-            });
-            
-            if (device === 'desktop') {
-                document.getElementById('desktopFrame').style.display = 'block';
-            } else if (device === 'tablet') {
-                document.getElementById('tabletFrame').style.display = 'block';
-            } else {
-                document.getElementById('mobileFrame').style.display = 'block';
-            }
-            
-            // Ajustar tamanhos
-            updateFrameSizes();
-            
-            // Registrar ação
-            logAction(`Dispositivo alterado para: ${device}`);
-        }
-
-        // Atualizar iframes
-        function updateIframes() {
-            const previewUrl = getPreviewUrl();
-            
-            // Atualizar todos os iframes
-            const frames = [
-                'previewFrame',
-                'tabletPreview',
-                'mobilePreview'
-            ];
-            
-            frames.forEach(frameId => {
-                const frame = document.getElementById(frameId);
-                if (frame) {
-                    frame.src = previewUrl;
+                if (heroSubtitle && homeData.hero && homeData.hero.subtitle) {
+                    heroSubtitle.textContent = homeData.hero.subtitle;
                 }
-            });
-            
-            // Atualizar timestamp
-            document.getElementById('lastUpdate').textContent = 
-                new Date().toLocaleTimeString('pt-PT');
-            
-            // Mostrar loading brevemente
-            document.getElementById('loadingState').style.display = 'flex';
-            setTimeout(() => {
-                document.getElementById('loadingState').style.display = 'none';
-            }, 1000);
-        }
-
-        // Obter URL do preview
-        function getPreviewUrl() {
-            let url = 'index.html?preview=true';
-            
-            // Adicionar parâmetros específicos da página
-            if (currentPage !== 'home') {
-                url += `&page=${currentPage}`;
-            }
-            
-            // Adicionar timestamp para evitar cache
-            url += `&t=${Date.now()}`;
-            
-            return url;
-        }
-
-        // Atualizar tamanhos dos frames
-        function updateFrameSizes() {
-            // Ajustar altura do container
-            const frameContainer = document.getElementById('frameContainer');
-            const headerHeight = 60;
-            const tabsHeight = 45;
-            const actionsHeight = 80;
-            
-            const availableHeight = window.innerHeight - headerHeight - tabsHeight - actionsHeight - 40;
-            frameContainer.style.height = `${availableHeight}px`;
-            
-            // Ajustar iframes para tablet e mobile
-            const tabletFrame = document.getElementById('tabletFrame');
-            const mobileFrame = document.getElementById('mobileFrame');
-            
-            if (tabletFrame.style.display !== 'none') {
-                const tabletContainer = tabletFrame.querySelector('.tablet-frame');
-                const maxHeight = availableHeight - 50;
-                tabletContainer.style.height = `${Math.min(1024, maxHeight)}px`;
-            }
-            
-            if (mobileFrame.style.display !== 'none') {
-                const mobileContainer = mobileFrame.querySelector('.mobile-frame');
-                const maxHeight = availableHeight - 50;
-                mobileContainer.style.height = `${Math.min(667, maxHeight)}px`;
-            }
-        }
-
-        // Atualizar informações do preview
-        function updatePreviewInfo() {
-            // Verificar conexão
-            fetch('/api/admin/status')
-                .then(response => response.json())
-                .then(data => {
-                    const statusElement = document.getElementById('previewStatus');
-                    if (data.success) {
-                        statusElement.textContent = 'Online';
-                        statusElement.style.color = '#2ecc71';
-                    } else {
-                        statusElement.textContent = 'Offline';
-                        statusElement.style.color = '#e74c3c';
-                    }
-                })
-                .catch(() => {
-                    document.getElementById('previewStatus').textContent = 'Erro';
-                    document.getElementById('previewStatus').style.color = '#e74c3c';
-                });
-        }
-
-        // Atualizar preview
-        function refreshPreview() {
-            logAction('Preview atualizado manualmente');
-            updateIframes();
-            showToast('Preview atualizado', 'success');
-        }
-
-        // Aplicar alterações
-        async function applyChanges() {
-            if (!confirm('Tem certeza que deseja aplicar as alterações? Isso atualizará o site em produção.')) {
-                return;
-            }
-            
-            try {
-                showToast('Aplicando alterações...', 'info');
+                if (heroButton && homeData.hero && homeData.hero.buttonText) {
+                    heroButton.textContent = homeData.hero.buttonText;
+                }
                 
-                // Aqui você implementaria a lógica para aplicar as alterações
-                // Por enquanto, apenas simularemos
+                // About section
+                const aboutTitle = document.getElementById('about-title');
+                const aboutDescription = document.getElementById('about-description');
                 
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                if (aboutTitle && homeData.about && homeData.about.title) {
+                    aboutTitle.textContent = homeData.about.title;
+                }
+                if (aboutDescription && homeData.about && homeData.about.description) {
+                    aboutDescription.textContent = homeData.about.description;
+                }
                 
-                showToast('Alterações aplicadas com sucesso!', 'success');
-                logAction('Alterações aplicadas no site');
+                // Services section
+                const servicesContainer = document.getElementById('services-container');
+                if (servicesContainer && homeData.services && homeData.services.length > 0) {
+                    servicesContainer.innerHTML = '';
+                    homeData.services.forEach(service => {
+                        const serviceElement = document.createElement('div');
+                        serviceElement.className = 'service-card';
+                        serviceElement.innerHTML = `
+                            <div class="service-icon">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <h3>${service.title}</h3>
+                            <p>${service.description}</p>
+                        `;
+                        servicesContainer.appendChild(serviceElement);
+                    });
+                }
                 
-                // Limpar alterações pendentes
-                pendingChanges = [];
-                updatePendingChanges();
+                // Footer
+                const footerCopyright = document.getElementById('footer-copyright');
+                const footerContact = document.getElementById('footer-contact');
                 
-            } catch (error) {
-                showToast('Erro ao aplicar alterações', 'error');
-                console.error('Erro:', error);
-            }
-        }
-
-        // Fechar preview
-        function closePreview() {
-            if (pendingChanges.length > 0) {
-                if (!confirm('Existem alterações pendentes. Deseja realmente sair sem aplicar?')) {
-                    return;
+                if (footerCopyright && homeData.footer && homeData.footer.copyright) {
+                    footerCopyright.textContent = homeData.footer.copyright;
+                }
+                if (footerContact && homeData.footer && homeData.footer.contact) {
+                    footerContact.textContent = homeData.footer.contact;
                 }
             }
-            window.location.href = '/admin';
-        }
-
-        // Adicionar alteração pendente
-        function addPendingChange(change) {
-            if (!pendingChanges.some(c => c.id === change.id)) {
-                pendingChanges.push(change);
-                updatePendingChanges();
-            }
-        }
-
-        // Atualizar lista de alterações pendentes
-        function updatePendingChanges() {
-            const list = document.getElementById('pendingChanges');
-            list.innerHTML = '';
             
-            if (pendingChanges.length === 0) {
-                list.innerHTML = '<li>Nenhuma alteração pendente</li>';
-                return;
-            }
-            
-            pendingChanges.forEach(change => {
-                const li = document.createElement('li');
-                li.textContent = change.description;
-                list.appendChild(li);
-            });
-        }
-
-        // Registrar ação
-        function logAction(action) {
-            console.log(`[Preview] ${action}`);
-        }
-
-        // Mostrar toast
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `
-                <div class="toast-icon">
-                    ${type === 'success' ? '✓' : 
-                      type === 'error' ? '✗' : 
-                      type === 'warning' ? '⚠' : 'ℹ'}
-                </div>
-                <div class="toast-content">
-                    <p>${message}</p>
-                </div>
-                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
-            `;
-            
-            container.appendChild(toast);
-            
-            // Remover automaticamente após 5 segundos
-            setTimeout(() => {
-                if (toast.parentElement) {
-                    toast.remove();
+            // Preencher galeria
+            if (typeof galleryItems !== 'undefined') {
+                const galleryContainer = document.getElementById('gallery-container');
+                if (galleryContainer && galleryItems.length > 0) {
+                    galleryContainer.innerHTML = '';
+                    galleryItems.forEach(item => {
+                        const galleryItem = document.createElement('div');
+                        galleryItem.className = 'gallery-item';
+                        galleryItem.innerHTML = `
+                            <img src="${item.src}" alt="${item.caption}" loading="lazy">
+                            <div class="gallery-overlay">
+                                <p>${item.caption}</p>
+                            </div>
+                        `;
+                        galleryContainer.appendChild(galleryItem);
+                    });
                 }
-            }, 5000);
-        }
-
-        // Polling para atualização automática
-        function startPreviewPolling() {
-            // Atualizar status a cada 30 segundos
-            setInterval(() => {
-                updatePreviewInfo();
-            }, 30000);
+            }
             
-            // Verificar alterações a cada minuto
-            setInterval(async () => {
-                try {
-                    const response = await fetch('/api/admin/preview/check');
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.hasChanges) {
-                            showToast('Novas alterações disponíveis', 'info');
+            // Preencher menu
+            if (typeof menuItems !== 'undefined') {
+                const menuContainer = document.getElementById('menu-container');
+                if (menuContainer && menuItems.length > 0) {
+                    menuContainer.innerHTML = '';
+                    menuItems.forEach(category => {
+                        // Cabeçalho da categoria
+                        const categoryHeader = document.createElement('div');
+                        categoryHeader.className = 'menu-category-header';
+                        categoryHeader.innerHTML = `<h3>${category.name}</h3>`;
+                        menuContainer.appendChild(categoryHeader);
+                        
+                        // Itens da categoria
+                        category.items.forEach(item => {
+                            const menuItem = document.createElement('div');
+                            menuItem.className = 'menu-item';
+                            menuItem.setAttribute('data-category', category.name.toLowerCase());
+                            menuItem.innerHTML = `
+                                <div class="menu-item-content">
+                                    <h4>${item.name}</h4>
+                                    <p>${item.description || ''}</p>
+                                </div>
+                                <div class="menu-item-price">
+                                    <span>${item.price} €</span>
+                                </div>
+                            `;
+                            menuContainer.appendChild(menuItem);
+                        });
+                    });
+                }
+            }
+            
+            // Ativar tabs do menu
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const menuItems = document.querySelectorAll('.menu-item');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remover active de todos os botões
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    // Adicionar active ao botão clicado
+                    this.classList.add('active');
+                    
+                    const category = this.getAttribute('data-category');
+                    
+                    // Filtrar itens do menu
+                    menuItems.forEach(item => {
+                        if (category === 'all' || item.getAttribute('data-category') === category) {
+                            item.style.display = 'flex';
+                        } else {
+                            item.style.display = 'none';
                         }
+                    });
+                });
+            });
+            
+            // Menu mobile
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            
+            if (hamburger && navMenu) {
+                hamburger.addEventListener('click', function() {
+                    hamburger.classList.toggle('active');
+                    navMenu.classList.toggle('active');
+                });
+                
+                // Fechar menu ao clicar em um link
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', function() {
+                        hamburger.classList.remove('active');
+                        navMenu.classList.remove('active');
+                    });
+                });
+            }
+            
+            // Smooth scroll para links âncora
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
                     }
-                } catch (error) {
-                    // Silencioso
+                });
+            });
+            
+            // Formulário de contato
+            const contactForm = document.getElementById('contactForm');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    // Simular envio
+                    alert('Obrigado pela sua mensagem! Entraremos em contato em breve.');
+                    this.reset();
+                });
+            }
+            
+            // Adicionar classe active ao header durante scroll
+            window.addEventListener('scroll', function() {
+                const header = document.querySelector('.header');
+                if (window.scrollY > 100) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
                 }
-            }, 60000);
-        }
-
-        // Inicializar ajustes de tamanho
-        window.addEventListener('load', updateFrameSizes);
-        window.addEventListener('resize', updateFrameSizes);
+                
+                // Ativar link ativo na navegação
+                const sections = document.querySelectorAll('section');
+                const navLinks = document.querySelectorAll('.nav-link');
+                
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (scrollY >= sectionTop - 200) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>
