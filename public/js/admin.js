@@ -1922,3 +1922,38 @@ async function publishToGitHub() {
         showToast('Erro de ligação ao publicar no GitHub', 'error');
     }
 }
+
+// ==================== CONTROLO DE PREVIEW ====================
+function setPreviewDevice(device) {
+    const wrapper = document.getElementById('previewWrapper');
+    const frame = document.getElementById('previewFrame');
+    const btnDesktop = document.getElementById('btn-device-desktop');
+    const btnTablet = document.getElementById('btn-device-tablet');
+    const btnMobile = document.getElementById('btn-device-mobile');
+
+    if (!wrapper) return;
+
+    [btnDesktop, btnTablet, btnMobile].forEach(btn => {
+        if (btn) btn.classList.remove('active');
+    });
+
+    if (device === 'tablet') {
+        wrapper.style.width = '768px';
+        wrapper.style.maxWidth = '100%';
+        if (btnTablet) btnTablet.classList.add('active');
+    } else if (device === 'mobile') {
+        wrapper.style.width = '390px';
+        wrapper.style.maxWidth = '100%';
+        if (btnMobile) btnMobile.classList.add('active');
+    } else {
+        wrapper.style.width = '100%';
+        if (btnDesktop) btnDesktop.classList.add('active');
+    }
+}
+
+function refreshPreview() {
+    const frame = document.getElementById('previewFrame');
+    if (frame) {
+        frame.src = '/index.html?v=' + Date.now();
+    }
+}

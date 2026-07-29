@@ -77,6 +77,36 @@ async function initializeFiles() {
     await initializeFiles();
 })();
 
+const fsSync = require('fs');
+
+function getGitRepoRoot() {
+    let curr = _appBase;
+    for (let i = 0; i < 5; i++) {
+        if (fsSync.existsSync(path.join(curr, '.git'))) {
+            return curr;
+        }
+        const parent = path.dirname(curr);
+        if (parent === curr) break;
+        curr = parent;
+    }
+    return _appBase;
+}
+
+async function syncDataFileToGitRepo(filename) {
+    try {
+        const gitRoot = getGitRepoRoot();
+        if (gitRoot && gitRoot !== dataDir) {
+            const srcPath = path.join(dataDir, filename);
+            const targetDataDir = path.join(gitRoot, 'data');
+            await fs.mkdir(targetDataDir, { recursive: true });
+            const content = await fs.readFile(srcPath, 'utf8');
+            await fs.writeFile(path.join(targetDataDir, filename), content, 'utf8');
+        }
+    } catch(e) {
+        logger.warn(`Sincronização de ${filename} para git root: ${e.message}`);
+    }
+}
+
 // Helper para gerar o bundle nyumba-data.js consumido pelo site público (index.html)
 async function buildNyumbaDataBundle() {
     try {
@@ -92,11 +122,19 @@ async function buildNyumbaDataBundle() {
             `window.NYUMBA_MENU = ${JSON.stringify(menuData, null, 2)};\n` +
             `window.NYUMBA_ALACARTE = ${JSON.stringify(alacarteData, null, 2)};\n`;
 
-        const rootJs = path.join(_appBase, 'nyumba-data.js');
-        const publicJs = path.join(_appBase, 'public', 'nyumba-data.js');
+        const gitRoot = getGitRepoRoot();
+        const targets = [
+            path.join(_appBase, 'nyumba-data.js'),
+            path.join(_appBase, 'public', 'nyumba-data.js'),
+            path.join(gitRoot, 'nyumba-data.js')
+        ];
 
-        await fs.writeFile(rootJs, bundleContent, 'utf8');
-        await fs.writeFile(publicJs, bundleContent, 'utf8');
+        for (const targetPath of targets) {
+            try {
+                await fs.mkdir(path.dirname(targetPath), { recursive: true });
+                await fs.writeFile(targetPath, bundleContent, 'utf8');
+            } catch(e) {}
+        }
     } catch(e) {
         logger.error('Erro ao gerar nyumba-data.js:', e);
     }
@@ -121,6 +159,7 @@ router.post('/home', async (req, res) => {
         
         await backupService.createBackup('home');
         await fs.writeFile(homePath, JSON.stringify(homeData, null, 2));
+        await syncDataFileToGitRepo('home.json');
         await buildNyumbaDataBundle();
         
         const gitResult = await gitService.commit('Atualização do Conceito e Informações Rápidas', req.session.user.username);
@@ -156,6 +195,7 @@ router.post('/gallery', async (req, res) => {
         
         await backupService.createBackup('gallery');
         await fs.writeFile(galleryPath, JSON.stringify(galleryData, null, 2));
+        await syncDataFileToGitRepo('gallery.json');
         await buildNyumbaDataBundle();
         const gitResult = await gitService.commit('Atualização da galeria', req.session.user.username);
         
@@ -190,6 +230,7 @@ router.post('/menu', async (req, res) => {
         
         await backupService.createBackup('menu');
         await fs.writeFile(menuPath, JSON.stringify(menuData, null, 2));
+        await syncDataFileToGitRepo('menu.json');
         await buildNyumbaDataBundle();
         const gitResult = await gitService.commit('Atualização do Menu Semanal', req.session.user.username);
         
@@ -224,6 +265,7 @@ router.post('/alacarte', async (req, res) => {
         
         await backupService.createBackup('alacarte');
         await fs.writeFile(alacartePath, JSON.stringify(alacarteData, null, 2));
+        await syncDataFileToGitRepo('alacarte.json');
         await buildNyumbaDataBundle();
         const gitResult = await gitService.commit('Atualização do Menu À La Carte', req.session.user.username);
         

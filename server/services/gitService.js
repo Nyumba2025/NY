@@ -6,9 +6,26 @@ const config = require('../utils/config');
 
 const logger = createLogger('git-service');
 // Em produção (.exe), APP_BASE_PATH é a pasta do executável; em dev é a raiz do projeto
-const _gitBase = process.env.APP_BASE_PATH || process.cwd();
+const fsSync = require('fs');
+
+function getGitRoot(startDir) {
+    let curr = startDir || process.cwd();
+    for (let i = 0; i < 5; i++) {
+        if (fsSync.existsSync(path.join(curr, '.git'))) {
+            return curr;
+        }
+        const parent = path.dirname(curr);
+        if (parent === curr) break;
+        curr = parent;
+    }
+    return startDir || process.cwd();
+}
+
+const _realGitRoot = getGitRoot(process.env.APP_BASE_PATH || process.cwd());
+logger.info(`Git Service conectado ao repositório real em: ${_realGitRoot}`);
+
 const git = simpleGit({
-    baseDir: _gitBase,
+    baseDir: _realGitRoot,
     binary: 'git',
     maxConcurrentProcesses: 6
 });
@@ -33,7 +50,6 @@ class GitService {
 
     async createInitialCommit() {
         try {
-            // Adicionar arquivos iniciais
             await this.addInitialFiles();
             await git.commit('Initial commit - Nyumba Admin System');
             logger.info('Commit inicial criado');
@@ -49,12 +65,13 @@ class GitService {
             'server/',
             'public/',
             'data/',
-            '.env.example'
+            'nyumba-data.js',
+            'index.html'
         ];
         
         for (const file of initialFiles) {
             try {
-                await fs.access(file);
+                await fs.access(path.join(_realGitRoot, file));
                 await git.add(file);
             } catch (error) {
                 // Arquivo pode não existir, ignorar
@@ -64,8 +81,13 @@ class GitService {
 
     async commit(message, author = 'Admin') {
         try {
-            // Adicionar todos os arquivos modificados (data, nyumba-data.js, index.html)
-            await git.add(['.']);
+            // Adicionar explicitamente nyumba-data.js, data/ e ficheiros modificados
+            try {
+                await git.add(['nyumba-data.js', 'data/', 'index.html']);
+            } catch (e) {}
+            try {
+                await git.add(['.']);
+            } catch (e) {}
             
             const status = await git.status();
             let committed = false;
@@ -76,32 +98,40 @@ class GitService {
                     commitOptions['--author'] = `${author} <${author}@nyumba.com>`;
                 }
                 await git.commit(message, commitOptions);
-                logger.info(`Commit realizado com sucesso: ${message}`);
+                logger.info(`Commit realizado com sucesso na raiz: ${message}`);
                 committed = true;
             } else {
-                logger.info('Nenhuma alteração pendente para commit');
+                logger.info('Nenhuma alteração pendente para commit no Git');
             }
             
-            // Tentar Push para o GitHub
+            // Tentar Push para o GitHub (master e main)
             let pushed = false;
             let pushError = null;
             
             try {
                 const remotes = await git.getRemotes();
                 if (remotes.length > 0) {
-                    await git.push('origin', 'master');
-                    pushed = true;
-                    logger.info(`Push realizado com sucesso para origin/master!`);
+                    try {
+                        await git.push('origin', 'master');
+                        pushed = true;
+                    } catch (e1) {
+                        pushError = e1.message;
+                    }
+
+                    try {
+                        await git.push('origin', 'master:main');
+                        pushed = true;
+                    } catch (e2) {
+                        if (!pushed) pushError = e2.message;
+                    }
+
+                    if (pushed) {
+                        logger.info(`Push efetuado com sucesso para o GitHub (origin)!`);
+                    }
                 }
-            } catch (err1) {
-                try {
-                    await git.push('origin', 'main');
-                    pushed = true;
-                    logger.info(`Push realizado com sucesso para origin/main!`);
-                } catch (err2) {
-                    pushError = err2.message || err1.message;
-                    logger.warn(`Push falhou: ${pushError}`);
-                }
+            } catch (err) {
+                pushError = err.message;
+                logger.warn(`Push falhou: ${pushError}`);
             }
             
             if (pushed) {
