@@ -119,7 +119,7 @@ class GitService {
                     }
 
                     try {
-                        await git.push('origin', 'master:main');
+                        await git.push(['origin', 'master:main', '--force']);
                         pushed = true;
                     } catch (e2) {
                         if (!pushed) pushError = e2.message;
