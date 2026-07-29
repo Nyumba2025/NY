@@ -712,11 +712,55 @@ let weeklyMenuData = {};
 async function loadWeeklyMenuData() {
     try {
         const response = await fetch('/api/admin/menu');
-        weeklyMenuData = await response.json();
-        renderWeeklyMenuEditor();
+        if (response.ok) {
+            weeklyMenuData = await response.json();
+        }
     } catch (error) {
         console.error('Erro ao carregar menu semanal:', error);
     }
+    renderWeeklyMenuEditor();
+}
+
+function collectWeeklyMenuFromDOM() {
+    const container = document.getElementById('weekly-menu-container');
+    if (!container) return;
+
+    const daysMap = { '1': 'Segunda', '2': 'Terça', '3': 'Quarta', '4': 'Quinta', '5': 'Sexta' };
+
+    Object.keys(daysMap).forEach(dayKey => {
+        const card = container.querySelector(`[data-day-card="${dayKey}"]`);
+        if (!card) return;
+
+        if (!weeklyMenuData[dayKey]) {
+            weeklyMenuData[dayKey] = { pt: daysMap[dayKey], en: 'Day', sopa: {}, pratos: [], sobremesa: {} };
+        }
+
+        // Sopa
+        const sopaPt = card.querySelector(`.sopa-pt`)?.value || '';
+        const sopaEn = card.querySelector(`.sopa-en`)?.value || '';
+        const sopaP  = card.querySelector(`.sopa-p`)?.value || '';
+        weeklyMenuData[dayKey].sopa = { pt: sopaPt, en: sopaEn, p: sopaP };
+
+        // Sobremesa
+        const sobPt = card.querySelector(`.sob-pt`)?.value || '';
+        const sobEn = card.querySelector(`.sob-en`)?.value || '';
+        const sobP  = card.querySelector(`.sob-p`)?.value || '';
+        weeklyMenuData[dayKey].sobremesa = { pt: sobPt, en: sobEn, p: sobP };
+
+        // Pratos Principais
+        const pratoCards = card.querySelectorAll(`.prato-item-card`);
+        const pratos = [];
+        pratoCards.forEach(pCard => {
+            pratos.push({
+                pt: pCard.querySelector('.prato-pt')?.value || '',
+                en: pCard.querySelector('.prato-en')?.value || '',
+                d_pt: pCard.querySelector('.prato-dpt')?.value || '',
+                d_en: pCard.querySelector('.prato-den')?.value || '',
+                p: pCard.querySelector('.prato-p')?.value || ''
+            });
+        });
+        weeklyMenuData[dayKey].pratos = pratos;
+    });
 }
 
 function renderWeeklyMenuEditor() {
@@ -757,6 +801,7 @@ function renderWeeklyMenuEditor() {
 
         const dayCard = document.createElement('div');
         dayCard.className = 'form-section';
+        dayCard.setAttribute('data-day-card', dayKey);
         dayCard.style.marginBottom = '25px';
 
         let pratosHtml = '';
@@ -772,23 +817,23 @@ function renderWeeklyMenuEditor() {
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="form-group">
                             <label>Nome (Português)</label>
-                            <input type="text" class="form-control" value="${prato.pt || ''}" onchange="updatePratoSemanal('${dayKey}', ${idx}, 'pt', this.value)">
+                            <input type="text" class="form-control prato-pt" value="${prato.pt || ''}">
                         </div>
                         <div class="form-group">
                             <label>Nome (Inglês)</label>
-                            <input type="text" class="form-control" value="${prato.en || ''}" onchange="updatePratoSemanal('${dayKey}', ${idx}, 'en', this.value)">
+                            <input type="text" class="form-control prato-en" value="${prato.en || ''}">
                         </div>
                         <div class="form-group">
                             <label>Descrição (Português)</label>
-                            <input type="text" class="form-control" value="${prato.d_pt || ''}" onchange="updatePratoSemanal('${dayKey}', ${idx}, 'd_pt', this.value)">
+                            <input type="text" class="form-control prato-dpt" value="${prato.d_pt || ''}">
                         </div>
                         <div class="form-group">
                             <label>Descrição (Inglês)</label>
-                            <input type="text" class="form-control" value="${prato.d_en || ''}" onchange="updatePratoSemanal('${dayKey}', ${idx}, 'd_en', this.value)">
+                            <input type="text" class="form-control prato-den" value="${prato.d_en || ''}">
                         </div>
                         <div class="form-group" style="grid-column: span 2;">
                             <label>Preço (ex: 500MT)</label>
-                            <input type="text" class="form-control" value="${prato.p || ''}" onchange="updatePratoSemanal('${dayKey}', ${idx}, 'p', this.value)">
+                            <input type="text" class="form-control prato-p" value="${prato.p || ''}">
                         </div>
                     </div>
                 </div>
@@ -803,15 +848,15 @@ function renderWeeklyMenuEditor() {
                 <div style="display: grid; grid-template-columns: 1fr 1fr 120px; gap: 10px;">
                     <div class="form-group">
                         <label>Nome (PT)</label>
-                        <input type="text" class="form-control" value="${dayData.sopa?.pt || ''}" onchange="updateSopaSemanal('${dayKey}', 'pt', this.value)">
+                        <input type="text" class="form-control sopa-pt" value="${dayData.sopa?.pt || ''}">
                     </div>
                     <div class="form-group">
                         <label>Nome (EN)</label>
-                        <input type="text" class="form-control" value="${dayData.sopa?.en || ''}" onchange="updateSopaSemanal('${dayKey}', 'en', this.value)">
+                        <input type="text" class="form-control sopa-en" value="${dayData.sopa?.en || ''}">
                     </div>
                     <div class="form-group">
                         <label>Preço</label>
-                        <input type="text" class="form-control" value="${dayData.sopa?.p || ''}" onchange="updateSopaSemanal('${dayKey}', 'p', this.value)">
+                        <input type="text" class="form-control sopa-p" value="${dayData.sopa?.p || ''}">
                     </div>
                 </div>
             </div>
@@ -829,15 +874,15 @@ function renderWeeklyMenuEditor() {
                 <div style="display: grid; grid-template-columns: 1fr 1fr 120px; gap: 10px;">
                     <div class="form-group">
                         <label>Nome (PT)</label>
-                        <input type="text" class="form-control" value="${dayData.sobremesa?.pt || ''}" onchange="updateSobremesaSemanal('${dayKey}', 'pt', this.value)">
+                        <input type="text" class="form-control sob-pt" value="${dayData.sobremesa?.pt || ''}">
                     </div>
                     <div class="form-group">
                         <label>Nome (EN)</label>
-                        <input type="text" class="form-control" value="${dayData.sobremesa?.en || ''}" onchange="updateSobremesaSemanal('${dayKey}', 'en', this.value)">
+                        <input type="text" class="form-control sob-en" value="${dayData.sobremesa?.en || ''}">
                     </div>
                     <div class="form-group">
                         <label>Preço</label>
-                        <input type="text" class="form-control" value="${dayData.sobremesa?.p || ''}" onchange="updateSobremesaSemanal('${dayKey}', 'p', this.value)">
+                        <input type="text" class="form-control sob-p" value="${dayData.sobremesa?.p || ''}">
                     </div>
                 </div>
             </div>
@@ -860,28 +905,17 @@ function renderWeeklyMenuEditor() {
     container.appendChild(actionsDiv);
 }
 
-function updateSopaSemanal(dayKey, field, val) {
-    if (!weeklyMenuData[dayKey]) weeklyMenuData[dayKey] = { sopa: {}, pratos: [], sobremesa: {} };
-    if (!weeklyMenuData[dayKey].sopa) weeklyMenuData[dayKey].sopa = {};
-    weeklyMenuData[dayKey].sopa[field] = val;
-    setUnsavedChanges(true);
-}
-
-function updateSobremesaSemanal(dayKey, field, val) {
-    if (!weeklyMenuData[dayKey]) weeklyMenuData[dayKey] = { sopa: {}, pratos: [], sobremesa: {} };
-    if (!weeklyMenuData[dayKey].sobremesa) weeklyMenuData[dayKey].sobremesa = {};
-    weeklyMenuData[dayKey].sobremesa[field] = val;
-    setUnsavedChanges(true);
-}
-
-function updatePratoSemanal(dayKey, idx, field, val) {
-    if (!weeklyMenuData[dayKey] || !weeklyMenuData[dayKey].pratos[idx]) return;
-    weeklyMenuData[dayKey].pratos[idx][field] = val;
-    setUnsavedChanges(true);
-}
-
 function addPratoSemanal(dayKey) {
-    if (!weeklyMenuData[dayKey]) weeklyMenuData[dayKey] = { pt: '', en: '', sopa: { pt: '', en: '', p: '180MT' }, pratos: [], sobremesa: { pt: '', en: '', p: '180MT' } };
+    collectWeeklyMenuFromDOM();
+    if (!weeklyMenuData[dayKey]) {
+        weeklyMenuData[dayKey] = {
+            pt: dayKey === '1' ? 'Segunda' : dayKey === '2' ? 'Terça' : dayKey === '3' ? 'Quarta' : dayKey === '4' ? 'Quinta' : 'Sexta',
+            en: 'Day',
+            sopa: { pt: '', en: '', p: '180MT' },
+            pratos: [],
+            sobremesa: { pt: '', en: '', p: '180MT' }
+        };
+    }
     if (!weeklyMenuData[dayKey].pratos) weeklyMenuData[dayKey].pratos = [];
     weeklyMenuData[dayKey].pratos.push({ pt: '', en: '', d_pt: '', d_en: '', p: '500MT' });
     renderWeeklyMenuEditor();
@@ -890,14 +924,19 @@ function addPratoSemanal(dayKey) {
 
 function removePratoSemanal(dayKey, idx) {
     if (confirm('Remover este prato principal?')) {
-        weeklyMenuData[dayKey].pratos.splice(idx, 1);
-        renderWeeklyMenuEditor();
-        setUnsavedChanges(true);
+        collectWeeklyMenuFromDOM();
+        if (weeklyMenuData[dayKey] && weeklyMenuData[dayKey].pratos) {
+            weeklyMenuData[dayKey].pratos.splice(idx, 1);
+            renderWeeklyMenuEditor();
+            setUnsavedChanges(true);
+        }
     }
 }
 
 async function saveWeeklyMenuData() {
     try {
+        collectWeeklyMenuFromDOM();
+        showLoading();
         const response = await fetch('/api/admin/menu', {
             method: 'POST',
             headers: {
@@ -907,13 +946,16 @@ async function saveWeeklyMenuData() {
             body: JSON.stringify(weeklyMenuData)
         });
         const result = await response.json();
+        hideLoading();
+
         if (result.success) {
-            showToast('Menu Semanal salvo com sucesso!', 'success');
+            showToast('✅ Menu Semanal salvo com sucesso!', 'success');
             setUnsavedChanges(false);
         } else {
             showToast(result.error || 'Erro ao salvar menu semanal', 'error');
         }
     } catch (error) {
+        hideLoading();
         showToast('Erro ao salvar menu semanal', 'error');
     }
 }
@@ -936,8 +978,7 @@ async function loadAlacarteData() {
             appetizers: [
                 { pt: "Rabada", en: "Oxtail", p: "350MT", d_pt: "Estufada tradicional", d_en: "Traditional stew" },
                 { pt: "Amêijoas à NYUMBA", en: "Clams NYUMBA", p: "400MT", d_pt: "Com molho especial da casa", d_en: "With house sauce" },
-                { pt: "Camarão Alinho", en: "Shrimp Alinho", p: "350MT", d_pt: "Com alho e ervas aromáticas", d_en: "Garlic and herbs" },
-                { pt: "Chouriço", en: "Chorizo", p: "400MT", d_pt: "Com batata e salada", d_en: "Served with potatoes and salad" }
+                { pt: "Camarão Alinho", en: "Shrimp Alinho", p: "350MT", d_pt: "Com alho e ervas aromáticas", d_en: "Garlic and herbs" }
             ],
             starter: [
                 { pt: "Creme de Cenoura", en: "Carrot Cream", p: "150MT", d_pt: "Nutritiva", d_en: "Nutritious" },
@@ -948,21 +989,43 @@ async function loadAlacarteData() {
             ],
             sandwiches: [
                 { pt: "Hamburguer Simples", en: "Simple Burger", p: "250MT", d_pt: "Com ovo ou queijo e batata frita", d_en: "With egg or cheese and French fries" },
-                { pt: "Nyumba Burguer", en: "Nyumba Burger", p: "500MT", d_pt: "Maionese caseira, mozzarella, batata frita", d_en: "Homemade mayo, mozzarella, fries" },
-                { pt: "Prego no pão", en: "Steak Sandwich", p: "350MT", d_pt: "Bife suculento em pão fresco", d_en: "Juicy steak in fresh bread" },
-                { pt: "Tosta Mista", en: "Ham & Cheese Toast", p: "280MT", d_pt: "Pão tostado com fiambre e queijo", d_en: "Toasted bread with ham and cheese" }
+                { pt: "Prego no pão", en: "Steak Sandwich", p: "350MT", d_pt: "Bife suculento em pão fresco", d_en: "Juicy steak in fresh bread" }
             ],
             plates: [
                 { pt: "Matabicho Thafo", en: "Thafo Breakfast", p: "500MT", d_pt: "2 ovos, tomate, salsichas, torradas, feijão doce e bacon", d_en: "2 eggs, tomato, sausages, toast, baked beans and bacon" }
             ],
             dessert: [
                 { pt: "Sorvete", en: "Ice Cream", p: "180MT", d_pt: "Vários sabores disponíveis", d_en: "Various flavors available" },
-                { pt: "Pudim", en: "Caramel Pudding", p: "180MT", d_pt: "Caseiro e cremoso", d_en: "Homemade and creamy" },
-                { pt: "Bolo de Chocolate", en: "Chocolate Cake", p: "250MT", d_pt: "Fatia generosa e húmida", d_en: "Generous moist slice" }
+                { pt: "Pudim", en: "Caramel Pudding", p: "180MT", d_pt: "Caseiro e cremoso", d_en: "Homemade and creamy" }
             ]
         };
     }
     renderAlacarteEditor();
+}
+
+function collectAlacarteFromDOM() {
+    const container = document.getElementById('alacarte-menu-container');
+    if (!container) return;
+
+    const categoriesMap = ['appetizers', 'starter', 'snacks', 'sandwiches', 'plates', 'dessert'];
+
+    categoriesMap.forEach(catKey => {
+        const card = container.querySelector(`[data-cat-card="${catKey}"]`);
+        if (!card) return;
+
+        const itemCards = card.querySelectorAll('.alacarte-item-card');
+        const items = [];
+        itemCards.forEach(iCard => {
+            items.push({
+                pt: iCard.querySelector('.item-pt')?.value || '',
+                en: iCard.querySelector('.item-en')?.value || '',
+                d_pt: iCard.querySelector('.item-dpt')?.value || '',
+                d_en: iCard.querySelector('.item-den')?.value || '',
+                p: iCard.querySelector('.item-p')?.value || ''
+            });
+        });
+        alacarteData[catKey] = items;
+    });
 }
 
 function renderAlacarteEditor() {
@@ -997,12 +1060,13 @@ function renderAlacarteEditor() {
         const items = alacarteData[catKey] || [];
         const catCard = document.createElement('div');
         catCard.className = 'form-section';
+        catCard.setAttribute('data-cat-card', catKey);
         catCard.style.marginBottom = '25px';
 
         let itemsHtml = '';
         items.forEach((item, idx) => {
             itemsHtml += `
-                <div style="border: 1px solid rgba(0,0,0,0.1); padding: 15px; border-radius: 8px; margin-bottom: 12px; background: #fafafa;">
+                <div class="alacarte-item-card" style="border: 1px solid rgba(0,0,0,0.1); padding: 15px; border-radius: 8px; margin-bottom: 12px; background: #fafafa;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <strong>Item ${idx + 1}: ${item.pt || 'Sem nome'}</strong>
                         <button type="button" class="btn btn-danger btn-sm" onclick="removeAlacarteItem('${catKey}', ${idx}); return false;">
@@ -1012,23 +1076,23 @@ function renderAlacarteEditor() {
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="form-group">
                             <label>Nome (Português)</label>
-                            <input type="text" class="form-control" value="${item.pt || ''}" onchange="updateAlacarteItem('${catKey}', ${idx}, 'pt', this.value)">
+                            <input type="text" class="form-control item-pt" value="${item.pt || ''}">
                         </div>
                         <div class="form-group">
                             <label>Nome (Inglês)</label>
-                            <input type="text" class="form-control" value="${item.en || ''}" onchange="updateAlacarteItem('${catKey}', ${idx}, 'en', this.value)">
+                            <input type="text" class="form-control item-en" value="${item.en || ''}">
                         </div>
                         <div class="form-group">
                             <label>Descrição (Português)</label>
-                            <input type="text" class="form-control" value="${item.d_pt || ''}" onchange="updateAlacarteItem('${catKey}', ${idx}, 'd_pt', this.value)">
+                            <input type="text" class="form-control item-dpt" value="${item.d_pt || ''}">
                         </div>
                         <div class="form-group">
                             <label>Descrição (Inglês)</label>
-                            <input type="text" class="form-control" value="${item.d_en || ''}" onchange="updateAlacarteItem('${catKey}', ${idx}, 'd_en', this.value)">
+                            <input type="text" class="form-control item-den" value="${item.d_en || ''}">
                         </div>
                         <div class="form-group" style="grid-column: span 2;">
                             <label>Preço (ex: 350MT)</label>
-                            <input type="text" class="form-control" value="${item.p || ''}" onchange="updateAlacarteItem('${catKey}', ${idx}, 'p', this.value)">
+                            <input type="text" class="form-control item-p" value="${item.p || ''}">
                         </div>
                     </div>
                 </div>
@@ -1067,6 +1131,7 @@ function updateAlacarteItem(catKey, idx, field, val) {
 }
 
 function addAlacarteItem(catKey) {
+    collectAlacarteFromDOM();
     if (!alacarteData[catKey]) alacarteData[catKey] = [];
     alacarteData[catKey].push({ pt: '', en: '', d_pt: '', d_en: '', p: '350MT' });
     renderAlacarteEditor();
@@ -1075,14 +1140,19 @@ function addAlacarteItem(catKey) {
 
 function removeAlacarteItem(catKey, idx) {
     if (confirm('Remover este item?')) {
-        alacarteData[catKey].splice(idx, 1);
-        renderAlacarteEditor();
-        setUnsavedChanges(true);
+        collectAlacarteFromDOM();
+        if (alacarteData[catKey]) {
+            alacarteData[catKey].splice(idx, 1);
+            renderAlacarteEditor();
+            setUnsavedChanges(true);
+        }
     }
 }
 
 async function saveAlacarteData() {
     try {
+        collectAlacarteFromDOM();
+        showLoading();
         const response = await fetch('/api/admin/alacarte', {
             method: 'POST',
             headers: {
@@ -1092,13 +1162,16 @@ async function saveAlacarteData() {
             body: JSON.stringify(alacarteData)
         });
         const result = await response.json();
+        hideLoading();
+
         if (result.success) {
-            showToast('Menu À La Carte salvo com sucesso!', 'success');
+            showToast('✅ Menu À La Carte salvo com sucesso!', 'success');
             setUnsavedChanges(false);
         } else {
             showToast(result.error || 'Erro ao salvar à la carte', 'error');
         }
     } catch (error) {
+        hideLoading();
         showToast('Erro ao salvar menu à la carte', 'error');
     }
 }
@@ -1901,7 +1974,27 @@ async function loadSystemInfo() {
 // ==================== PUBLICAR NO GITHUB ====================
 async function publishToGitHub() {
     try {
+        if (typeof collectWeeklyMenuFromDOM === 'function') collectWeeklyMenuFromDOM();
+        if (typeof collectAlacarteFromDOM === 'function') collectAlacarteFromDOM();
+
         showLoading();
+
+        // Guardar alterações pendentes antes de publicar
+        if (weeklyMenuData && Object.keys(weeklyMenuData).length > 0) {
+            await fetch('/api/admin/menu', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+                body: JSON.stringify(weeklyMenuData)
+            }).catch(() => {});
+        }
+        if (alacarteData && Object.keys(alacarteData).length > 0) {
+            await fetch('/api/admin/alacarte', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+                body: JSON.stringify(alacarteData)
+            }).catch(() => {});
+        }
+
         const response = await fetch('/api/admin/publish', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
@@ -1912,10 +2005,11 @@ async function publishToGitHub() {
 
         if (result.pushed) {
             showToast('✅ Publicado com sucesso no GitHub! O site será atualizado em breve.', 'success');
+            setUnsavedChanges(false);
         } else if (result.success) {
-            showToast('⚠️ Guardado localmente, mas o push falhou.', 'warning');
+            showToast('⚠️ Guardado localmente. ' + (result.message || 'Push para o GitHub pendente.'), 'warning');
         } else {
-            showToast('❌ Erro ao publicar', 'error');
+            showToast('❌ Erro ao publicar: ' + (result.error || result.message || 'Falha no servidor'), 'error');
         }
     } catch (error) {
         hideLoading();
